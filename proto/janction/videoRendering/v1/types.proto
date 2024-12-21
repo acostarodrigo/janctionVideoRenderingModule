@@ -16,3 +16,82 @@ message GenesisState {
 }
 
 
+message Worker {
+  enum WorkerStatus {
+    WORKER_STATUS_UNDEFINED = 0;
+    WORKER_STATUS_RENDERING = 1;
+    WORKER_STATUS_PROPOSED_SOLUTION = 2;
+    WORKER_STATUS_VALIDATING_SOLUTION = 3;
+    WORKER_STATUS_DONE = 4;
+  }
+
+  message Reputation {
+    uint64 stacked = 1;
+    int64 points = 2;
+    uint32 validations = 3;
+    uint32 solutions = 4;
+  }
+
+  string address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  WorkerStatus status = 2;
+  Reputation reputation = 3;
+}
+
+/*
+  Video Rendering Task
+  @cid the IPFS CID submitted by a task requester
+*/
+message VideoRenderingTask {
+  string requester = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+  string cid = 2;
+  uint32 start_frame = 3;
+  uint32 end_frame = 4;
+  uint32 gpu = 5;
+  uint32 reward = 6;
+  bool in_progress = 7;
+  map<uint32, VideoRenderingThread>  threads = 8;
+}
+
+  /*
+    A Video Rendering Thread is the smallest unit of work for a Task. 
+    Workers will try to complete a thread as soon as possible to submit first a solution
+
+  */
+  message VideoRenderingThread {
+    string thread_id = 1;
+    uint32 start_frame = 2;
+    uint32 end_frame = 3;
+    bool in_progress = 4;
+    repeated Worker workers = 5;  
+    Solution solution = 6;
+    repeated Validation validations = 7;
+    
+
+    message Solution {
+      string proposed_by = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
+      repeated string files = 2;
+    }
+
+    message Validation {
+      enum ValidationStatus {
+        VALIDATION_STATUS_UNDEFINED = 0;
+        VALIDATION_STATUS_IN_PROGRESS = 1;
+        VALIDATION_STATUS_PASSED = 2;
+        VALIDATION_STATUS_NOT_PASSED = 3;
+      }
+      string validator = 1[(cosmos_proto.scalar) = "cosmos.AddressString"];
+      uint32 start_frame = 2;
+      uint32 end_frame = 3;
+      ValidationStatus status = 4;
+
+    }
+  }
+
+  message VideoRenderingTaskInfo {
+    uint64 nextId = 1;
+  }
+  
+  message IndexedVideoRenderingTask {
+    string index = 1;
+    VideoRenderingTask videoRenderingTask = 2 [(gogoproto.nullable) = false];
+  }
