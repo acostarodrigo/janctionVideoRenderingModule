@@ -24,6 +24,71 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.GoGoProtoPackageIsVersion3 // please upgrade the proto package
 
+type Worker_WorkerStatus int32
+
+const (
+	Worker_WORKER_STATUS_UNDEFINED           Worker_WorkerStatus = 0
+	Worker_WORKER_STATUS_RENDERING           Worker_WorkerStatus = 1
+	Worker_WORKER_STATUS_PROPOSED_SOLUTION   Worker_WorkerStatus = 2
+	Worker_WORKER_STATUS_VALIDATING_SOLUTION Worker_WorkerStatus = 3
+	Worker_WORKER_STATUS_DONE                Worker_WorkerStatus = 4
+)
+
+var Worker_WorkerStatus_name = map[int32]string{
+	0: "WORKER_STATUS_UNDEFINED",
+	1: "WORKER_STATUS_RENDERING",
+	2: "WORKER_STATUS_PROPOSED_SOLUTION",
+	3: "WORKER_STATUS_VALIDATING_SOLUTION",
+	4: "WORKER_STATUS_DONE",
+}
+
+var Worker_WorkerStatus_value = map[string]int32{
+	"WORKER_STATUS_UNDEFINED":           0,
+	"WORKER_STATUS_RENDERING":           1,
+	"WORKER_STATUS_PROPOSED_SOLUTION":   2,
+	"WORKER_STATUS_VALIDATING_SOLUTION": 3,
+	"WORKER_STATUS_DONE":                4,
+}
+
+func (x Worker_WorkerStatus) String() string {
+	return proto.EnumName(Worker_WorkerStatus_name, int32(x))
+}
+
+func (Worker_WorkerStatus) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_48dc248d3c391ada, []int{2, 0}
+}
+
+type VideoRenderingThread_Validation_ValidationStatus int32
+
+const (
+	VideoRenderingThread_Validation_VALIDATION_STATUS_UNDEFINED   VideoRenderingThread_Validation_ValidationStatus = 0
+	VideoRenderingThread_Validation_VALIDATION_STATUS_IN_PROGRESS VideoRenderingThread_Validation_ValidationStatus = 1
+	VideoRenderingThread_Validation_VALIDATION_STATUS_PASSED      VideoRenderingThread_Validation_ValidationStatus = 2
+	VideoRenderingThread_Validation_VALIDATION_STATUS_NOT_PASSED  VideoRenderingThread_Validation_ValidationStatus = 3
+)
+
+var VideoRenderingThread_Validation_ValidationStatus_name = map[int32]string{
+	0: "VALIDATION_STATUS_UNDEFINED",
+	1: "VALIDATION_STATUS_IN_PROGRESS",
+	2: "VALIDATION_STATUS_PASSED",
+	3: "VALIDATION_STATUS_NOT_PASSED",
+}
+
+var VideoRenderingThread_Validation_ValidationStatus_value = map[string]int32{
+	"VALIDATION_STATUS_UNDEFINED":   0,
+	"VALIDATION_STATUS_IN_PROGRESS": 1,
+	"VALIDATION_STATUS_PASSED":      2,
+	"VALIDATION_STATUS_NOT_PASSED":  3,
+}
+
+func (x VideoRenderingThread_Validation_ValidationStatus) String() string {
+	return proto.EnumName(VideoRenderingThread_Validation_ValidationStatus_name, int32(x))
+}
+
+func (VideoRenderingThread_Validation_ValidationStatus) EnumDescriptor() ([]byte, []int) {
+	return fileDescriptor_48dc248d3c391ada, []int{4, 1, 0}
+}
+
 // Params defines the parameters of the module.
 type Params struct {
 }
@@ -65,6 +130,10 @@ var xxx_messageInfo_Params proto.InternalMessageInfo
 type GenesisState struct {
 	// params defines all the parameters of the module.
 	Params Params `protobuf:"bytes,1,opt,name=params,proto3" json:"params"`
+	// Video Rendering Task index
+	VideoRenderingTaskInfo *VideoRenderingTaskInfo `protobuf:"bytes,3,opt,name=videoRenderingTaskInfo,proto3" json:"videoRenderingTaskInfo,omitempty"`
+	// List of Video Rendering tasks
+	VideoRenderingTaskList []IndexedVideoRenderingTask `protobuf:"bytes,5,rep,name=videoRenderingTaskList,proto3" json:"videoRenderingTaskList"`
 }
 
 func (m *GenesisState) Reset()         { *m = GenesisState{} }
@@ -107,9 +176,574 @@ func (m *GenesisState) GetParams() Params {
 	return Params{}
 }
 
+func (m *GenesisState) GetVideoRenderingTaskInfo() *VideoRenderingTaskInfo {
+	if m != nil {
+		return m.VideoRenderingTaskInfo
+	}
+	return nil
+}
+
+func (m *GenesisState) GetVideoRenderingTaskList() []IndexedVideoRenderingTask {
+	if m != nil {
+		return m.VideoRenderingTaskList
+	}
+	return nil
+}
+
+type Worker struct {
+	Address    string              `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	Status     Worker_WorkerStatus `protobuf:"varint,2,opt,name=status,proto3,enum=janction.videoRendering.v1.Worker_WorkerStatus" json:"status,omitempty"`
+	Reputation *Worker_Reputation  `protobuf:"bytes,3,opt,name=reputation,proto3" json:"reputation,omitempty"`
+}
+
+func (m *Worker) Reset()         { *m = Worker{} }
+func (m *Worker) String() string { return proto.CompactTextString(m) }
+func (*Worker) ProtoMessage()    {}
+func (*Worker) Descriptor() ([]byte, []int) {
+	return fileDescriptor_48dc248d3c391ada, []int{2}
+}
+func (m *Worker) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Worker) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Worker.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Worker) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Worker.Merge(m, src)
+}
+func (m *Worker) XXX_Size() int {
+	return m.Size()
+}
+func (m *Worker) XXX_DiscardUnknown() {
+	xxx_messageInfo_Worker.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Worker proto.InternalMessageInfo
+
+func (m *Worker) GetAddress() string {
+	if m != nil {
+		return m.Address
+	}
+	return ""
+}
+
+func (m *Worker) GetStatus() Worker_WorkerStatus {
+	if m != nil {
+		return m.Status
+	}
+	return Worker_WORKER_STATUS_UNDEFINED
+}
+
+func (m *Worker) GetReputation() *Worker_Reputation {
+	if m != nil {
+		return m.Reputation
+	}
+	return nil
+}
+
+type Worker_Reputation struct {
+	Stacked     uint64 `protobuf:"varint,1,opt,name=stacked,proto3" json:"stacked,omitempty"`
+	Points      int64  `protobuf:"varint,2,opt,name=points,proto3" json:"points,omitempty"`
+	Validations uint32 `protobuf:"varint,3,opt,name=validations,proto3" json:"validations,omitempty"`
+	Solutions   uint32 `protobuf:"varint,4,opt,name=solutions,proto3" json:"solutions,omitempty"`
+}
+
+func (m *Worker_Reputation) Reset()         { *m = Worker_Reputation{} }
+func (m *Worker_Reputation) String() string { return proto.CompactTextString(m) }
+func (*Worker_Reputation) ProtoMessage()    {}
+func (*Worker_Reputation) Descriptor() ([]byte, []int) {
+	return fileDescriptor_48dc248d3c391ada, []int{2, 0}
+}
+func (m *Worker_Reputation) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *Worker_Reputation) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_Worker_Reputation.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *Worker_Reputation) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_Worker_Reputation.Merge(m, src)
+}
+func (m *Worker_Reputation) XXX_Size() int {
+	return m.Size()
+}
+func (m *Worker_Reputation) XXX_DiscardUnknown() {
+	xxx_messageInfo_Worker_Reputation.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_Worker_Reputation proto.InternalMessageInfo
+
+func (m *Worker_Reputation) GetStacked() uint64 {
+	if m != nil {
+		return m.Stacked
+	}
+	return 0
+}
+
+func (m *Worker_Reputation) GetPoints() int64 {
+	if m != nil {
+		return m.Points
+	}
+	return 0
+}
+
+func (m *Worker_Reputation) GetValidations() uint32 {
+	if m != nil {
+		return m.Validations
+	}
+	return 0
+}
+
+func (m *Worker_Reputation) GetSolutions() uint32 {
+	if m != nil {
+		return m.Solutions
+	}
+	return 0
+}
+
+// Video Rendering Task
+// @cid the IPFS CID submitted by a task requester
+type VideoRenderingTask struct {
+	Requester  string                           `protobuf:"bytes,1,opt,name=requester,proto3" json:"requester,omitempty"`
+	Cid        string                           `protobuf:"bytes,2,opt,name=cid,proto3" json:"cid,omitempty"`
+	StartFrame uint32                           `protobuf:"varint,3,opt,name=start_frame,json=startFrame,proto3" json:"start_frame,omitempty"`
+	EndFrame   uint32                           `protobuf:"varint,4,opt,name=end_frame,json=endFrame,proto3" json:"end_frame,omitempty"`
+	Gpu        uint32                           `protobuf:"varint,5,opt,name=gpu,proto3" json:"gpu,omitempty"`
+	Reward     uint32                           `protobuf:"varint,6,opt,name=reward,proto3" json:"reward,omitempty"`
+	InProgress bool                             `protobuf:"varint,7,opt,name=in_progress,json=inProgress,proto3" json:"in_progress,omitempty"`
+	Threads    map[uint32]*VideoRenderingThread `protobuf:"bytes,8,rep,name=threads,proto3" json:"threads,omitempty" protobuf_key:"varint,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+}
+
+func (m *VideoRenderingTask) Reset()         { *m = VideoRenderingTask{} }
+func (m *VideoRenderingTask) String() string { return proto.CompactTextString(m) }
+func (*VideoRenderingTask) ProtoMessage()    {}
+func (*VideoRenderingTask) Descriptor() ([]byte, []int) {
+	return fileDescriptor_48dc248d3c391ada, []int{3}
+}
+func (m *VideoRenderingTask) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *VideoRenderingTask) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_VideoRenderingTask.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *VideoRenderingTask) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_VideoRenderingTask.Merge(m, src)
+}
+func (m *VideoRenderingTask) XXX_Size() int {
+	return m.Size()
+}
+func (m *VideoRenderingTask) XXX_DiscardUnknown() {
+	xxx_messageInfo_VideoRenderingTask.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_VideoRenderingTask proto.InternalMessageInfo
+
+func (m *VideoRenderingTask) GetRequester() string {
+	if m != nil {
+		return m.Requester
+	}
+	return ""
+}
+
+func (m *VideoRenderingTask) GetCid() string {
+	if m != nil {
+		return m.Cid
+	}
+	return ""
+}
+
+func (m *VideoRenderingTask) GetStartFrame() uint32 {
+	if m != nil {
+		return m.StartFrame
+	}
+	return 0
+}
+
+func (m *VideoRenderingTask) GetEndFrame() uint32 {
+	if m != nil {
+		return m.EndFrame
+	}
+	return 0
+}
+
+func (m *VideoRenderingTask) GetGpu() uint32 {
+	if m != nil {
+		return m.Gpu
+	}
+	return 0
+}
+
+func (m *VideoRenderingTask) GetReward() uint32 {
+	if m != nil {
+		return m.Reward
+	}
+	return 0
+}
+
+func (m *VideoRenderingTask) GetInProgress() bool {
+	if m != nil {
+		return m.InProgress
+	}
+	return false
+}
+
+func (m *VideoRenderingTask) GetThreads() map[uint32]*VideoRenderingThread {
+	if m != nil {
+		return m.Threads
+	}
+	return nil
+}
+
+// A Video Rendering Thread is the smallest unit of work for a Task.
+// Workers will try to complete a thread as soon as possible to submit first a solution
+type VideoRenderingThread struct {
+	ThreadId    string                             `protobuf:"bytes,1,opt,name=thread_id,json=threadId,proto3" json:"thread_id,omitempty"`
+	StartFrame  uint32                             `protobuf:"varint,2,opt,name=start_frame,json=startFrame,proto3" json:"start_frame,omitempty"`
+	EndFrame    uint32                             `protobuf:"varint,3,opt,name=end_frame,json=endFrame,proto3" json:"end_frame,omitempty"`
+	InProgress  bool                               `protobuf:"varint,4,opt,name=in_progress,json=inProgress,proto3" json:"in_progress,omitempty"`
+	Workers     []*Worker                          `protobuf:"bytes,5,rep,name=workers,proto3" json:"workers,omitempty"`
+	Solution    *VideoRenderingThread_Solution     `protobuf:"bytes,6,opt,name=solution,proto3" json:"solution,omitempty"`
+	Validations []*VideoRenderingThread_Validation `protobuf:"bytes,7,rep,name=validations,proto3" json:"validations,omitempty"`
+}
+
+func (m *VideoRenderingThread) Reset()         { *m = VideoRenderingThread{} }
+func (m *VideoRenderingThread) String() string { return proto.CompactTextString(m) }
+func (*VideoRenderingThread) ProtoMessage()    {}
+func (*VideoRenderingThread) Descriptor() ([]byte, []int) {
+	return fileDescriptor_48dc248d3c391ada, []int{4}
+}
+func (m *VideoRenderingThread) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *VideoRenderingThread) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_VideoRenderingThread.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *VideoRenderingThread) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_VideoRenderingThread.Merge(m, src)
+}
+func (m *VideoRenderingThread) XXX_Size() int {
+	return m.Size()
+}
+func (m *VideoRenderingThread) XXX_DiscardUnknown() {
+	xxx_messageInfo_VideoRenderingThread.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_VideoRenderingThread proto.InternalMessageInfo
+
+func (m *VideoRenderingThread) GetThreadId() string {
+	if m != nil {
+		return m.ThreadId
+	}
+	return ""
+}
+
+func (m *VideoRenderingThread) GetStartFrame() uint32 {
+	if m != nil {
+		return m.StartFrame
+	}
+	return 0
+}
+
+func (m *VideoRenderingThread) GetEndFrame() uint32 {
+	if m != nil {
+		return m.EndFrame
+	}
+	return 0
+}
+
+func (m *VideoRenderingThread) GetInProgress() bool {
+	if m != nil {
+		return m.InProgress
+	}
+	return false
+}
+
+func (m *VideoRenderingThread) GetWorkers() []*Worker {
+	if m != nil {
+		return m.Workers
+	}
+	return nil
+}
+
+func (m *VideoRenderingThread) GetSolution() *VideoRenderingThread_Solution {
+	if m != nil {
+		return m.Solution
+	}
+	return nil
+}
+
+func (m *VideoRenderingThread) GetValidations() []*VideoRenderingThread_Validation {
+	if m != nil {
+		return m.Validations
+	}
+	return nil
+}
+
+type VideoRenderingThread_Solution struct {
+	ProposedBy string   `protobuf:"bytes,1,opt,name=proposed_by,json=proposedBy,proto3" json:"proposed_by,omitempty"`
+	Files      []string `protobuf:"bytes,2,rep,name=files,proto3" json:"files,omitempty"`
+}
+
+func (m *VideoRenderingThread_Solution) Reset()         { *m = VideoRenderingThread_Solution{} }
+func (m *VideoRenderingThread_Solution) String() string { return proto.CompactTextString(m) }
+func (*VideoRenderingThread_Solution) ProtoMessage()    {}
+func (*VideoRenderingThread_Solution) Descriptor() ([]byte, []int) {
+	return fileDescriptor_48dc248d3c391ada, []int{4, 0}
+}
+func (m *VideoRenderingThread_Solution) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *VideoRenderingThread_Solution) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_VideoRenderingThread_Solution.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *VideoRenderingThread_Solution) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_VideoRenderingThread_Solution.Merge(m, src)
+}
+func (m *VideoRenderingThread_Solution) XXX_Size() int {
+	return m.Size()
+}
+func (m *VideoRenderingThread_Solution) XXX_DiscardUnknown() {
+	xxx_messageInfo_VideoRenderingThread_Solution.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_VideoRenderingThread_Solution proto.InternalMessageInfo
+
+func (m *VideoRenderingThread_Solution) GetProposedBy() string {
+	if m != nil {
+		return m.ProposedBy
+	}
+	return ""
+}
+
+func (m *VideoRenderingThread_Solution) GetFiles() []string {
+	if m != nil {
+		return m.Files
+	}
+	return nil
+}
+
+type VideoRenderingThread_Validation struct {
+	Validator  string                                           `protobuf:"bytes,1,opt,name=validator,proto3" json:"validator,omitempty"`
+	StartFrame uint32                                           `protobuf:"varint,2,opt,name=start_frame,json=startFrame,proto3" json:"start_frame,omitempty"`
+	EndFrame   uint32                                           `protobuf:"varint,3,opt,name=end_frame,json=endFrame,proto3" json:"end_frame,omitempty"`
+	Status     VideoRenderingThread_Validation_ValidationStatus `protobuf:"varint,4,opt,name=status,proto3,enum=janction.videoRendering.v1.VideoRenderingThread_Validation_ValidationStatus" json:"status,omitempty"`
+}
+
+func (m *VideoRenderingThread_Validation) Reset()         { *m = VideoRenderingThread_Validation{} }
+func (m *VideoRenderingThread_Validation) String() string { return proto.CompactTextString(m) }
+func (*VideoRenderingThread_Validation) ProtoMessage()    {}
+func (*VideoRenderingThread_Validation) Descriptor() ([]byte, []int) {
+	return fileDescriptor_48dc248d3c391ada, []int{4, 1}
+}
+func (m *VideoRenderingThread_Validation) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *VideoRenderingThread_Validation) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_VideoRenderingThread_Validation.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *VideoRenderingThread_Validation) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_VideoRenderingThread_Validation.Merge(m, src)
+}
+func (m *VideoRenderingThread_Validation) XXX_Size() int {
+	return m.Size()
+}
+func (m *VideoRenderingThread_Validation) XXX_DiscardUnknown() {
+	xxx_messageInfo_VideoRenderingThread_Validation.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_VideoRenderingThread_Validation proto.InternalMessageInfo
+
+func (m *VideoRenderingThread_Validation) GetValidator() string {
+	if m != nil {
+		return m.Validator
+	}
+	return ""
+}
+
+func (m *VideoRenderingThread_Validation) GetStartFrame() uint32 {
+	if m != nil {
+		return m.StartFrame
+	}
+	return 0
+}
+
+func (m *VideoRenderingThread_Validation) GetEndFrame() uint32 {
+	if m != nil {
+		return m.EndFrame
+	}
+	return 0
+}
+
+func (m *VideoRenderingThread_Validation) GetStatus() VideoRenderingThread_Validation_ValidationStatus {
+	if m != nil {
+		return m.Status
+	}
+	return VideoRenderingThread_Validation_VALIDATION_STATUS_UNDEFINED
+}
+
+type VideoRenderingTaskInfo struct {
+	NextId uint64 `protobuf:"varint,1,opt,name=nextId,proto3" json:"nextId,omitempty"`
+}
+
+func (m *VideoRenderingTaskInfo) Reset()         { *m = VideoRenderingTaskInfo{} }
+func (m *VideoRenderingTaskInfo) String() string { return proto.CompactTextString(m) }
+func (*VideoRenderingTaskInfo) ProtoMessage()    {}
+func (*VideoRenderingTaskInfo) Descriptor() ([]byte, []int) {
+	return fileDescriptor_48dc248d3c391ada, []int{5}
+}
+func (m *VideoRenderingTaskInfo) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *VideoRenderingTaskInfo) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_VideoRenderingTaskInfo.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *VideoRenderingTaskInfo) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_VideoRenderingTaskInfo.Merge(m, src)
+}
+func (m *VideoRenderingTaskInfo) XXX_Size() int {
+	return m.Size()
+}
+func (m *VideoRenderingTaskInfo) XXX_DiscardUnknown() {
+	xxx_messageInfo_VideoRenderingTaskInfo.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_VideoRenderingTaskInfo proto.InternalMessageInfo
+
+func (m *VideoRenderingTaskInfo) GetNextId() uint64 {
+	if m != nil {
+		return m.NextId
+	}
+	return 0
+}
+
+type IndexedVideoRenderingTask struct {
+	Index              string             `protobuf:"bytes,1,opt,name=index,proto3" json:"index,omitempty"`
+	VideoRenderingTask VideoRenderingTask `protobuf:"bytes,2,opt,name=videoRenderingTask,proto3" json:"videoRenderingTask"`
+}
+
+func (m *IndexedVideoRenderingTask) Reset()         { *m = IndexedVideoRenderingTask{} }
+func (m *IndexedVideoRenderingTask) String() string { return proto.CompactTextString(m) }
+func (*IndexedVideoRenderingTask) ProtoMessage()    {}
+func (*IndexedVideoRenderingTask) Descriptor() ([]byte, []int) {
+	return fileDescriptor_48dc248d3c391ada, []int{6}
+}
+func (m *IndexedVideoRenderingTask) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *IndexedVideoRenderingTask) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_IndexedVideoRenderingTask.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *IndexedVideoRenderingTask) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_IndexedVideoRenderingTask.Merge(m, src)
+}
+func (m *IndexedVideoRenderingTask) XXX_Size() int {
+	return m.Size()
+}
+func (m *IndexedVideoRenderingTask) XXX_DiscardUnknown() {
+	xxx_messageInfo_IndexedVideoRenderingTask.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_IndexedVideoRenderingTask proto.InternalMessageInfo
+
+func (m *IndexedVideoRenderingTask) GetIndex() string {
+	if m != nil {
+		return m.Index
+	}
+	return ""
+}
+
+func (m *IndexedVideoRenderingTask) GetVideoRenderingTask() VideoRenderingTask {
+	if m != nil {
+		return m.VideoRenderingTask
+	}
+	return VideoRenderingTask{}
+}
+
 func init() {
+	proto.RegisterEnum("janction.videoRendering.v1.Worker_WorkerStatus", Worker_WorkerStatus_name, Worker_WorkerStatus_value)
+	proto.RegisterEnum("janction.videoRendering.v1.VideoRenderingThread_Validation_ValidationStatus", VideoRenderingThread_Validation_ValidationStatus_name, VideoRenderingThread_Validation_ValidationStatus_value)
 	proto.RegisterType((*Params)(nil), "janction.videoRendering.v1.Params")
 	proto.RegisterType((*GenesisState)(nil), "janction.videoRendering.v1.GenesisState")
+	proto.RegisterType((*Worker)(nil), "janction.videoRendering.v1.Worker")
+	proto.RegisterType((*Worker_Reputation)(nil), "janction.videoRendering.v1.Worker.Reputation")
+	proto.RegisterType((*VideoRenderingTask)(nil), "janction.videoRendering.v1.VideoRenderingTask")
+	proto.RegisterMapType((map[uint32]*VideoRenderingThread)(nil), "janction.videoRendering.v1.VideoRenderingTask.ThreadsEntry")
+	proto.RegisterType((*VideoRenderingThread)(nil), "janction.videoRendering.v1.VideoRenderingThread")
+	proto.RegisterType((*VideoRenderingThread_Solution)(nil), "janction.videoRendering.v1.VideoRenderingThread.Solution")
+	proto.RegisterType((*VideoRenderingThread_Validation)(nil), "janction.videoRendering.v1.VideoRenderingThread.Validation")
+	proto.RegisterType((*VideoRenderingTaskInfo)(nil), "janction.videoRendering.v1.VideoRenderingTaskInfo")
+	proto.RegisterType((*IndexedVideoRenderingTask)(nil), "janction.videoRendering.v1.IndexedVideoRenderingTask")
 }
 
 func init() {
@@ -117,20 +751,68 @@ func init() {
 }
 
 var fileDescriptor_48dc248d3c391ada = []byte{
-	// 206 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x52, 0xcb, 0x4a, 0xcc, 0x4b,
-	0x2e, 0xc9, 0xcc, 0xcf, 0xd3, 0x2f, 0xcb, 0x4c, 0x49, 0xcd, 0x0f, 0x4a, 0xcd, 0x4b, 0x49, 0x2d,
-	0xca, 0xcc, 0x4b, 0xd7, 0x2f, 0x33, 0xd4, 0x2f, 0xa9, 0x2c, 0x48, 0x2d, 0xd6, 0x2b, 0x28, 0xca,
-	0x2f, 0xc9, 0x17, 0x92, 0x82, 0xa9, 0xd3, 0x43, 0x55, 0xa7, 0x57, 0x66, 0x28, 0x25, 0x99, 0x9c,
-	0x5f, 0x9c, 0x9b, 0x5f, 0x1c, 0x0f, 0x56, 0xa9, 0x0f, 0xe1, 0x40, 0xb4, 0x49, 0x89, 0xa4, 0xe7,
-	0xa7, 0xe7, 0x43, 0xc4, 0x41, 0x2c, 0x88, 0xa8, 0x12, 0x07, 0x17, 0x5b, 0x40, 0x62, 0x51, 0x62,
-	0x6e, 0xb1, 0x52, 0x00, 0x17, 0x8f, 0x7b, 0x6a, 0x5e, 0x6a, 0x71, 0x66, 0x71, 0x70, 0x49, 0x62,
-	0x49, 0xaa, 0x90, 0x03, 0x17, 0x5b, 0x01, 0x58, 0x46, 0x82, 0x51, 0x81, 0x51, 0x83, 0xdb, 0x48,
-	0x49, 0x0f, 0xb7, 0xbd, 0x7a, 0x10, 0x33, 0x9c, 0x58, 0x4e, 0xdc, 0x93, 0x67, 0x08, 0x82, 0xea,
-	0x73, 0xb2, 0x39, 0xf1, 0x48, 0x8e, 0xf1, 0xc2, 0x23, 0x39, 0xc6, 0x07, 0x8f, 0xe4, 0x18, 0x27,
-	0x3c, 0x96, 0x63, 0xb8, 0xf0, 0x58, 0x8e, 0xe1, 0xc6, 0x63, 0x39, 0x86, 0x28, 0xa5, 0xf4, 0xcc,
-	0x92, 0x8c, 0xd2, 0x24, 0xbd, 0xe4, 0xfc, 0x5c, 0x7d, 0x1c, 0xbe, 0x4e, 0x62, 0x03, 0x3b, 0xd0,
-	0x18, 0x10, 0x00, 0x00, 0xff, 0xff, 0xa7, 0x13, 0xe1, 0x13, 0x17, 0x01, 0x00, 0x00,
+	// 965 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xa4, 0x56, 0x4f, 0x6f, 0x1a, 0x47,
+	0x14, 0x67, 0x59, 0xcc, 0x9f, 0x87, 0x53, 0xa1, 0x91, 0xe5, 0x6e, 0xb0, 0x8b, 0xc9, 0x56, 0xad,
+	0xb8, 0x04, 0x12, 0xaa, 0x56, 0x4d, 0x9b, 0x43, 0xb1, 0x58, 0xa3, 0x55, 0xdd, 0x05, 0xcd, 0x82,
+	0x23, 0xb5, 0xaa, 0xd0, 0x9a, 0x1d, 0x93, 0x8d, 0xf1, 0x2e, 0xdd, 0x19, 0x48, 0xb8, 0x54, 0xaa,
+	0xfa, 0x05, 0x7a, 0x6a, 0xbf, 0x44, 0x2e, 0x95, 0xfa, 0x21, 0x72, 0x8c, 0x7a, 0xea, 0xa9, 0xaa,
+	0xec, 0x43, 0xbf, 0x46, 0xb4, 0x33, 0xbb, 0xfc, 0x31, 0x60, 0x07, 0xf9, 0xc4, 0xcc, 0x7b, 0xbf,
+	0xf7, 0x7b, 0xb3, 0xef, 0xcd, 0xfb, 0x0d, 0xf0, 0xe9, 0x0b, 0xcb, 0xed, 0x31, 0xc7, 0x73, 0x2b,
+	0x63, 0xc7, 0x26, 0x1e, 0x26, 0xae, 0x4d, 0x7c, 0xc7, 0xed, 0x57, 0xc6, 0x8f, 0x2b, 0x6c, 0x32,
+	0x24, 0xb4, 0x3c, 0xf4, 0x3d, 0xe6, 0xa1, 0x7c, 0x84, 0x2b, 0x2f, 0xe2, 0xca, 0xe3, 0xc7, 0xf9,
+	0xfb, 0x3d, 0x8f, 0x5e, 0x78, 0xb4, 0xcb, 0x91, 0x15, 0xb1, 0x11, 0x61, 0xf9, 0x9d, 0xbe, 0xd7,
+	0xf7, 0x84, 0x3d, 0x58, 0x09, 0xab, 0x9a, 0x86, 0x64, 0xcb, 0xf2, 0xad, 0x0b, 0xaa, 0xfe, 0x19,
+	0x87, 0xed, 0x06, 0x71, 0x09, 0x75, 0xa8, 0xc9, 0x2c, 0x46, 0xd0, 0x37, 0x90, 0x1c, 0x72, 0x97,
+	0x22, 0x15, 0xa5, 0x52, 0xb6, 0xaa, 0x96, 0xd7, 0x27, 0x2e, 0x0b, 0x92, 0xc3, 0xc4, 0x9b, 0x7f,
+	0x0f, 0x62, 0x38, 0x8c, 0x43, 0x2f, 0x60, 0x77, 0x11, 0xd9, 0xb6, 0xe8, 0xb9, 0xee, 0x9e, 0x79,
+	0x8a, 0xcc, 0x19, 0xab, 0x37, 0x31, 0x9e, 0xac, 0x8c, 0xc4, 0x6b, 0x18, 0x11, 0x5d, 0x95, 0xeb,
+	0xd8, 0xa1, 0x4c, 0xd9, 0x2a, 0xca, 0xa5, 0x6c, 0xf5, 0xf3, 0x9b, 0x72, 0xe9, 0xae, 0x4d, 0x5e,
+	0x11, 0x7b, 0x39, 0x65, 0xf8, 0x41, 0x6b, 0xa8, 0xd5, 0x5f, 0x13, 0x90, 0x7c, 0xe6, 0xf9, 0xe7,
+	0xc4, 0x47, 0x55, 0x48, 0x59, 0xb6, 0xed, 0x13, 0x2a, 0xca, 0x95, 0x39, 0x54, 0xfe, 0xfe, 0xeb,
+	0xe1, 0x4e, 0xd8, 0x81, 0x9a, 0xf0, 0x98, 0x2c, 0x88, 0xc6, 0x11, 0x10, 0x35, 0x20, 0x49, 0x99,
+	0xc5, 0x46, 0x54, 0x89, 0x17, 0xa5, 0xd2, 0x07, 0xd5, 0xca, 0x4d, 0x67, 0x14, 0x79, 0xc2, 0x1f,
+	0x93, 0x87, 0xe1, 0x30, 0x1c, 0x7d, 0x07, 0xe0, 0x93, 0xe1, 0x88, 0x59, 0x41, 0x6c, 0x58, 0xdc,
+	0x87, 0xef, 0x41, 0x86, 0xa7, 0x41, 0x78, 0x8e, 0x20, 0xff, 0x33, 0xc0, 0xcc, 0x83, 0x14, 0x48,
+	0x51, 0x66, 0xf5, 0xce, 0x89, 0xcd, 0xbf, 0x2c, 0x81, 0xa3, 0x2d, 0xda, 0x85, 0xe4, 0xd0, 0x73,
+	0x5c, 0x26, 0xce, 0x2f, 0xe3, 0x70, 0x87, 0x8a, 0x90, 0x1d, 0x5b, 0x03, 0xc7, 0xe6, 0xf1, 0x94,
+	0x9f, 0xe7, 0x1e, 0x9e, 0x37, 0xa1, 0x7d, 0xc8, 0x50, 0x6f, 0x30, 0x12, 0xfe, 0x04, 0xf7, 0xcf,
+	0x0c, 0xea, 0x6b, 0x09, 0xb6, 0xe7, 0xbf, 0x13, 0xed, 0xc1, 0x87, 0xcf, 0x9a, 0xf8, 0x5b, 0x0d,
+	0x77, 0xcd, 0x76, 0xad, 0xdd, 0x31, 0xbb, 0x1d, 0xa3, 0xae, 0x1d, 0xe9, 0x86, 0x56, 0xcf, 0xc5,
+	0x96, 0x9d, 0x58, 0x33, 0xea, 0x1a, 0xd6, 0x8d, 0x46, 0x4e, 0x42, 0x1f, 0xc3, 0xc1, 0xa2, 0xb3,
+	0x85, 0x9b, 0xad, 0xa6, 0xa9, 0xd5, 0xbb, 0x66, 0xf3, 0xb8, 0xd3, 0xd6, 0x9b, 0x46, 0x2e, 0x8e,
+	0x3e, 0x81, 0x07, 0x8b, 0xa0, 0x93, 0xda, 0xb1, 0x5e, 0xaf, 0xb5, 0x75, 0xa3, 0x31, 0x83, 0xc9,
+	0x68, 0x17, 0xd0, 0x22, 0xac, 0xde, 0x34, 0xb4, 0x5c, 0x42, 0x7d, 0x2d, 0x03, 0x5a, 0xbe, 0x3a,
+	0xe8, 0x0b, 0xc8, 0xf8, 0xe4, 0xa7, 0x11, 0xa1, 0x8c, 0xf8, 0xb7, 0xde, 0x89, 0x19, 0x14, 0xe5,
+	0x40, 0xee, 0x39, 0x36, 0x2f, 0x69, 0x06, 0x07, 0x4b, 0x74, 0x00, 0x59, 0xca, 0x2c, 0x9f, 0x75,
+	0xcf, 0x7c, 0xeb, 0x82, 0x84, 0xf5, 0x04, 0x6e, 0x3a, 0x0a, 0x2c, 0x68, 0x0f, 0x32, 0xc4, 0xb5,
+	0x43, 0xb7, 0x28, 0x67, 0x9a, 0xb8, 0xb6, 0x70, 0xe6, 0x40, 0xee, 0x0f, 0x47, 0xca, 0x16, 0x37,
+	0x07, 0xcb, 0xa0, 0x6f, 0x3e, 0x79, 0x69, 0xf9, 0xb6, 0x92, 0xe4, 0xc6, 0x70, 0x17, 0xe4, 0x71,
+	0xdc, 0x40, 0x3b, 0xfa, 0xfc, 0x1e, 0xa7, 0x8a, 0x52, 0x29, 0x8d, 0xc1, 0x71, 0x5b, 0xa1, 0x05,
+	0x75, 0x20, 0xc5, 0x9e, 0xfb, 0xc4, 0xb2, 0xa9, 0x92, 0xe6, 0x53, 0xf5, 0xf5, 0x66, 0x13, 0x5c,
+	0x6e, 0x8b, 0x68, 0xcd, 0x65, 0xfe, 0x04, 0x47, 0x5c, 0xf9, 0x01, 0x6c, 0xcf, 0x3b, 0x82, 0x13,
+	0x9f, 0x93, 0x09, 0xaf, 0xd9, 0x3d, 0x1c, 0x2c, 0xd1, 0x11, 0x6c, 0x8d, 0xad, 0xc1, 0x88, 0xf0,
+	0xaa, 0x64, 0xab, 0x8f, 0x36, 0x48, 0xcb, 0x89, 0xb1, 0x08, 0xff, 0x2a, 0xfe, 0xa5, 0xa4, 0xfe,
+	0x9f, 0x84, 0x9d, 0x55, 0x98, 0xa0, 0x8a, 0xe2, 0x44, 0x5d, 0x47, 0x5c, 0xf5, 0x0c, 0x4e, 0x0b,
+	0x83, 0xbe, 0xd4, 0x83, 0xf8, 0xcd, 0x3d, 0x90, 0xaf, 0xf5, 0xe0, 0x5a, 0x65, 0x13, 0x4b, 0x95,
+	0x7d, 0x0a, 0xa9, 0x97, 0xfc, 0xc6, 0xd3, 0x50, 0xaf, 0xd4, 0xdb, 0xc7, 0x17, 0x47, 0x21, 0xa8,
+	0x03, 0xe9, 0x68, 0x7a, 0x78, 0x4b, 0xb3, 0xd5, 0x27, 0x9b, 0x56, 0xa8, 0x6c, 0x86, 0x04, 0x78,
+	0x4a, 0x85, 0x7e, 0x5c, 0x9c, 0xe3, 0xd4, 0xc6, 0x2d, 0x17, 0xcc, 0x27, 0x53, 0x8e, 0x05, 0x11,
+	0xc8, 0xff, 0x00, 0xe9, 0x28, 0x29, 0x7a, 0x02, 0xd9, 0xa1, 0xef, 0x0d, 0x3d, 0x4a, 0xec, 0xee,
+	0xe9, 0xe4, 0xd6, 0x71, 0x81, 0x08, 0x7c, 0x38, 0x41, 0x3b, 0xb0, 0x75, 0xe6, 0x0c, 0x48, 0x20,
+	0x42, 0x72, 0x29, 0x83, 0xc5, 0x26, 0xff, 0x8b, 0x0c, 0x30, 0x4b, 0x1c, 0x0c, 0x63, 0x98, 0xda,
+	0x7b, 0x8f, 0x61, 0x9c, 0x42, 0xef, 0xd8, 0x76, 0x7b, 0x2a, 0xf0, 0x09, 0x2e, 0xf0, 0xc7, 0x77,
+	0xa8, 0xdd, 0xdc, 0x72, 0x51, 0xfd, 0xd5, 0xdf, 0x25, 0xc8, 0x5d, 0x77, 0xa2, 0x03, 0xd8, 0x8b,
+	0x54, 0xac, 0x69, 0xac, 0x92, 0xcd, 0x07, 0xf0, 0xd1, 0x32, 0x40, 0x37, 0x02, 0x81, 0x6c, 0x60,
+	0xcd, 0x34, 0x73, 0x12, 0xda, 0x07, 0x65, 0x19, 0xd2, 0xaa, 0x99, 0xa6, 0x56, 0xcf, 0xc5, 0x51,
+	0x11, 0xf6, 0x97, 0xbd, 0x46, 0xb3, 0x1d, 0x21, 0x64, 0xf5, 0x11, 0xec, 0xae, 0x7e, 0xc5, 0x03,
+	0x05, 0x72, 0xc9, 0x2b, 0xa6, 0x47, 0x4f, 0x4a, 0xb8, 0x53, 0xff, 0x90, 0xe0, 0xfe, 0xda, 0xc7,
+	0x38, 0xe8, 0xb4, 0x13, 0x38, 0xc3, 0xe1, 0x14, 0x1b, 0x64, 0x03, 0x5a, 0x7e, 0x9e, 0x43, 0xa1,
+	0x28, 0x6f, 0xa6, 0x4f, 0xe1, 0x73, 0xbf, 0x82, 0xef, 0xf0, 0xe9, 0x9b, 0xcb, 0x82, 0xf4, 0xf6,
+	0xb2, 0x20, 0xfd, 0x77, 0x59, 0x90, 0x7e, 0xbb, 0x2a, 0xc4, 0xde, 0x5e, 0x15, 0x62, 0xff, 0x5c,
+	0x15, 0x62, 0xdf, 0xab, 0x7d, 0x87, 0x3d, 0x1f, 0x9d, 0x96, 0x7b, 0xde, 0x45, 0x65, 0xcd, 0x5f,
+	0xb8, 0xd3, 0x24, 0xff, 0xb7, 0xf5, 0xd9, 0xbb, 0x00, 0x00, 0x00, 0xff, 0xff, 0x72, 0x96, 0x23,
+	0x63, 0xe4, 0x09, 0x00, 0x00,
 }
 
 func (m *Params) Marshal() (dAtA []byte, err error) {
@@ -176,6 +858,32 @@ func (m *GenesisState) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	_ = i
 	var l int
 	_ = l
+	if len(m.VideoRenderingTaskList) > 0 {
+		for iNdEx := len(m.VideoRenderingTaskList) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.VideoRenderingTaskList[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x2a
+		}
+	}
+	if m.VideoRenderingTaskInfo != nil {
+		{
+			size, err := m.VideoRenderingTaskInfo.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
 	{
 		size, err := m.Params.MarshalToSizedBuffer(dAtA[:i])
 		if err != nil {
@@ -186,6 +894,429 @@ func (m *GenesisState) MarshalToSizedBuffer(dAtA []byte) (int, error) {
 	}
 	i--
 	dAtA[i] = 0xa
+	return len(dAtA) - i, nil
+}
+
+func (m *Worker) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Worker) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Worker) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Reputation != nil {
+		{
+			size, err := m.Reputation.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x1a
+	}
+	if m.Status != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Status))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Address) > 0 {
+		i -= len(m.Address)
+		copy(dAtA[i:], m.Address)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Address)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *Worker_Reputation) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *Worker_Reputation) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *Worker_Reputation) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Solutions != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Solutions))
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.Validations != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Validations))
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.Points != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Points))
+		i--
+		dAtA[i] = 0x10
+	}
+	if m.Stacked != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Stacked))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *VideoRenderingTask) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *VideoRenderingTask) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *VideoRenderingTask) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Threads) > 0 {
+		for k := range m.Threads {
+			v := m.Threads[k]
+			baseI := i
+			if v != nil {
+				{
+					size, err := v.MarshalToSizedBuffer(dAtA[:i])
+					if err != nil {
+						return 0, err
+					}
+					i -= size
+					i = encodeVarintTypes(dAtA, i, uint64(size))
+				}
+				i--
+				dAtA[i] = 0x12
+			}
+			i = encodeVarintTypes(dAtA, i, uint64(k))
+			i--
+			dAtA[i] = 0x8
+			i = encodeVarintTypes(dAtA, i, uint64(baseI-i))
+			i--
+			dAtA[i] = 0x42
+		}
+	}
+	if m.InProgress {
+		i--
+		if m.InProgress {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x38
+	}
+	if m.Reward != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Reward))
+		i--
+		dAtA[i] = 0x30
+	}
+	if m.Gpu != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Gpu))
+		i--
+		dAtA[i] = 0x28
+	}
+	if m.EndFrame != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.EndFrame))
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.StartFrame != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.StartFrame))
+		i--
+		dAtA[i] = 0x18
+	}
+	if len(m.Cid) > 0 {
+		i -= len(m.Cid)
+		copy(dAtA[i:], m.Cid)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Cid)))
+		i--
+		dAtA[i] = 0x12
+	}
+	if len(m.Requester) > 0 {
+		i -= len(m.Requester)
+		copy(dAtA[i:], m.Requester)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Requester)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *VideoRenderingThread) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *VideoRenderingThread) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *VideoRenderingThread) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Validations) > 0 {
+		for iNdEx := len(m.Validations) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Validations[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x3a
+		}
+	}
+	if m.Solution != nil {
+		{
+			size, err := m.Solution.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintTypes(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0x32
+	}
+	if len(m.Workers) > 0 {
+		for iNdEx := len(m.Workers) - 1; iNdEx >= 0; iNdEx-- {
+			{
+				size, err := m.Workers[iNdEx].MarshalToSizedBuffer(dAtA[:i])
+				if err != nil {
+					return 0, err
+				}
+				i -= size
+				i = encodeVarintTypes(dAtA, i, uint64(size))
+			}
+			i--
+			dAtA[i] = 0x2a
+		}
+	}
+	if m.InProgress {
+		i--
+		if m.InProgress {
+			dAtA[i] = 1
+		} else {
+			dAtA[i] = 0
+		}
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.EndFrame != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.EndFrame))
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.StartFrame != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.StartFrame))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.ThreadId) > 0 {
+		i -= len(m.ThreadId)
+		copy(dAtA[i:], m.ThreadId)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.ThreadId)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *VideoRenderingThread_Solution) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *VideoRenderingThread_Solution) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *VideoRenderingThread_Solution) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Files) > 0 {
+		for iNdEx := len(m.Files) - 1; iNdEx >= 0; iNdEx-- {
+			i -= len(m.Files[iNdEx])
+			copy(dAtA[i:], m.Files[iNdEx])
+			i = encodeVarintTypes(dAtA, i, uint64(len(m.Files[iNdEx])))
+			i--
+			dAtA[i] = 0x12
+		}
+	}
+	if len(m.ProposedBy) > 0 {
+		i -= len(m.ProposedBy)
+		copy(dAtA[i:], m.ProposedBy)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.ProposedBy)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *VideoRenderingThread_Validation) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *VideoRenderingThread_Validation) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *VideoRenderingThread_Validation) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.Status != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.Status))
+		i--
+		dAtA[i] = 0x20
+	}
+	if m.EndFrame != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.EndFrame))
+		i--
+		dAtA[i] = 0x18
+	}
+	if m.StartFrame != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.StartFrame))
+		i--
+		dAtA[i] = 0x10
+	}
+	if len(m.Validator) > 0 {
+		i -= len(m.Validator)
+		copy(dAtA[i:], m.Validator)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Validator)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *VideoRenderingTaskInfo) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *VideoRenderingTaskInfo) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *VideoRenderingTaskInfo) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.NextId != 0 {
+		i = encodeVarintTypes(dAtA, i, uint64(m.NextId))
+		i--
+		dAtA[i] = 0x8
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *IndexedVideoRenderingTask) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *IndexedVideoRenderingTask) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *IndexedVideoRenderingTask) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	{
+		size, err := m.VideoRenderingTask.MarshalToSizedBuffer(dAtA[:i])
+		if err != nil {
+			return 0, err
+		}
+		i -= size
+		i = encodeVarintTypes(dAtA, i, uint64(size))
+	}
+	i--
+	dAtA[i] = 0x12
+	if len(m.Index) > 0 {
+		i -= len(m.Index)
+		copy(dAtA[i:], m.Index)
+		i = encodeVarintTypes(dAtA, i, uint64(len(m.Index)))
+		i--
+		dAtA[i] = 0xa
+	}
 	return len(dAtA) - i, nil
 }
 
@@ -216,6 +1347,208 @@ func (m *GenesisState) Size() (n int) {
 	var l int
 	_ = l
 	l = m.Params.Size()
+	n += 1 + l + sovTypes(uint64(l))
+	if m.VideoRenderingTaskInfo != nil {
+		l = m.VideoRenderingTaskInfo.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if len(m.VideoRenderingTaskList) > 0 {
+		for _, e := range m.VideoRenderingTaskList {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *Worker) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Address)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if m.Status != 0 {
+		n += 1 + sovTypes(uint64(m.Status))
+	}
+	if m.Reputation != nil {
+		l = m.Reputation.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	return n
+}
+
+func (m *Worker_Reputation) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.Stacked != 0 {
+		n += 1 + sovTypes(uint64(m.Stacked))
+	}
+	if m.Points != 0 {
+		n += 1 + sovTypes(uint64(m.Points))
+	}
+	if m.Validations != 0 {
+		n += 1 + sovTypes(uint64(m.Validations))
+	}
+	if m.Solutions != 0 {
+		n += 1 + sovTypes(uint64(m.Solutions))
+	}
+	return n
+}
+
+func (m *VideoRenderingTask) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Requester)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = len(m.Cid)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if m.StartFrame != 0 {
+		n += 1 + sovTypes(uint64(m.StartFrame))
+	}
+	if m.EndFrame != 0 {
+		n += 1 + sovTypes(uint64(m.EndFrame))
+	}
+	if m.Gpu != 0 {
+		n += 1 + sovTypes(uint64(m.Gpu))
+	}
+	if m.Reward != 0 {
+		n += 1 + sovTypes(uint64(m.Reward))
+	}
+	if m.InProgress {
+		n += 2
+	}
+	if len(m.Threads) > 0 {
+		for k, v := range m.Threads {
+			_ = k
+			_ = v
+			l = 0
+			if v != nil {
+				l = v.Size()
+				l += 1 + sovTypes(uint64(l))
+			}
+			mapEntrySize := 1 + sovTypes(uint64(k)) + l
+			n += mapEntrySize + 1 + sovTypes(uint64(mapEntrySize))
+		}
+	}
+	return n
+}
+
+func (m *VideoRenderingThread) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ThreadId)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if m.StartFrame != 0 {
+		n += 1 + sovTypes(uint64(m.StartFrame))
+	}
+	if m.EndFrame != 0 {
+		n += 1 + sovTypes(uint64(m.EndFrame))
+	}
+	if m.InProgress {
+		n += 2
+	}
+	if len(m.Workers) > 0 {
+		for _, e := range m.Workers {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	if m.Solution != nil {
+		l = m.Solution.Size()
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if len(m.Validations) > 0 {
+		for _, e := range m.Validations {
+			l = e.Size()
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *VideoRenderingThread_Solution) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.ProposedBy)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if len(m.Files) > 0 {
+		for _, s := range m.Files {
+			l = len(s)
+			n += 1 + l + sovTypes(uint64(l))
+		}
+	}
+	return n
+}
+
+func (m *VideoRenderingThread_Validation) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Validator)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	if m.StartFrame != 0 {
+		n += 1 + sovTypes(uint64(m.StartFrame))
+	}
+	if m.EndFrame != 0 {
+		n += 1 + sovTypes(uint64(m.EndFrame))
+	}
+	if m.Status != 0 {
+		n += 1 + sovTypes(uint64(m.Status))
+	}
+	return n
+}
+
+func (m *VideoRenderingTaskInfo) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.NextId != 0 {
+		n += 1 + sovTypes(uint64(m.NextId))
+	}
+	return n
+}
+
+func (m *IndexedVideoRenderingTask) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Index)
+	if l > 0 {
+		n += 1 + l + sovTypes(uint64(l))
+	}
+	l = m.VideoRenderingTask.Size()
 	n += 1 + l + sovTypes(uint64(l))
 	return n
 }
@@ -335,6 +1668,1345 @@ func (m *GenesisState) Unmarshal(dAtA []byte) error {
 				return io.ErrUnexpectedEOF
 			}
 			if err := m.Params.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field VideoRenderingTaskInfo", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.VideoRenderingTaskInfo == nil {
+				m.VideoRenderingTaskInfo = &VideoRenderingTaskInfo{}
+			}
+			if err := m.VideoRenderingTaskInfo.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field VideoRenderingTaskList", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.VideoRenderingTaskList = append(m.VideoRenderingTaskList, IndexedVideoRenderingTask{})
+			if err := m.VideoRenderingTaskList[len(m.VideoRenderingTaskList)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Worker) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Worker: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Worker: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Address = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
+			}
+			m.Status = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Status |= Worker_WorkerStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Reputation", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Reputation == nil {
+				m.Reputation = &Worker_Reputation{}
+			}
+			if err := m.Reputation.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *Worker_Reputation) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Reputation: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Reputation: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Stacked", wireType)
+			}
+			m.Stacked = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Stacked |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Points", wireType)
+			}
+			m.Points = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Points |= int64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Validations", wireType)
+			}
+			m.Validations = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Validations |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Solutions", wireType)
+			}
+			m.Solutions = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Solutions |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *VideoRenderingTask) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: VideoRenderingTask: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: VideoRenderingTask: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Requester", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Requester = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Cid", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Cid = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StartFrame", wireType)
+			}
+			m.StartFrame = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.StartFrame |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EndFrame", wireType)
+			}
+			m.EndFrame = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.EndFrame |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 5:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Gpu", wireType)
+			}
+			m.Gpu = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Gpu |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 6:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Reward", wireType)
+			}
+			m.Reward = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Reward |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 7:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field InProgress", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.InProgress = bool(v != 0)
+		case 8:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Threads", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Threads == nil {
+				m.Threads = make(map[uint32]*VideoRenderingThread)
+			}
+			var mapkey uint32
+			var mapvalue *VideoRenderingThread
+			for iNdEx < postIndex {
+				entryPreIndex := iNdEx
+				var wire uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return ErrIntOverflowTypes
+					}
+					if iNdEx >= l {
+						return io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					wire |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				fieldNum := int32(wire >> 3)
+				if fieldNum == 1 {
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowTypes
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						mapkey |= uint32(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+				} else if fieldNum == 2 {
+					var mapmsglen int
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return ErrIntOverflowTypes
+						}
+						if iNdEx >= l {
+							return io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						mapmsglen |= int(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					if mapmsglen < 0 {
+						return ErrInvalidLengthTypes
+					}
+					postmsgIndex := iNdEx + mapmsglen
+					if postmsgIndex < 0 {
+						return ErrInvalidLengthTypes
+					}
+					if postmsgIndex > l {
+						return io.ErrUnexpectedEOF
+					}
+					mapvalue = &VideoRenderingThread{}
+					if err := mapvalue.Unmarshal(dAtA[iNdEx:postmsgIndex]); err != nil {
+						return err
+					}
+					iNdEx = postmsgIndex
+				} else {
+					iNdEx = entryPreIndex
+					skippy, err := skipTypes(dAtA[iNdEx:])
+					if err != nil {
+						return err
+					}
+					if (skippy < 0) || (iNdEx+skippy) < 0 {
+						return ErrInvalidLengthTypes
+					}
+					if (iNdEx + skippy) > postIndex {
+						return io.ErrUnexpectedEOF
+					}
+					iNdEx += skippy
+				}
+			}
+			m.Threads[mapkey] = mapvalue
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *VideoRenderingThread) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: VideoRenderingThread: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: VideoRenderingThread: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ThreadId", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ThreadId = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StartFrame", wireType)
+			}
+			m.StartFrame = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.StartFrame |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EndFrame", wireType)
+			}
+			m.EndFrame = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.EndFrame |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field InProgress", wireType)
+			}
+			var v int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				v |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			m.InProgress = bool(v != 0)
+		case 5:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Workers", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Workers = append(m.Workers, &Worker{})
+			if err := m.Workers[len(m.Workers)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 6:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Solution", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.Solution == nil {
+				m.Solution = &VideoRenderingThread_Solution{}
+			}
+			if err := m.Solution.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		case 7:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Validations", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Validations = append(m.Validations, &VideoRenderingThread_Validation{})
+			if err := m.Validations[len(m.Validations)-1].Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *VideoRenderingThread_Solution) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Solution: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Solution: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field ProposedBy", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.ProposedBy = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Files", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Files = append(m.Files, string(dAtA[iNdEx:postIndex]))
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *VideoRenderingThread_Validation) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: Validation: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: Validation: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Validator", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Validator = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field StartFrame", wireType)
+			}
+			m.StartFrame = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.StartFrame |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 3:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field EndFrame", wireType)
+			}
+			m.EndFrame = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.EndFrame |= uint32(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		case 4:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
+			}
+			m.Status = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.Status |= VideoRenderingThread_Validation_ValidationStatus(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *VideoRenderingTaskInfo) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: VideoRenderingTaskInfo: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: VideoRenderingTaskInfo: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 0 {
+				return fmt.Errorf("proto: wrong wireType = %d for field NextId", wireType)
+			}
+			m.NextId = 0
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				m.NextId |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+		default:
+			iNdEx = preIndex
+			skippy, err := skipTypes(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *IndexedVideoRenderingTask) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowTypes
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: IndexedVideoRenderingTask: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: IndexedVideoRenderingTask: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Index", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Index = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		case 2:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field VideoRenderingTask", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowTypes
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthTypes
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthTypes
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if err := m.VideoRenderingTask.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

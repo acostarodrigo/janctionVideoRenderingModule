@@ -13,6 +13,12 @@ message Params {}
 message GenesisState {
   // params defines all the parameters of the module.
   Params params = 1 [ (gogoproto.nullable) = false ];
+
+  // Video Rendering Task index
+  VideoRenderingTaskInfo videoRenderingTaskInfo = 3;
+
+  // List of Video Rendering tasks
+  repeated IndexedVideoRenderingTask videoRenderingTaskList = 5 [(gogoproto.nullable) = false];
 }
 
 
@@ -87,10 +93,12 @@ message VideoRenderingTask {
     }
   }
 
+  // Stores information about the Video Rendering  task 
   message VideoRenderingTaskInfo {
     uint64 nextId = 1;
   }
   
+  // Stores the Video Rendering Task with the index
   message IndexedVideoRenderingTask {
     string index = 1;
     VideoRenderingTask videoRenderingTask = 2 [(gogoproto.nullable) = false];
