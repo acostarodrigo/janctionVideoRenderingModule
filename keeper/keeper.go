@@ -22,6 +22,8 @@ type Keeper struct {
 	// state management
 	Schema collections.Schema
 	Params collections.Item[videoRendering.Params]
+
+	VideoRenderingTasks collections.Map[string, videoRendering.VideoRenderingTask]
 }
 
 // NewKeeper creates a new Keeper instance
@@ -32,10 +34,11 @@ func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService s
 
 	sb := collections.NewSchemaBuilder(storeService)
 	k := Keeper{
-		cdc:          cdc,
-		addressCodec: addressCodec,
-		authority:    authority,
-		Params:       collections.NewItem(sb, videoRendering.ParamsKey, "params", codec.CollValue[videoRendering.Params](cdc)),
+		cdc:                 cdc,
+		addressCodec:        addressCodec,
+		authority:           authority,
+		Params:              collections.NewItem(sb, videoRendering.ParamsKey, "params", codec.CollValue[videoRendering.Params](cdc)),
+		VideoRenderingTasks: collections.NewMap(sb, videoRendering.VideoRenderingTaskKey, "videoRenderingTasks", collections.StringKey, codec.CollValue[videoRendering.VideoRenderingTask](cdc)),
 	}
 
 	schema, err := sb.Build()

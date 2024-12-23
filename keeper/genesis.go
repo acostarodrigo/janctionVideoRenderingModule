@@ -23,6 +23,8 @@ func (k *Keeper) ExportGenesis(ctx context.Context) (*videoRendering.GenesisStat
 	}
 
 	return &videoRendering.GenesisState{
-		Params: params,
+		Params:                 params,
+		VideoRenderingTaskList: []videoRendering.IndexedVideoRenderingTask{},
+		VideoRenderingTaskInfo: &videoRendering.VideoRenderingTaskInfo{NextId: 1},
 	}, nil
 }

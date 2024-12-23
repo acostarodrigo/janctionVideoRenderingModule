@@ -6,5 +6,5 @@ const ModuleName = "videoRendering"
 
 var (
 	ParamsKey             = collections.NewPrefix("Params")
-	VideoRenderingTaskKey = collections.NewPrefix("VideoRenderingFiles/value/")
+	VideoRenderingTaskKey = collections.NewPrefix("videoRenderingTaskList/value/")
 )

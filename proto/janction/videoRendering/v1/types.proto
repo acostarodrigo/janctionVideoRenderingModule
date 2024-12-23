@@ -52,10 +52,9 @@ message VideoRenderingTask {
   string cid = 2;
   uint32 start_frame = 3;
   uint32 end_frame = 4;
-  uint32 gpu = 5;
-  uint32 reward = 6;
-  bool in_progress = 7;
-  map<uint32, VideoRenderingThread>  threads = 8;
+  uint32 threadAmount = 5;
+  bool in_progress = 6;
+  map<uint32, VideoRenderingThread>  threads = 7;
 }
 
   /*

@@ -1,0 +1,35 @@
+syntax = "proto3";
+package janction.videoRendering.v1;
+
+option go_package = "github.com/janction/videoRendering";
+
+import "cosmos/msg/v1/msg.proto";
+import "gogoproto/gogo.proto";
+import "janction/videoRendering/v1/types.proto";
+import "cosmos_proto/cosmos.proto";
+
+// Msg defines the module Msg service.
+service Msg {
+  option (cosmos.msg.v1.service) = true;
+
+  // CreateGame create a game.
+  rpc CreateVideoRenderingTask(MsgCreateVideoRenderingTask)
+    returns (MsgCreateVideoRenderingTaskResponse);
+}
+
+// MsgCreateGame defines the Msg/CreateGame request type.
+message MsgCreateVideoRenderingTask {
+  option (cosmos.msg.v1.signer) = "creator";
+
+  // creator is the message sender.
+  string creator = 1;
+  string cid = 2 ;
+  uint32 startFrame = 3 ;
+  uint32 endFrame = 4 ;
+  uint32 threads = 5;
+}
+
+// MsgCreateGameResponse defines the Msg/CreateGame response type.
+message MsgCreateVideoRenderingTaskResponse {
+    string task_id = 1;
+}
