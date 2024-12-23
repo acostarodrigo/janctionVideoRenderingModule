@@ -1,6 +1,7 @@
 package module
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 
@@ -52,9 +53,9 @@ func (AppModule) RegisterLegacyAminoCodec(cdc *codec.LegacyAmino) {}
 
 // RegisterGRPCGatewayRoutes registers the gRPC Gateway routes for the videoRendering module.
 func (AppModule) RegisterGRPCGatewayRoutes(clientCtx client.Context, mux *gwruntime.ServeMux) {
-	// if err := videoRendering.RegisterQueryHandlerClient(context.Background(), mux, videoRendering.NewQueryClient(clientCtx)); err != nil {
-	//     panic(err)
-	// }
+	if err := videoRendering.RegisterQueryHandlerClient(context.Background(), mux, videoRendering.NewQueryClient(clientCtx)); err != nil {
+		panic(err)
+	}
 }
 
 // RegisterInterfaces registers interfaces and implementations of the videoRendering module.
@@ -69,7 +70,7 @@ func (AppModule) ConsensusVersion() uint64 { return ConsensusVersion }
 func (am AppModule) RegisterServices(cfg module.Configurator) {
 	// Register servers
 	videoRendering.RegisterMsgServer(cfg.MsgServer(), keeper.NewMsgServerImpl(am.keeper))
-	// videoRendering.RegisterQueryServer(cfg.QueryServer(), keeper.NewQueryServerImpl(am.keeper))
+	videoRendering.RegisterQueryServer(cfg.QueryServer(), keeper.NewQueryServerImpl(am.keeper))
 
 	// Register in place module state migration migrations
 	// m := keeper.NewMigrator(am.keeper)

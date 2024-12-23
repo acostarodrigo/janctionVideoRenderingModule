@@ -1,0 +1,33 @@
+syntax = "proto3";
+package janction.videoRendering.v1;
+
+option go_package = "github.com/janction/videoRendering";
+
+import "janction/videoRendering/v1/types.proto";
+import "google/api/annotations.proto";
+import "cosmos/query/v1/query.proto";
+import "gogoproto/gogo.proto";
+
+// Query defines the module Query service.
+service Query {
+  // GetGame returns the game at the requested index.
+  rpc GetVideoRenderingTask(QueryGetVideoRenderingTaskRequest) returns (QueryGetVideoRenderingTaskResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get =
+      "/janction/videoRendering/v1/game/{index}";
+  }
+}
+
+// QueryGetGameRequest is the request type for the Query/GetGame RPC
+// method.
+message QueryGetVideoRenderingTaskRequest {
+  // index defines the index of the game to retrieve.
+  string index = 1;
+}
+
+// QueryGetGameResponse is the response type for the Query/GetGame RPC
+// method.
+message QueryGetVideoRenderingTaskResponse {
+  // Game defines the game at the requested index.
+  VideoRenderingTask video_rendering_task = 1;
+}
