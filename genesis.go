@@ -3,7 +3,9 @@ package videoRendering
 // NewGenesisState creates a new genesis state with default values.
 func NewGenesisState() *GenesisState {
 	return &GenesisState{
-		Params: DefaultParams(),
+		Params:                 DefaultParams(),
+		VideoRenderingTaskList: GetEmptyVideoRenderingTaskList(),
+		VideoRenderingTaskInfo: &VideoRenderingTaskInfo{NextId: 1},
 	}
 }
 

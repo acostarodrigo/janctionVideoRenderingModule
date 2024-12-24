@@ -12,6 +12,10 @@ func (k *Keeper) InitGenesis(ctx context.Context, data *videoRendering.GenesisSt
 		return err
 	}
 
+	if err := k.VideoRenderingTaskInfo.Set(ctx, *data.VideoRenderingTaskInfo); err != nil {
+		return err
+	}
+
 	return nil
 }
 

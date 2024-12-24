@@ -2,6 +2,8 @@ package keeper
 
 import (
 	"context"
+	"log"
+	"strconv"
 
 	"github.com/janction/videoRendering"
 )
@@ -19,8 +21,23 @@ func NewMsgServerImpl(keeper Keeper) videoRendering.MsgServer {
 
 // CreateGame defines the handler for the MsgCreateVideoRenderingTask message.
 func (ms msgServer) CreateVideoRenderingTask(ctx context.Context, msg *videoRendering.MsgCreateVideoRenderingTask) (*videoRendering.MsgCreateVideoRenderingTaskResponse, error) {
-	if err := ms.k.VideoRenderingTasks.Set(ctx, "1", videoRendering.VideoRenderingTask{Requester: msg.Creator, Cid: msg.Cid, StartFrame: msg.StartFrame, EndFrame: msg.EndFrame, InProgress: false, ThreadAmount: msg.Threads}); err != nil {
+	// TODO had validations about the parameters
+	log.Println("Started creation")
+	taskInfo, err := ms.k.VideoRenderingTaskInfo.Get(ctx)
+	if err != nil {
 		return nil, err
 	}
-	return &videoRendering.MsgCreateVideoRenderingTaskResponse{TaskId: "1"}, nil
+
+	var nextId = taskInfo.NextId
+	// we get the taskId in string
+	taskId := strconv.FormatUint(nextId, 10)
+
+	// and increase the task id counter for next task
+	nextId++
+	ms.k.VideoRenderingTaskInfo.Set(ctx, videoRendering.VideoRenderingTaskInfo{NextId: nextId})
+
+	if err := ms.k.VideoRenderingTasks.Set(ctx, taskId, videoRendering.VideoRenderingTask{Requester: msg.Creator, Cid: msg.Cid, StartFrame: msg.StartFrame, EndFrame: msg.EndFrame, InProgress: false, ThreadAmount: msg.Threads}); err != nil {
+		return nil, err
+	}
+	return &videoRendering.MsgCreateVideoRenderingTaskResponse{TaskId: taskId}, nil
 }
