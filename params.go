@@ -4,6 +4,7 @@ package videoRendering
 func DefaultParams() Params {
 	return Params{
 		// Set default values here.
+		VideoRenderingKeyName: "videoRenderingKey",
 	}
 }
 

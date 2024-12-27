@@ -7,7 +7,9 @@ import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 
 // Params defines the parameters of the module.
-message Params {}
+message Params {
+  string video_rendering_key_name = 1;
+}
 
 // GenesisState is the state that must be provided at genesis.
 message GenesisState {
