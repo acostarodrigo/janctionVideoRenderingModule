@@ -18,6 +18,8 @@ type Keeper struct {
 	// typically, this should be the x/gov module account.
 	authority string
 
+	Path string
+
 	// state management
 	Schema                 collections.Schema
 	Params                 collections.Item[videoRendering.Params]
@@ -26,7 +28,7 @@ type Keeper struct {
 }
 
 // NewKeeper creates a new Keeper instance
-func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService storetypes.KVStoreService, authority string) Keeper {
+func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService storetypes.KVStoreService, authority string, path string) Keeper {
 	if _, err := addressCodec.StringToBytes(authority); err != nil {
 		panic(fmt.Errorf("invalid authority address: %w", err))
 	}
@@ -39,6 +41,7 @@ func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService s
 		Params:                 collections.NewItem(sb, videoRendering.ParamsKey, "params", codec.CollValue[videoRendering.Params](cdc)),
 		VideoRenderingTaskInfo: collections.NewItem(sb, videoRendering.TaskInfoKey, "taskInfo", codec.CollValue[videoRendering.VideoRenderingTaskInfo](cdc)),
 		VideoRenderingTasks:    collections.NewMap(sb, videoRendering.VideoRenderingTaskKey, "videoRenderingTasks", collections.StringKey, codec.CollValue[videoRendering.VideoRenderingTask](cdc)),
+		Path:                   path,
 	}
 
 	schema, err := sb.Build()
