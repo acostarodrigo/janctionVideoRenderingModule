@@ -122,7 +122,8 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 func (am AppModule) EndBlock(ctx context.Context) error {
 	log.Println("*********************")
 	log.Println("end Block")
-	log.Println("Path", am.keeper.Path)
+	conf := am.keeper.Configuration
+	log.Println("Enabled?", conf.Enabled)
 
 	log.Println("*********************")
 	return nil
