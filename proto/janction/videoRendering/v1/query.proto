@@ -16,6 +16,9 @@ service Query {
     option (google.api.http).get =
       "/janction/videoRendering/v1/game/{index}";
   }
+
+  rpc GetPendingVideoRenderingTasks(QueryGetPendingVideoRenderingTaskRequest) returns (QueryGetPendingVideoRenderingTaskResponse){
+  }
 }
 
 // QueryGetGameRequest is the request type for the Query/GetGame RPC
@@ -30,4 +33,12 @@ message QueryGetVideoRenderingTaskRequest {
 message QueryGetVideoRenderingTaskResponse {
   // Game defines the game at the requested index.
   VideoRenderingTask video_rendering_task = 1;
+}
+
+message QueryGetPendingVideoRenderingTaskRequest {
+  
+}
+
+message QueryGetPendingVideoRenderingTaskResponse {
+  repeated VideoRenderingTask video_rendering_tasks = 1;
 }

@@ -19,7 +19,8 @@ import (
 const _ = grpc.SupportPackageIsVersion7
 
 const (
-	Query_GetVideoRenderingTask_FullMethodName = "/janction.videoRendering.v1.Query/GetVideoRenderingTask"
+	Query_GetVideoRenderingTask_FullMethodName         = "/janction.videoRendering.v1.Query/GetVideoRenderingTask"
+	Query_GetPendingVideoRenderingTasks_FullMethodName = "/janction.videoRendering.v1.Query/GetPendingVideoRenderingTasks"
 )
 
 // QueryClient is the client API for Query service.
@@ -28,6 +29,7 @@ const (
 type QueryClient interface {
 	// GetGame returns the game at the requested index.
 	GetVideoRenderingTask(ctx context.Context, in *QueryGetVideoRenderingTaskRequest, opts ...grpc.CallOption) (*QueryGetVideoRenderingTaskResponse, error)
+	GetPendingVideoRenderingTasks(ctx context.Context, in *QueryGetPendingVideoRenderingTaskRequest, opts ...grpc.CallOption) (*QueryGetPendingVideoRenderingTaskResponse, error)
 }
 
 type queryClient struct {
@@ -47,12 +49,22 @@ func (c *queryClient) GetVideoRenderingTask(ctx context.Context, in *QueryGetVid
 	return out, nil
 }
 
+func (c *queryClient) GetPendingVideoRenderingTasks(ctx context.Context, in *QueryGetPendingVideoRenderingTaskRequest, opts ...grpc.CallOption) (*QueryGetPendingVideoRenderingTaskResponse, error) {
+	out := new(QueryGetPendingVideoRenderingTaskResponse)
+	err := c.cc.Invoke(ctx, Query_GetPendingVideoRenderingTasks_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // QueryServer is the server API for Query service.
 // All implementations must embed UnimplementedQueryServer
 // for forward compatibility
 type QueryServer interface {
 	// GetGame returns the game at the requested index.
 	GetVideoRenderingTask(context.Context, *QueryGetVideoRenderingTaskRequest) (*QueryGetVideoRenderingTaskResponse, error)
+	GetPendingVideoRenderingTasks(context.Context, *QueryGetPendingVideoRenderingTaskRequest) (*QueryGetPendingVideoRenderingTaskResponse, error)
 	mustEmbedUnimplementedQueryServer()
 }
 
@@ -62,6 +74,9 @@ type UnimplementedQueryServer struct {
 
 func (UnimplementedQueryServer) GetVideoRenderingTask(context.Context, *QueryGetVideoRenderingTaskRequest) (*QueryGetVideoRenderingTaskResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVideoRenderingTask not implemented")
+}
+func (UnimplementedQueryServer) GetPendingVideoRenderingTasks(context.Context, *QueryGetPendingVideoRenderingTaskRequest) (*QueryGetPendingVideoRenderingTaskResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetPendingVideoRenderingTasks not implemented")
 }
 func (UnimplementedQueryServer) mustEmbedUnimplementedQueryServer() {}
 
@@ -94,6 +109,24 @@ func _Query_GetVideoRenderingTask_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_GetPendingVideoRenderingTasks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetPendingVideoRenderingTaskRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetPendingVideoRenderingTasks(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Query_GetPendingVideoRenderingTasks_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetPendingVideoRenderingTasks(ctx, req.(*QueryGetPendingVideoRenderingTaskRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Query_ServiceDesc is the grpc.ServiceDesc for Query service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -104,6 +137,10 @@ var Query_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetVideoRenderingTask",
 			Handler:    _Query_GetVideoRenderingTask_Handler,
+		},
+		{
+			MethodName: "GetPendingVideoRenderingTasks",
+			Handler:    _Query_GetPendingVideoRenderingTasks_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

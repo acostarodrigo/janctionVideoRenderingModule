@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 
 	"cosmossdk.io/core/appmodule"
 	gwruntime "github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -120,11 +119,9 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 // EndBlock contains the logic that is automatically triggered at the end of each block.
 // The end block implementation is optional.
 func (am AppModule) EndBlock(ctx context.Context) error {
-	log.Println("*********************")
-	log.Println("end Block")
-	conf := am.keeper.Configuration
-	log.Println("Enabled?", conf.Enabled)
+	if am.keeper.Configuration.Enabled {
+		// TODO process pending video rendering tasks
+	}
 
-	log.Println("*********************")
 	return nil
 }

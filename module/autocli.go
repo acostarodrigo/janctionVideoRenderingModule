@@ -19,6 +19,11 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 						{ProtoField: "index"},
 					},
 				},
+				{
+					RpcMethod: "GetPendingVideoRenderingTasks",
+					Use:       "get-pending-video-rendering-tasks",
+					Short:     "Gets the pending video rendering tasks",
+				},
 			},
 		},
 		Tx: &autocliv1.ServiceCommandDescriptor{

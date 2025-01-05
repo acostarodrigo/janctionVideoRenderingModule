@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"errors"
+	"log"
 
 	"cosmossdk.io/collections"
 	"google.golang.org/grpc/codes"
@@ -33,4 +34,27 @@ func (qs queryServer) GetVideoRenderingTask(ctx context.Context, req *videoRende
 	}
 
 	return nil, status.Error(codes.Internal, err.Error())
+}
+
+func (qs queryServer) GetPendingVideoRenderingTasks(ctx context.Context, req *videoRendering.QueryGetPendingVideoRenderingTaskRequest) (*videoRendering.QueryGetPendingVideoRenderingTaskResponse, error) {
+	ti, err := qs.k.VideoRenderingTaskInfo.Get(ctx)
+
+	if err != nil {
+		return nil, err
+	}
+	nextId := ti.NextId
+
+	var result []*videoRendering.VideoRenderingTask
+	for i := 0; i < int(nextId); i++ {
+		task, err := qs.k.VideoRenderingTasks.Get(ctx, string(i))
+		if err != nil {
+			log.Fatalf("unable to retrieve task with id %v. Error: %v", string(i), err.Error())
+			continue
+		}
+
+		if task.InProgress {
+			result = append(result, &task)
+		}
+	}
+	return &videoRendering.QueryGetPendingVideoRenderingTaskResponse{VideoRenderingTasks: result}, nil
 }
