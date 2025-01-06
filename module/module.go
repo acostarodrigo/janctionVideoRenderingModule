@@ -4,6 +4,8 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"log"
+	"strconv"
 
 	"cosmossdk.io/core/appmodule"
 	gwruntime "github.com/grpc-ecosystem/grpc-gateway/runtime"
@@ -116,11 +118,35 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 	return cdc.MustMarshalJSON(gs)
 }
 
+func (am AppModule) getPendingVideoRenderingTasks(ctx context.Context) []videoRendering.VideoRenderingTask {
+	ti, err := am.keeper.VideoRenderingTaskInfo.Get(ctx)
+	if err != nil {
+		panic(err)
+	}
+	var result []videoRendering.VideoRenderingTask
+	nextId := int(ti.NextId)
+	for i := 0; i < nextId; i++ {
+		task, err := am.keeper.VideoRenderingTasks.Get(ctx, strconv.Itoa(i))
+		if err != nil {
+			continue
+		}
+
+		if task.InProgress {
+			result = append(result, task)
+		}
+	}
+	return result
+}
+
 // EndBlock contains the logic that is automatically triggered at the end of each block.
 // The end block implementation is optional.
 func (am AppModule) EndBlock(ctx context.Context) error {
 	if am.keeper.Configuration.Enabled {
 		// TODO process pending video rendering tasks
+		pendingTask := am.getPendingVideoRenderingTasks(ctx)
+		if pendingTask != nil {
+			log.Println("Ready to process task.", pendingTask[0].TaskId)
+		}
 	}
 
 	return nil
