@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"errors"
+	"io/fs"
 	"log"
 	"os"
 
@@ -20,6 +21,13 @@ type VideoConfiguration struct {
 func GetVideoRenderingConfiguration(rootPath string) (*VideoConfiguration, error) {
 	var path string = rootPath + "/config/videoRendering.toml"
 	conf := VideoConfiguration{Enabled: false, Path: path}
+
+	// we make sure the root path exists. It might yet not be initialized
+	_, err := os.Stat(rootPath)
+	if errors.Is(err, fs.ErrNotExist) {
+		log.Println("File doesn't exists", rootPath)
+		return &conf, nil
+	}
 
 	// Load the YAML file
 	file, err := os.Open(path)
@@ -44,6 +52,13 @@ func GetVideoRenderingConfiguration(rootPath string) (*VideoConfiguration, error
 }
 
 func (c *VideoConfiguration) SaveConf() error {
+	// we make sure the root path exists. It might not be initialized
+	_, err := os.Stat(c.Path)
+	if errors.Is(err, fs.ErrNotExist) {
+		log.Println("File doesn't exists", c.Path)
+		return nil
+	}
+
 	// Marshal the struct into YAML format
 	data, err := toml.Marshal(&c)
 	if err != nil {
