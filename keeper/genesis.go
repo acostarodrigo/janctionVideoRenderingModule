@@ -12,7 +12,7 @@ func (k *Keeper) InitGenesis(ctx context.Context, data *videoRendering.GenesisSt
 		return err
 	}
 
-	if err := k.VideoRenderingTaskInfo.Set(ctx, *data.VideoRenderingTaskInfo); err != nil {
+	if err := k.VideoRenderingTaskInfo.Set(ctx, data.VideoRenderingTaskInfo); err != nil {
 		return err
 	}
 
@@ -29,6 +29,6 @@ func (k *Keeper) ExportGenesis(ctx context.Context) (*videoRendering.GenesisStat
 	return &videoRendering.GenesisState{
 		Params:                 params,
 		VideoRenderingTaskList: []videoRendering.IndexedVideoRenderingTask{},
-		VideoRenderingTaskInfo: &videoRendering.VideoRenderingTaskInfo{NextId: 1},
+		VideoRenderingTaskInfo: videoRendering.VideoRenderingTaskInfo{NextId: 1},
 	}, nil
 }

@@ -40,6 +40,14 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 						{ProtoField: "threads"},
 					},
 				},
+				{
+					RpcMethod: "AddWorker",
+					Use:       "add-worker [address]",
+					Short:     "Registers a new worker that will perform video rendering tasks",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "address"},
+					},
+				},
 			},
 		},
 	}

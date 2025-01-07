@@ -15,6 +15,10 @@ service Msg {
   // CreateGame create a game.
   rpc CreateVideoRenderingTask(MsgCreateVideoRenderingTask)
     returns (MsgCreateVideoRenderingTaskResponse);
+  
+  // Adds a new worker
+  rpc AddWorker(MsgAddWorker)
+    returns (MsgAddWorkerResponse);
 }
 
 // MsgCreateGame defines the Msg/CreateGame request type.
@@ -32,4 +36,13 @@ message MsgCreateVideoRenderingTask {
 // MsgCreateGameResponse defines the Msg/CreateGame response type.
 message MsgCreateVideoRenderingTaskResponse {
     string task_id = 1;
+}
+
+message MsgAddWorker {
+  option (cosmos.msg.v1.signer) = "address";
+  string address = 1;
+}
+
+message MsgAddWorkerResponse {
+
 }

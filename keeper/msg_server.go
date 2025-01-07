@@ -2,7 +2,10 @@ package keeper
 
 import (
 	"context"
+	"log"
 	"strconv"
+
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 
 	"github.com/janction/videoRendering"
 )
@@ -42,4 +45,23 @@ func (ms msgServer) CreateVideoRenderingTask(ctx context.Context, msg *videoRend
 		return nil, err
 	}
 	return &videoRendering.MsgCreateVideoRenderingTaskResponse{TaskId: taskId}, nil
+}
+
+func (ms msgServer) AddWorker(ctx context.Context, msg *videoRendering.MsgAddWorker) (*videoRendering.MsgAddWorkerResponse, error) {
+	found, err := ms.k.Workers.Has(ctx, msg.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	if found {
+		log.Printf("Worker %v already exists.", msg.Address)
+		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerAlreadyRegistered.Error(), "worker (%s) is already registered", msg.Address)
+	}
+
+	// worker is not previously registered, so we move on
+	reputation := videoRendering.Worker_Reputation{Points: 0, Stacked: 100}
+	worker := videoRendering.Worker{Address: msg.Address, Reputation: &reputation, Status: videoRendering.Worker_WORKER_STATUS_IDLE, Enabled: true}
+
+	ms.k.Workers.Set(ctx, msg.Address, worker)
+	return &videoRendering.MsgAddWorkerResponse{}, nil
 }

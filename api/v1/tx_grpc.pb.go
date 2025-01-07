@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 
 const (
 	Msg_CreateVideoRenderingTask_FullMethodName = "/janction.videoRendering.v1.Msg/CreateVideoRenderingTask"
+	Msg_AddWorker_FullMethodName                = "/janction.videoRendering.v1.Msg/AddWorker"
 )
 
 // MsgClient is the client API for Msg service.
@@ -28,6 +29,8 @@ const (
 type MsgClient interface {
 	// CreateGame create a game.
 	CreateVideoRenderingTask(ctx context.Context, in *MsgCreateVideoRenderingTask, opts ...grpc.CallOption) (*MsgCreateVideoRenderingTaskResponse, error)
+	// Adds a new worker
+	AddWorker(ctx context.Context, in *MsgAddWorker, opts ...grpc.CallOption) (*MsgAddWorkerResponse, error)
 }
 
 type msgClient struct {
@@ -47,12 +50,23 @@ func (c *msgClient) CreateVideoRenderingTask(ctx context.Context, in *MsgCreateV
 	return out, nil
 }
 
+func (c *msgClient) AddWorker(ctx context.Context, in *MsgAddWorker, opts ...grpc.CallOption) (*MsgAddWorkerResponse, error) {
+	out := new(MsgAddWorkerResponse)
+	err := c.cc.Invoke(ctx, Msg_AddWorker_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 // All implementations must embed UnimplementedMsgServer
 // for forward compatibility
 type MsgServer interface {
 	// CreateGame create a game.
 	CreateVideoRenderingTask(context.Context, *MsgCreateVideoRenderingTask) (*MsgCreateVideoRenderingTaskResponse, error)
+	// Adds a new worker
+	AddWorker(context.Context, *MsgAddWorker) (*MsgAddWorkerResponse, error)
 	mustEmbedUnimplementedMsgServer()
 }
 
@@ -62,6 +76,9 @@ type UnimplementedMsgServer struct {
 
 func (UnimplementedMsgServer) CreateVideoRenderingTask(context.Context, *MsgCreateVideoRenderingTask) (*MsgCreateVideoRenderingTaskResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method CreateVideoRenderingTask not implemented")
+}
+func (UnimplementedMsgServer) AddWorker(context.Context, *MsgAddWorker) (*MsgAddWorkerResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method AddWorker not implemented")
 }
 func (UnimplementedMsgServer) mustEmbedUnimplementedMsgServer() {}
 
@@ -94,6 +111,24 @@ func _Msg_CreateVideoRenderingTask_Handler(srv interface{}, ctx context.Context,
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_AddWorker_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgAddWorker)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).AddWorker(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_AddWorker_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).AddWorker(ctx, req.(*MsgAddWorker))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Msg_ServiceDesc is the grpc.ServiceDesc for Msg service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -104,6 +139,10 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "CreateVideoRenderingTask",
 			Handler:    _Msg_CreateVideoRenderingTask_Handler,
+		},
+		{
+			MethodName: "AddWorker",
+			Handler:    _Msg_AddWorker_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

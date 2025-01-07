@@ -5,7 +5,8 @@ func NewGenesisState() *GenesisState {
 	return &GenesisState{
 		Params:                 DefaultParams(),
 		VideoRenderingTaskList: GetEmptyVideoRenderingTaskList(),
-		VideoRenderingTaskInfo: &VideoRenderingTaskInfo{NextId: 1},
+		VideoRenderingTaskInfo: VideoRenderingTaskInfo{NextId: 1},
+		Workers:                []Worker{},
 	}
 }
 

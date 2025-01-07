@@ -23,6 +23,7 @@ type Keeper struct {
 	Params                 collections.Item[videoRendering.Params]
 	VideoRenderingTaskInfo collections.Item[videoRendering.VideoRenderingTaskInfo]
 	VideoRenderingTasks    collections.Map[string, videoRendering.VideoRenderingTask]
+	Workers                collections.Map[string, videoRendering.Worker]
 	Configuration          VideoConfiguration
 }
 
@@ -46,6 +47,7 @@ func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService s
 		Params:                 collections.NewItem(sb, videoRendering.ParamsKey, "params", codec.CollValue[videoRendering.Params](cdc)),
 		VideoRenderingTaskInfo: collections.NewItem(sb, videoRendering.TaskInfoKey, "taskInfo", codec.CollValue[videoRendering.VideoRenderingTaskInfo](cdc)),
 		VideoRenderingTasks:    collections.NewMap(sb, videoRendering.VideoRenderingTaskKey, "videoRenderingTasks", collections.StringKey, codec.CollValue[videoRendering.VideoRenderingTask](cdc)),
+		Workers:                collections.NewMap(sb, videoRendering.WorkerKey, "workers", collections.StringKey, codec.CollValue[videoRendering.Worker](cdc)),
 		Configuration:          *config,
 	}
 
