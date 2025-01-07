@@ -17,10 +17,13 @@ message GenesisState {
   Params params = 1 [ (gogoproto.nullable) = false ];
 
   // Video Rendering Task index
-  VideoRenderingTaskInfo videoRenderingTaskInfo = 3;
+  VideoRenderingTaskInfo videoRenderingTaskInfo = 3 [(gogoproto.nullable) = false];
 
   // List of Video Rendering tasks
-  repeated IndexedVideoRenderingTask videoRenderingTaskList = 5 [(gogoproto.nullable) = false];
+  repeated IndexedVideoRenderingTask videoRenderingTaskList = 4 [(gogoproto.nullable) = false];
+  
+  // List of Workers
+  repeated  Worker workers = 5 [(gogoproto.nullable) = false];
 }
 
 
@@ -70,7 +73,7 @@ message VideoRenderingTask {
     uint32 start_frame = 2;
     uint32 end_frame = 3;
     bool in_progress = 4;
-    repeated Worker workers = 5;  
+    repeated string workers = 5;
     Solution solution = 6;
     repeated Validation validations = 7;
     
