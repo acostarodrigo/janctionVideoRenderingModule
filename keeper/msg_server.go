@@ -59,6 +59,7 @@ func (ms msgServer) AddWorker(ctx context.Context, msg *videoRendering.MsgAddWor
 	}
 
 	// worker is not previously registered, so we move on
+	// TODO I'm facking a stacked value of 100 for future use
 	reputation := videoRendering.Worker_Reputation{Points: 0, Stacked: 100}
 	worker := videoRendering.Worker{Address: msg.Address, Reputation: &reputation, Status: videoRendering.Worker_WORKER_STATUS_IDLE, Enabled: true}
 
