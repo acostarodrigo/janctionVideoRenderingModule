@@ -37,7 +37,7 @@ func (ms msgServer) CreateVideoRenderingTask(ctx context.Context, msg *videoRend
 	nextId++
 	ms.k.VideoRenderingTaskInfo.Set(ctx, videoRendering.VideoRenderingTaskInfo{NextId: nextId})
 
-	videoTask := videoRendering.VideoRenderingTask{TaskId: taskId, Requester: msg.Creator, Cid: msg.Cid, StartFrame: msg.StartFrame, EndFrame: msg.EndFrame, InProgress: true, ThreadAmount: msg.Threads}
+	videoTask := videoRendering.VideoRenderingTask{TaskId: taskId, Requester: msg.Creator, Cid: msg.Cid, StartFrame: msg.StartFrame, EndFrame: msg.EndFrame, InProgress: true, ThreadAmount: msg.Threads, Reward: msg.Reward}
 	threads := videoTask.GenerateThreads()
 	videoTask.Threads = threads
 

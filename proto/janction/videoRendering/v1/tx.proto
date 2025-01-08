@@ -31,6 +31,7 @@ message MsgCreateVideoRenderingTask {
   uint32 startFrame = 3 ;
   uint32 endFrame = 4 ;
   uint32 threads = 5;
+  uint64 reward = 6;
 }
 
 // MsgCreateGameResponse defines the Msg/CreateGame response type.

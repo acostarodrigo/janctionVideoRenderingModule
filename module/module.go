@@ -118,12 +118,12 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 	return cdc.MustMarshalJSON(gs)
 }
 
-func (am AppModule) getPendingVideoRenderingTasks(ctx context.Context) []videoRendering.VideoRenderingTask {
+func (am AppModule) getPendingVideoRenderingTask(ctx context.Context) (bool, videoRendering.VideoRenderingTask) {
 	ti, err := am.keeper.VideoRenderingTaskInfo.Get(ctx)
+
 	if err != nil {
 		panic(err)
 	}
-	var result []videoRendering.VideoRenderingTask
 	nextId := int(ti.NextId)
 	for i := 0; i < nextId; i++ {
 		task, err := am.keeper.VideoRenderingTasks.Get(ctx, strconv.Itoa(i))
@@ -131,11 +131,12 @@ func (am AppModule) getPendingVideoRenderingTasks(ctx context.Context) []videoRe
 			continue
 		}
 
-		if task.InProgress {
-			result = append(result, task)
+		// we only search for in progress and with the reward this node will accept
+		if task.InProgress && task.Reward >= uint64(am.keeper.Configuration.MinReward) {
+			return true, task
 		}
 	}
-	return result
+	return false, videoRendering.VideoRenderingTask{}
 }
 
 // EndBlock contains the logic that is automatically triggered at the end of each block.
@@ -143,9 +144,9 @@ func (am AppModule) getPendingVideoRenderingTasks(ctx context.Context) []videoRe
 func (am AppModule) EndBlock(ctx context.Context) error {
 	if am.keeper.Configuration.Enabled {
 		// TODO process pending video rendering tasks
-		pendingTask := am.getPendingVideoRenderingTasks(ctx)
-		if pendingTask != nil {
-			log.Println("Ready to process task.", pendingTask[0].TaskId)
+		found, task := am.getPendingVideoRenderingTask(ctx)
+		if found {
+			log.Println("Ready to process task.", task.TaskId)
 		}
 	}
 

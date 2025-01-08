@@ -31,13 +31,14 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 			RpcCommandOptions: []*autocliv1.RpcCommandOptions{
 				{
 					RpcMethod: "CreateVideoRenderingTask",
-					Use:       "create-video-rendering-task [cid] [startFrame] [endFrame] [threads]",
+					Use:       "create-video-rendering-task [cid] [startFrame] [endFrame] [threads] [reward]",
 					Short:     "Creates a new video Rendering task",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{ProtoField: "cid"},
 						{ProtoField: "startFrame"},
 						{ProtoField: "endFrame"},
 						{ProtoField: "threads"},
+						{ProtoField: "reward"},
 					},
 				},
 				{
