@@ -1,6 +1,9 @@
 package videoRendering
 
-import "strconv"
+import (
+	"context"
+	"strconv"
+)
 
 func (VideoRenderingTask) Validate() error {
 	return nil
@@ -52,4 +55,9 @@ func splitFrames(startFrame, endFrame, threads int) []frameRange {
 	}
 
 	return result
+}
+
+func (t *VideoRenderingTask) SubscribeWorkerToTask(ctx context.Context, workerAddress string) error {
+	// TODO call cmd with message subscribeWorkerToTask
+	return nil
 }

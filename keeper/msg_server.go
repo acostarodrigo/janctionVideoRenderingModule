@@ -66,3 +66,30 @@ func (ms msgServer) AddWorker(ctx context.Context, msg *videoRendering.MsgAddWor
 	ms.k.Workers.Set(ctx, msg.Address, worker)
 	return &videoRendering.MsgAddWorkerResponse{}, nil
 }
+
+func (ms msgServer) SubscribeWorkerToTask(ctx context.Context, msg *videoRendering.MsgSubscribeWorkerToTask) (*videoRendering.MsgSubscribeWorkerToTaskResponse, error) {
+	worker, err := ms.k.Workers.Get(ctx, msg.Address)
+	if err != nil {
+		return nil, err
+	}
+
+	if !worker.Enabled {
+		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerNotAvailable.Error(), "worker (%s) it nos enabled or doesn't exists", msg.Address)
+	}
+	task, err := ms.k.VideoRenderingTasks.Get(ctx, msg.TaskId)
+	if err != nil {
+		return nil, err
+	}
+	if !task.InProgress {
+		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerTaskNotAvailable.Error(), "task (%s) is already completed. Can't subscribe worker", msg.TaskId)
+	}
+
+	for _, v := range task.Threads {
+		if len(v.Workers) < 10 {
+			v.Workers = append(v.Workers, msg.Address)
+			ms.k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
+			return &videoRendering.MsgSubscribeWorkerToTaskResponse{ThreadId: v.ThreadId}, nil
+		}
+	}
+	return nil, nil
+}

@@ -139,14 +139,37 @@ func (am AppModule) getPendingVideoRenderingTask(ctx context.Context) (bool, vid
 	return false, videoRendering.VideoRenderingTask{}
 }
 
+func (am AppModule) BeginBlock(ctx context.Context) error {
+	// TODO get task I'm susbcribed to, and start working on it
+	return nil
+}
+
 // EndBlock contains the logic that is automatically triggered at the end of each block.
 // The end block implementation is optional.
 func (am AppModule) EndBlock(ctx context.Context) error {
-	if am.keeper.Configuration.Enabled {
-		// TODO process pending video rendering tasks
-		found, task := am.getPendingVideoRenderingTask(ctx)
-		if found {
-			log.Println("Ready to process task.", task.TaskId)
+	k := am.keeper
+
+	// we validate if this node is enabled to perform work
+	if k.Configuration.Enabled {
+		// we get the address of the worker's alias and set it on the keeper's configuration
+		conf := &am.keeper.Configuration
+		address := keeper.GetWorkerAddress(conf.WorkerName)
+		am.keeper.Configuration.WorkerAddress = address
+
+		// we validate if the worker is idle
+		worker, _ := k.Workers.Get(ctx, k.Configuration.WorkerAddress)
+		if worker.Enabled {
+			if worker.Status == videoRendering.Worker_WORKER_STATUS_IDLE {
+				// we find any task in progress that has enought reward
+				log.Printf(" worker %v is idle ", worker.Address)
+				found, task := am.getPendingVideoRenderingTask(ctx)
+				if found {
+					task.SubscribeWorkerToTask(ctx, worker.Address)
+				}
+			} else {
+				// TODO validate the node is actually doing some work.
+				log.Printf(" worker %v is doing work ", worker.Address)
+			}
 		}
 	}
 

@@ -19,6 +19,8 @@ service Msg {
   // Adds a new worker
   rpc AddWorker(MsgAddWorker)
     returns (MsgAddWorkerResponse);
+
+  rpc SubscribeWorkerToTask(MsgSubscribeWorkerToTask) returns (MsgSubscribeWorkerToTaskResponse);
 }
 
 // MsgCreateGame defines the Msg/CreateGame request type.
@@ -46,4 +48,14 @@ message MsgAddWorker {
 
 message MsgAddWorkerResponse {
 
+}
+
+message MsgSubscribeWorkerToTask {
+  option (cosmos.msg.v1.signer) = "address";
+  string address = 1;
+  string taskId = 2;
+}
+
+message MsgSubscribeWorkerToTaskResponse {
+  string threadId = 1;
 }

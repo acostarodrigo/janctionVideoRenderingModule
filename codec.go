@@ -11,6 +11,7 @@ func RegisterInterfaces(registry types.InterfaceRegistry) {
 	registry.RegisterImplementations((*sdk.Msg)(nil),
 		&MsgCreateVideoRenderingTask{},
 		&MsgAddWorker{},
+		&MsgSubscribeWorkerToTask{},
 	)
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)
 }
