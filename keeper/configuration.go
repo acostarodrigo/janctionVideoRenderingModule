@@ -5,8 +5,6 @@ import (
 	"io/fs"
 	"log"
 	"os"
-	"os/exec"
-	"strings"
 
 	"github.com/BurntSushi/toml"
 )
@@ -14,10 +12,10 @@ import (
 type VideoConfiguration struct {
 	Enabled           bool   `toml:"enabled"`
 	WorkerName        string `toml:"worker_name"`
+	WorkerAddress     string `toml:"worker_address"`
 	WorkerKeyLocation string `toml:"worker_key_location"`
-	WorkerAddress     string
-	MinReward         int64 `toml:"min_reward"`
-	GPUAmount         int64 `toml:"gpu_amount"`
+	MinReward         int64  `toml:"min_reward"`
+	GPUAmount         int64  `toml:"gpu_amount"`
 	Path              string
 }
 
@@ -85,19 +83,4 @@ func (c *VideoConfiguration) SaveConf() error {
 
 	log.Println("YAML data saved to " + c.Path)
 	return nil
-}
-
-func GetWorkerAddress(name string) string {
-	executableName := "minid"
-
-	cmd := exec.Command(executableName, "keys", "show", name, "-a")
-	out, err := cmd.Output()
-	if err != nil {
-		log.Fatalf("unable to retrieve worker %v address . Error %v", name, err)
-		return ""
-	}
-
-	nodeKey := strings.TrimSpace(string(out))
-	log.Printf("Got key for worker %v address . Address %v", name, nodeKey)
-	return nodeKey
 }
