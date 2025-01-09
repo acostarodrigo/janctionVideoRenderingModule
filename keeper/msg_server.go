@@ -88,6 +88,10 @@ func (ms msgServer) SubscribeWorkerToTask(ctx context.Context, msg *videoRenderi
 		if len(v.Workers) < 10 {
 			v.Workers = append(v.Workers, msg.Address)
 			ms.k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
+			worker.CurrentTaskId = task.TaskId
+			worker.CurrentThreadId = v.ThreadId
+			ms.k.Workers.Set(ctx, msg.Address, worker)
+
 			return &videoRendering.MsgSubscribeWorkerToTaskResponse{ThreadId: v.ThreadId}, nil
 		}
 	}

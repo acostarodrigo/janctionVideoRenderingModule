@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"slices"
 	"strconv"
 
 	"cosmossdk.io/core/appmodule"
@@ -118,7 +119,7 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 	return cdc.MustMarshalJSON(gs)
 }
 
-func (am AppModule) getPendingVideoRenderingTask(ctx context.Context) (bool, videoRendering.VideoRenderingTask) {
+func (am AppModule) getPendingVideoRenderingTask(ctx context.Context, worker string) (bool, videoRendering.VideoRenderingTask) {
 	ti, err := am.keeper.VideoRenderingTaskInfo.Get(ctx)
 
 	if err != nil {
@@ -133,7 +134,17 @@ func (am AppModule) getPendingVideoRenderingTask(ctx context.Context) (bool, vid
 
 		// we only search for in progress and with the reward this node will accept
 		if task.InProgress && task.Reward >= uint64(am.keeper.Configuration.MinReward) {
-			return true, task
+			// we found a task that might be suitable to start working on.
+			// we need to check if we are already subscribed as a worker in any of the threads
+			for _, v := range task.Threads {
+				log.Printf("worker %v  found on thread %v. Skipping", worker, v.ThreadId)
+				if slices.Contains(v.Workers, worker) {
+					return false, videoRendering.VideoRenderingTask{}
+				} else {
+					log.Printf("worker %v not found on thread %v. registering", worker, v.ThreadId)
+					return true, task
+				}
+			}
 		}
 	}
 	return false, videoRendering.VideoRenderingTask{}
@@ -150,26 +161,21 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 	k := am.keeper
 
 	// we validate if this node is enabled to perform work
-	if k.Configuration.Enabled {
-		// we get the address of the worker's alias and set it on the keeper's configuration
-		conf := &am.keeper.Configuration
-		address := keeper.GetWorkerAddress(conf.WorkerName)
-		am.keeper.Configuration.WorkerAddress = address
-
+	if k.Configuration.Enabled && k.Configuration.WorkerAddress != "" {
 		// we validate if the worker is idle
 		worker, _ := k.Workers.Get(ctx, k.Configuration.WorkerAddress)
-		if worker.Enabled {
-			if worker.Status == videoRendering.Worker_WORKER_STATUS_IDLE {
-				// we find any task in progress that has enought reward
-				log.Printf(" worker %v is idle ", worker.Address)
-				found, task := am.getPendingVideoRenderingTask(ctx)
-				if found {
-					task.SubscribeWorkerToTask(ctx, worker.Address)
-				}
-			} else {
-				// TODO validate the node is actually doing some work.
-				log.Printf(" worker %v is doing work ", worker.Address)
+		if worker.Enabled && worker.CurrentTaskId == "" {
+			// we find any task in progress that has enought reward
+			log.Printf(" worker %v is idle ", worker.Address)
+			found, task := am.getPendingVideoRenderingTask(ctx, worker.Address)
+			if found {
+				log.Printf(" registering worker %v in task %v ", worker.Address, task.TaskId)
+				go task.SubscribeWorkerToTask(ctx, worker.Address)
+
 			}
+		} else {
+			// TODO validate the node is actually doing some work.
+			log.Printf(" worker %v is doing work ", worker.Address)
 		}
 	}
 

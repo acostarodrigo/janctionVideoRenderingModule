@@ -48,6 +48,8 @@ message Worker {
   WorkerStatus status = 2;
   Reputation reputation = 3;
   bool enabled = 4;
+  string current_task_id = 5;
+  string current_thread_id = 6;
 }
 
 /*
