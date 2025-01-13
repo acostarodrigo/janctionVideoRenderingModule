@@ -6,6 +6,7 @@ import (
 	"strconv"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/ipfs/go-cid"
 
 	"github.com/janction/videoRendering"
 )
@@ -27,6 +28,13 @@ func (ms msgServer) CreateVideoRenderingTask(ctx context.Context, msg *videoRend
 	taskInfo, err := ms.k.VideoRenderingTaskInfo.Get(ctx)
 	if err != nil {
 		return nil, err
+	}
+
+	// we make sure the provided CID is valid
+	_, err = cid.Decode(msg.Cid)
+	if err != nil {
+		log.Printf("provided cid is invalid: (%s)", msg.Cid)
+		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVideoRenderingTask.Error(), "cid %s is invalid", msg.Cid)
 	}
 
 	var nextId = taskInfo.NextId
@@ -84,12 +92,13 @@ func (ms msgServer) SubscribeWorkerToTask(ctx context.Context, msg *videoRenderi
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerTaskNotAvailable.Error(), "task (%s) is already completed. Can't subscribe worker", msg.TaskId)
 	}
 
-	for _, v := range task.Threads {
+	for i, v := range task.Threads {
 		if len(v.Workers) < 10 {
 			v.Workers = append(v.Workers, msg.Address)
 			ms.k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
 			worker.CurrentTaskId = task.TaskId
-			worker.CurrentThreadId = v.ThreadId
+			worker.CurrentThreadIndex = uint32(i)
+			worker.Status = videoRendering.Worker_WORKER_STATUS_IDLE
 			ms.k.Workers.Set(ctx, msg.Address, worker)
 
 			return &videoRendering.MsgSubscribeWorkerToTaskResponse{ThreadId: v.ThreadId}, nil

@@ -49,7 +49,7 @@ message Worker {
   Reputation reputation = 3;
   bool enabled = 4;
   string current_task_id = 5;
-  string current_thread_id = 6;
+  uint32 current_thread_index = 6;
 }
 
 /*

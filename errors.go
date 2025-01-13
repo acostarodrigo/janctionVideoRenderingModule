@@ -9,4 +9,6 @@ var (
 	ErrWorkerAlreadyRegistered = errors.Register(ModuleName, 4, "worker already registered")
 	ErrWorkerNotAvailable      = errors.Register(ModuleName, 5, "worker cannot subscribe to task")
 	ErrWorkerTaskNotAvailable  = errors.Register(ModuleName, 6, "task is already completed")
+
+	ErrInvalidVideoRenderingTask = errors.Register(ModuleName, 7, "invalid video rendering task")
 )

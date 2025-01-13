@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"path/filepath"
 	"slices"
 	"strconv"
 
@@ -151,7 +152,29 @@ func (am AppModule) getPendingVideoRenderingTask(ctx context.Context, worker str
 }
 
 func (am AppModule) BeginBlock(ctx context.Context) error {
-	// TODO get task I'm susbcribed to, and start working on it
+	k := am.keeper
+	if k.Configuration.Enabled && k.Configuration.WorkerAddress != "" {
+		worker, _ := k.Workers.Get(ctx, k.Configuration.WorkerAddress)
+		if worker.Enabled && worker.CurrentTaskId != "" && worker.Status == videoRendering.Worker_WORKER_STATUS_IDLE {
+			// we have to start some work!
+			task, err := k.VideoRenderingTasks.Get(ctx, worker.CurrentTaskId)
+			if err != nil {
+				log.Printf("error processing task %v. %v", task.TaskId, err.Error())
+				return nil
+			}
+			thread := *task.Threads[worker.CurrentThreadIndex]
+			if thread.Solution == nil {
+				log.Printf("thread %v of task %v started", thread.ThreadId, task.TaskId)
+				workPath := filepath.Join(k.Configuration.RootPath, "renders", thread.ThreadId)
+
+				go thread.StartWork(worker.Address, task.Cid, workPath)
+			} else {
+				log.Printf("thread %v of task %v might be ready to evaluate?", thread.ThreadId, task.TaskId)
+			}
+
+		}
+	}
+
 	return nil
 }
 

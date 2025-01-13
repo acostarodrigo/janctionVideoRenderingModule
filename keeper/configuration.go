@@ -16,12 +16,13 @@ type VideoConfiguration struct {
 	WorkerKeyLocation string `toml:"worker_key_location"`
 	MinReward         int64  `toml:"min_reward"`
 	GPUAmount         int64  `toml:"gpu_amount"`
-	Path              string
+	ConfigPath        string
+	RootPath          string
 }
 
 func GetVideoRenderingConfiguration(rootPath string) (*VideoConfiguration, error) {
-	var path string = rootPath + "/config/videoRendering.toml"
-	conf := VideoConfiguration{Enabled: false, Path: path}
+	var configPath string = rootPath + "/config/videoRendering.toml"
+	conf := VideoConfiguration{Enabled: false, RootPath: rootPath, ConfigPath: configPath}
 
 	// we make sure the root path exists. It might yet not be initialized
 	_, err := os.Stat(rootPath)
@@ -31,7 +32,7 @@ func GetVideoRenderingConfiguration(rootPath string) (*VideoConfiguration, error
 	}
 
 	// Load the YAML file
-	file, err := os.Open(path)
+	file, err := os.Open(configPath)
 	if err != nil {
 		if errors.Is(err, os.ErrNotExist) {
 			conf.SaveConf()
@@ -54,9 +55,9 @@ func GetVideoRenderingConfiguration(rootPath string) (*VideoConfiguration, error
 
 func (c *VideoConfiguration) SaveConf() error {
 	// we make sure the root path exists. It might not be initialized
-	_, err := os.Stat(c.Path)
+	_, err := os.Stat(c.ConfigPath)
 	if errors.Is(err, fs.ErrNotExist) {
-		log.Println("File doesn't exists", c.Path)
+		log.Println("File doesn't exists", c.ConfigPath)
 		return nil
 	}
 
@@ -68,7 +69,7 @@ func (c *VideoConfiguration) SaveConf() error {
 	}
 
 	// Save the YAML data to a file
-	file, err := os.Create(c.Path)
+	file, err := os.Create(c.ConfigPath)
 	if err != nil {
 		log.Fatalf("Error creating file: %v\n", err.Error())
 		return err
@@ -81,6 +82,6 @@ func (c *VideoConfiguration) SaveConf() error {
 		return err
 	}
 
-	log.Println("YAML data saved to " + c.Path)
+	log.Println("YAML data saved to " + c.ConfigPath)
 	return nil
 }
