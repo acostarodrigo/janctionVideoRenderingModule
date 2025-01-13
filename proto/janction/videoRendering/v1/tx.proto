@@ -21,6 +21,10 @@ service Msg {
     returns (MsgAddWorkerResponse);
 
   rpc SubscribeWorkerToTask(MsgSubscribeWorkerToTask) returns (MsgSubscribeWorkerToTaskResponse);
+
+
+  // Propose a solution for the test of the nodes to validate
+  rpc ProposeSolution(MsgProposeSolution) returns (MsgProposeSolutionResponse);
 }
 
 // MsgCreateGame defines the Msg/CreateGame request type.
@@ -58,4 +62,19 @@ message MsgSubscribeWorkerToTask {
 
 message MsgSubscribeWorkerToTaskResponse {
   string threadId = 1;
+}
+
+// Msg to Propose a solution to an specific thread
+// Actual solution is a map of hashes
+message MsgProposeSolution {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1;
+  string task_id = 2;
+  string thread_id = 3;
+  map<string, string> solution = 4;
+}
+
+// no response needed to a proposed solution
+message MsgProposeSolutionResponse {
+  
 }
