@@ -3,6 +3,7 @@ package keeper
 import (
 	"context"
 	"log"
+	"slices"
 	"strconv"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
@@ -46,7 +47,7 @@ func (ms msgServer) CreateVideoRenderingTask(ctx context.Context, msg *videoRend
 	ms.k.VideoRenderingTaskInfo.Set(ctx, videoRendering.VideoRenderingTaskInfo{NextId: nextId})
 
 	videoTask := videoRendering.VideoRenderingTask{TaskId: taskId, Requester: msg.Creator, Cid: msg.Cid, StartFrame: msg.StartFrame, EndFrame: msg.EndFrame, InProgress: true, ThreadAmount: msg.Threads, Reward: msg.Reward}
-	threads := videoTask.GenerateThreads()
+	threads := videoTask.GenerateThreads(taskId)
 	videoTask.Threads = threads
 
 	if err := ms.k.VideoRenderingTasks.Set(ctx, taskId, videoTask); err != nil {
@@ -104,5 +105,57 @@ func (ms msgServer) SubscribeWorkerToTask(ctx context.Context, msg *videoRenderi
 			return &videoRendering.MsgSubscribeWorkerToTaskResponse{ThreadId: v.ThreadId}, nil
 		}
 	}
+	return nil, nil
+}
+
+func (ms msgServer) ProposeSolution(ctx context.Context, msg *videoRendering.MsgProposeSolution) (*videoRendering.MsgProposeSolutionResponse, error) {
+	log.Println("Get solution...")
+	for key, value := range msg.Solution {
+		log.Printf("Found %s with %s", key, value)
+	}
+
+	// creator of the solution must be a valid worker
+	worker, err := ms.k.Workers.Get(ctx, msg.Creator)
+	if err != nil {
+		return &videoRendering.MsgProposeSolutionResponse{}, err
+	}
+
+	if !worker.Enabled {
+		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "workers %s is not enabled to propose a solution", msg.Creator)
+	}
+
+	task, err := ms.k.VideoRenderingTasks.Get(ctx, msg.TaskId)
+	if err != nil {
+		return nil, err
+	}
+
+	// task must exists and be in progress
+	if !task.InProgress {
+		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "Task %s is not valid to accept solutions", msg.TaskId)
+	}
+
+	for i, v := range task.Threads {
+		// TODO threads might be better as map instead of slice
+		if v.ThreadId == msg.ThreadId {
+			if v.Solution != nil {
+				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "Thread %s already has a solution", msg.ThreadId)
+			}
+			// worker must be a valid registered worker in the thread with a solution
+			if !slices.Contains(v.Workers, msg.Creator) {
+				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "Worker %s is not valid at thread %s", msg.Creator, msg.ThreadId)
+			}
+
+			// we have passed all validations, lets add the solution to the thread
+
+			task.Threads[i].Solution = &videoRendering.VideoRenderingThread_Solution{ProposedBy: msg.Creator, Files: msg.Solution}
+			err = ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
+			if err != nil {
+				log.Printf("unable to propose solution %s", err.Error())
+				panic(err)
+			}
+			log.Printf("Proposing solution %s", msg.Solution)
+		}
+	}
+
 	return nil, nil
 }

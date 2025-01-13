@@ -11,6 +11,7 @@ import (
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	io "io"
 	reflect "reflect"
+	sort "sort"
 	sync "sync"
 )
 
@@ -3417,106 +3418,107 @@ func (x *fastReflection_VideoRenderingTask) ProtoMethods() *protoiface.Methods {
 	}
 }
 
-var _ protoreflect.List = (*_VideoRenderingThread_5_list)(nil)
+var _ protoreflect.List = (*_VideoRenderingThread_6_list)(nil)
 
-type _VideoRenderingThread_5_list struct {
+type _VideoRenderingThread_6_list struct {
 	list *[]string
 }
 
-func (x *_VideoRenderingThread_5_list) Len() int {
+func (x *_VideoRenderingThread_6_list) Len() int {
 	if x.list == nil {
 		return 0
 	}
 	return len(*x.list)
 }
 
-func (x *_VideoRenderingThread_5_list) Get(i int) protoreflect.Value {
+func (x *_VideoRenderingThread_6_list) Get(i int) protoreflect.Value {
 	return protoreflect.ValueOfString((*x.list)[i])
 }
 
-func (x *_VideoRenderingThread_5_list) Set(i int, value protoreflect.Value) {
+func (x *_VideoRenderingThread_6_list) Set(i int, value protoreflect.Value) {
 	valueUnwrapped := value.String()
 	concreteValue := valueUnwrapped
 	(*x.list)[i] = concreteValue
 }
 
-func (x *_VideoRenderingThread_5_list) Append(value protoreflect.Value) {
+func (x *_VideoRenderingThread_6_list) Append(value protoreflect.Value) {
 	valueUnwrapped := value.String()
 	concreteValue := valueUnwrapped
 	*x.list = append(*x.list, concreteValue)
 }
 
-func (x *_VideoRenderingThread_5_list) AppendMutable() protoreflect.Value {
+func (x *_VideoRenderingThread_6_list) AppendMutable() protoreflect.Value {
 	panic(fmt.Errorf("AppendMutable can not be called on message VideoRenderingThread at list field Workers as it is not of Message kind"))
 }
 
-func (x *_VideoRenderingThread_5_list) Truncate(n int) {
+func (x *_VideoRenderingThread_6_list) Truncate(n int) {
 	*x.list = (*x.list)[:n]
 }
 
-func (x *_VideoRenderingThread_5_list) NewElement() protoreflect.Value {
+func (x *_VideoRenderingThread_6_list) NewElement() protoreflect.Value {
 	v := ""
 	return protoreflect.ValueOfString(v)
 }
 
-func (x *_VideoRenderingThread_5_list) IsValid() bool {
+func (x *_VideoRenderingThread_6_list) IsValid() bool {
 	return x.list != nil
 }
 
-var _ protoreflect.List = (*_VideoRenderingThread_7_list)(nil)
+var _ protoreflect.List = (*_VideoRenderingThread_8_list)(nil)
 
-type _VideoRenderingThread_7_list struct {
+type _VideoRenderingThread_8_list struct {
 	list *[]*VideoRenderingThread_Validation
 }
 
-func (x *_VideoRenderingThread_7_list) Len() int {
+func (x *_VideoRenderingThread_8_list) Len() int {
 	if x.list == nil {
 		return 0
 	}
 	return len(*x.list)
 }
 
-func (x *_VideoRenderingThread_7_list) Get(i int) protoreflect.Value {
+func (x *_VideoRenderingThread_8_list) Get(i int) protoreflect.Value {
 	return protoreflect.ValueOfMessage((*x.list)[i].ProtoReflect())
 }
 
-func (x *_VideoRenderingThread_7_list) Set(i int, value protoreflect.Value) {
+func (x *_VideoRenderingThread_8_list) Set(i int, value protoreflect.Value) {
 	valueUnwrapped := value.Message()
 	concreteValue := valueUnwrapped.Interface().(*VideoRenderingThread_Validation)
 	(*x.list)[i] = concreteValue
 }
 
-func (x *_VideoRenderingThread_7_list) Append(value protoreflect.Value) {
+func (x *_VideoRenderingThread_8_list) Append(value protoreflect.Value) {
 	valueUnwrapped := value.Message()
 	concreteValue := valueUnwrapped.Interface().(*VideoRenderingThread_Validation)
 	*x.list = append(*x.list, concreteValue)
 }
 
-func (x *_VideoRenderingThread_7_list) AppendMutable() protoreflect.Value {
+func (x *_VideoRenderingThread_8_list) AppendMutable() protoreflect.Value {
 	v := new(VideoRenderingThread_Validation)
 	*x.list = append(*x.list, v)
 	return protoreflect.ValueOfMessage(v.ProtoReflect())
 }
 
-func (x *_VideoRenderingThread_7_list) Truncate(n int) {
+func (x *_VideoRenderingThread_8_list) Truncate(n int) {
 	for i := n; i < len(*x.list); i++ {
 		(*x.list)[i] = nil
 	}
 	*x.list = (*x.list)[:n]
 }
 
-func (x *_VideoRenderingThread_7_list) NewElement() protoreflect.Value {
+func (x *_VideoRenderingThread_8_list) NewElement() protoreflect.Value {
 	v := new(VideoRenderingThread_Validation)
 	return protoreflect.ValueOfMessage(v.ProtoReflect())
 }
 
-func (x *_VideoRenderingThread_7_list) IsValid() bool {
+func (x *_VideoRenderingThread_8_list) IsValid() bool {
 	return x.list != nil
 }
 
 var (
 	md_VideoRenderingThread             protoreflect.MessageDescriptor
 	fd_VideoRenderingThread_thread_id   protoreflect.FieldDescriptor
+	fd_VideoRenderingThread_task_id     protoreflect.FieldDescriptor
 	fd_VideoRenderingThread_start_frame protoreflect.FieldDescriptor
 	fd_VideoRenderingThread_end_frame   protoreflect.FieldDescriptor
 	fd_VideoRenderingThread_in_progress protoreflect.FieldDescriptor
@@ -3529,6 +3531,7 @@ func init() {
 	file_janction_videoRendering_v1_types_proto_init()
 	md_VideoRenderingThread = File_janction_videoRendering_v1_types_proto.Messages().ByName("VideoRenderingThread")
 	fd_VideoRenderingThread_thread_id = md_VideoRenderingThread.Fields().ByName("thread_id")
+	fd_VideoRenderingThread_task_id = md_VideoRenderingThread.Fields().ByName("task_id")
 	fd_VideoRenderingThread_start_frame = md_VideoRenderingThread.Fields().ByName("start_frame")
 	fd_VideoRenderingThread_end_frame = md_VideoRenderingThread.Fields().ByName("end_frame")
 	fd_VideoRenderingThread_in_progress = md_VideoRenderingThread.Fields().ByName("in_progress")
@@ -3608,6 +3611,12 @@ func (x *fastReflection_VideoRenderingThread) Range(f func(protoreflect.FieldDes
 			return
 		}
 	}
+	if x.TaskId != "" {
+		value := protoreflect.ValueOfString(x.TaskId)
+		if !f(fd_VideoRenderingThread_task_id, value) {
+			return
+		}
+	}
 	if x.StartFrame != uint32(0) {
 		value := protoreflect.ValueOfUint32(x.StartFrame)
 		if !f(fd_VideoRenderingThread_start_frame, value) {
@@ -3627,7 +3636,7 @@ func (x *fastReflection_VideoRenderingThread) Range(f func(protoreflect.FieldDes
 		}
 	}
 	if len(x.Workers) != 0 {
-		value := protoreflect.ValueOfList(&_VideoRenderingThread_5_list{list: &x.Workers})
+		value := protoreflect.ValueOfList(&_VideoRenderingThread_6_list{list: &x.Workers})
 		if !f(fd_VideoRenderingThread_workers, value) {
 			return
 		}
@@ -3639,7 +3648,7 @@ func (x *fastReflection_VideoRenderingThread) Range(f func(protoreflect.FieldDes
 		}
 	}
 	if len(x.Validations) != 0 {
-		value := protoreflect.ValueOfList(&_VideoRenderingThread_7_list{list: &x.Validations})
+		value := protoreflect.ValueOfList(&_VideoRenderingThread_8_list{list: &x.Validations})
 		if !f(fd_VideoRenderingThread_validations, value) {
 			return
 		}
@@ -3661,6 +3670,8 @@ func (x *fastReflection_VideoRenderingThread) Has(fd protoreflect.FieldDescripto
 	switch fd.FullName() {
 	case "janction.videoRendering.v1.VideoRenderingThread.thread_id":
 		return x.ThreadId != ""
+	case "janction.videoRendering.v1.VideoRenderingThread.task_id":
+		return x.TaskId != ""
 	case "janction.videoRendering.v1.VideoRenderingThread.start_frame":
 		return x.StartFrame != uint32(0)
 	case "janction.videoRendering.v1.VideoRenderingThread.end_frame":
@@ -3691,6 +3702,8 @@ func (x *fastReflection_VideoRenderingThread) Clear(fd protoreflect.FieldDescrip
 	switch fd.FullName() {
 	case "janction.videoRendering.v1.VideoRenderingThread.thread_id":
 		x.ThreadId = ""
+	case "janction.videoRendering.v1.VideoRenderingThread.task_id":
+		x.TaskId = ""
 	case "janction.videoRendering.v1.VideoRenderingThread.start_frame":
 		x.StartFrame = uint32(0)
 	case "janction.videoRendering.v1.VideoRenderingThread.end_frame":
@@ -3722,6 +3735,9 @@ func (x *fastReflection_VideoRenderingThread) Get(descriptor protoreflect.FieldD
 	case "janction.videoRendering.v1.VideoRenderingThread.thread_id":
 		value := x.ThreadId
 		return protoreflect.ValueOfString(value)
+	case "janction.videoRendering.v1.VideoRenderingThread.task_id":
+		value := x.TaskId
+		return protoreflect.ValueOfString(value)
 	case "janction.videoRendering.v1.VideoRenderingThread.start_frame":
 		value := x.StartFrame
 		return protoreflect.ValueOfUint32(value)
@@ -3733,18 +3749,18 @@ func (x *fastReflection_VideoRenderingThread) Get(descriptor protoreflect.FieldD
 		return protoreflect.ValueOfBool(value)
 	case "janction.videoRendering.v1.VideoRenderingThread.workers":
 		if len(x.Workers) == 0 {
-			return protoreflect.ValueOfList(&_VideoRenderingThread_5_list{})
+			return protoreflect.ValueOfList(&_VideoRenderingThread_6_list{})
 		}
-		listValue := &_VideoRenderingThread_5_list{list: &x.Workers}
+		listValue := &_VideoRenderingThread_6_list{list: &x.Workers}
 		return protoreflect.ValueOfList(listValue)
 	case "janction.videoRendering.v1.VideoRenderingThread.solution":
 		value := x.Solution
 		return protoreflect.ValueOfMessage(value.ProtoReflect())
 	case "janction.videoRendering.v1.VideoRenderingThread.validations":
 		if len(x.Validations) == 0 {
-			return protoreflect.ValueOfList(&_VideoRenderingThread_7_list{})
+			return protoreflect.ValueOfList(&_VideoRenderingThread_8_list{})
 		}
-		listValue := &_VideoRenderingThread_7_list{list: &x.Validations}
+		listValue := &_VideoRenderingThread_8_list{list: &x.Validations}
 		return protoreflect.ValueOfList(listValue)
 	default:
 		if descriptor.IsExtension() {
@@ -3768,6 +3784,8 @@ func (x *fastReflection_VideoRenderingThread) Set(fd protoreflect.FieldDescripto
 	switch fd.FullName() {
 	case "janction.videoRendering.v1.VideoRenderingThread.thread_id":
 		x.ThreadId = value.Interface().(string)
+	case "janction.videoRendering.v1.VideoRenderingThread.task_id":
+		x.TaskId = value.Interface().(string)
 	case "janction.videoRendering.v1.VideoRenderingThread.start_frame":
 		x.StartFrame = uint32(value.Uint())
 	case "janction.videoRendering.v1.VideoRenderingThread.end_frame":
@@ -3776,13 +3794,13 @@ func (x *fastReflection_VideoRenderingThread) Set(fd protoreflect.FieldDescripto
 		x.InProgress = value.Bool()
 	case "janction.videoRendering.v1.VideoRenderingThread.workers":
 		lv := value.List()
-		clv := lv.(*_VideoRenderingThread_5_list)
+		clv := lv.(*_VideoRenderingThread_6_list)
 		x.Workers = *clv.list
 	case "janction.videoRendering.v1.VideoRenderingThread.solution":
 		x.Solution = value.Message().Interface().(*VideoRenderingThread_Solution)
 	case "janction.videoRendering.v1.VideoRenderingThread.validations":
 		lv := value.List()
-		clv := lv.(*_VideoRenderingThread_7_list)
+		clv := lv.(*_VideoRenderingThread_8_list)
 		x.Validations = *clv.list
 	default:
 		if fd.IsExtension() {
@@ -3808,7 +3826,7 @@ func (x *fastReflection_VideoRenderingThread) Mutable(fd protoreflect.FieldDescr
 		if x.Workers == nil {
 			x.Workers = []string{}
 		}
-		value := &_VideoRenderingThread_5_list{list: &x.Workers}
+		value := &_VideoRenderingThread_6_list{list: &x.Workers}
 		return protoreflect.ValueOfList(value)
 	case "janction.videoRendering.v1.VideoRenderingThread.solution":
 		if x.Solution == nil {
@@ -3819,10 +3837,12 @@ func (x *fastReflection_VideoRenderingThread) Mutable(fd protoreflect.FieldDescr
 		if x.Validations == nil {
 			x.Validations = []*VideoRenderingThread_Validation{}
 		}
-		value := &_VideoRenderingThread_7_list{list: &x.Validations}
+		value := &_VideoRenderingThread_8_list{list: &x.Validations}
 		return protoreflect.ValueOfList(value)
 	case "janction.videoRendering.v1.VideoRenderingThread.thread_id":
 		panic(fmt.Errorf("field thread_id of message janction.videoRendering.v1.VideoRenderingThread is not mutable"))
+	case "janction.videoRendering.v1.VideoRenderingThread.task_id":
+		panic(fmt.Errorf("field task_id of message janction.videoRendering.v1.VideoRenderingThread is not mutable"))
 	case "janction.videoRendering.v1.VideoRenderingThread.start_frame":
 		panic(fmt.Errorf("field start_frame of message janction.videoRendering.v1.VideoRenderingThread is not mutable"))
 	case "janction.videoRendering.v1.VideoRenderingThread.end_frame":
@@ -3844,6 +3864,8 @@ func (x *fastReflection_VideoRenderingThread) NewField(fd protoreflect.FieldDesc
 	switch fd.FullName() {
 	case "janction.videoRendering.v1.VideoRenderingThread.thread_id":
 		return protoreflect.ValueOfString("")
+	case "janction.videoRendering.v1.VideoRenderingThread.task_id":
+		return protoreflect.ValueOfString("")
 	case "janction.videoRendering.v1.VideoRenderingThread.start_frame":
 		return protoreflect.ValueOfUint32(uint32(0))
 	case "janction.videoRendering.v1.VideoRenderingThread.end_frame":
@@ -3852,13 +3874,13 @@ func (x *fastReflection_VideoRenderingThread) NewField(fd protoreflect.FieldDesc
 		return protoreflect.ValueOfBool(false)
 	case "janction.videoRendering.v1.VideoRenderingThread.workers":
 		list := []string{}
-		return protoreflect.ValueOfList(&_VideoRenderingThread_5_list{list: &list})
+		return protoreflect.ValueOfList(&_VideoRenderingThread_6_list{list: &list})
 	case "janction.videoRendering.v1.VideoRenderingThread.solution":
 		m := new(VideoRenderingThread_Solution)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
 	case "janction.videoRendering.v1.VideoRenderingThread.validations":
 		list := []*VideoRenderingThread_Validation{}
-		return protoreflect.ValueOfList(&_VideoRenderingThread_7_list{list: &list})
+		return protoreflect.ValueOfList(&_VideoRenderingThread_8_list{list: &list})
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.VideoRenderingThread"))
@@ -3932,6 +3954,10 @@ func (x *fastReflection_VideoRenderingThread) ProtoMethods() *protoiface.Methods
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
+		l = len(x.TaskId)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
 		if x.StartFrame != 0 {
 			n += 1 + runtime.Sov(uint64(x.StartFrame))
 		}
@@ -3999,7 +4025,7 @@ func (x *fastReflection_VideoRenderingThread) ProtoMethods() *protoiface.Methods
 				copy(dAtA[i:], encoded)
 				i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
 				i--
-				dAtA[i] = 0x3a
+				dAtA[i] = 0x42
 			}
 		}
 		if x.Solution != nil {
@@ -4014,7 +4040,7 @@ func (x *fastReflection_VideoRenderingThread) ProtoMethods() *protoiface.Methods
 			copy(dAtA[i:], encoded)
 			i = runtime.EncodeVarint(dAtA, i, uint64(len(encoded)))
 			i--
-			dAtA[i] = 0x32
+			dAtA[i] = 0x3a
 		}
 		if len(x.Workers) > 0 {
 			for iNdEx := len(x.Workers) - 1; iNdEx >= 0; iNdEx-- {
@@ -4022,7 +4048,7 @@ func (x *fastReflection_VideoRenderingThread) ProtoMethods() *protoiface.Methods
 				copy(dAtA[i:], x.Workers[iNdEx])
 				i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Workers[iNdEx])))
 				i--
-				dAtA[i] = 0x2a
+				dAtA[i] = 0x32
 			}
 		}
 		if x.InProgress {
@@ -4033,17 +4059,24 @@ func (x *fastReflection_VideoRenderingThread) ProtoMethods() *protoiface.Methods
 				dAtA[i] = 0
 			}
 			i--
-			dAtA[i] = 0x20
+			dAtA[i] = 0x28
 		}
 		if x.EndFrame != 0 {
 			i = runtime.EncodeVarint(dAtA, i, uint64(x.EndFrame))
 			i--
-			dAtA[i] = 0x18
+			dAtA[i] = 0x20
 		}
 		if x.StartFrame != 0 {
 			i = runtime.EncodeVarint(dAtA, i, uint64(x.StartFrame))
 			i--
-			dAtA[i] = 0x10
+			dAtA[i] = 0x18
+		}
+		if len(x.TaskId) > 0 {
+			i -= len(x.TaskId)
+			copy(dAtA[i:], x.TaskId)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.TaskId)))
+			i--
+			dAtA[i] = 0x12
 		}
 		if len(x.ThreadId) > 0 {
 			i -= len(x.ThreadId)
@@ -4134,6 +4167,38 @@ func (x *fastReflection_VideoRenderingThread) ProtoMethods() *protoiface.Methods
 				x.ThreadId = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
 			case 2:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field TaskId", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.TaskId = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 3:
 				if wireType != 0 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field StartFrame", wireType)
 				}
@@ -4152,7 +4217,7 @@ func (x *fastReflection_VideoRenderingThread) ProtoMethods() *protoiface.Methods
 						break
 					}
 				}
-			case 3:
+			case 4:
 				if wireType != 0 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field EndFrame", wireType)
 				}
@@ -4171,7 +4236,7 @@ func (x *fastReflection_VideoRenderingThread) ProtoMethods() *protoiface.Methods
 						break
 					}
 				}
-			case 4:
+			case 5:
 				if wireType != 0 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field InProgress", wireType)
 				}
@@ -4191,7 +4256,7 @@ func (x *fastReflection_VideoRenderingThread) ProtoMethods() *protoiface.Methods
 					}
 				}
 				x.InProgress = bool(v != 0)
-			case 5:
+			case 6:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Workers", wireType)
 				}
@@ -4223,7 +4288,7 @@ func (x *fastReflection_VideoRenderingThread) ProtoMethods() *protoiface.Methods
 				}
 				x.Workers = append(x.Workers, string(dAtA[iNdEx:postIndex]))
 				iNdEx = postIndex
-			case 6:
+			case 7:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Solution", wireType)
 				}
@@ -4259,7 +4324,7 @@ func (x *fastReflection_VideoRenderingThread) ProtoMethods() *protoiface.Methods
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
 				}
 				iNdEx = postIndex
-			case 7:
+			case 8:
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Validations", wireType)
 				}
@@ -4328,50 +4393,86 @@ func (x *fastReflection_VideoRenderingThread) ProtoMethods() *protoiface.Methods
 	}
 }
 
-var _ protoreflect.List = (*_VideoRenderingThread_Solution_2_list)(nil)
+var _ protoreflect.Map = (*_VideoRenderingThread_Solution_2_map)(nil)
 
-type _VideoRenderingThread_Solution_2_list struct {
-	list *[]string
+type _VideoRenderingThread_Solution_2_map struct {
+	m *map[string]string
 }
 
-func (x *_VideoRenderingThread_Solution_2_list) Len() int {
-	if x.list == nil {
+func (x *_VideoRenderingThread_Solution_2_map) Len() int {
+	if x.m == nil {
 		return 0
 	}
-	return len(*x.list)
+	return len(*x.m)
 }
 
-func (x *_VideoRenderingThread_Solution_2_list) Get(i int) protoreflect.Value {
-	return protoreflect.ValueOfString((*x.list)[i])
+func (x *_VideoRenderingThread_Solution_2_map) Range(f func(protoreflect.MapKey, protoreflect.Value) bool) {
+	if x.m == nil {
+		return
+	}
+	for k, v := range *x.m {
+		mapKey := (protoreflect.MapKey)(protoreflect.ValueOfString(k))
+		mapValue := protoreflect.ValueOfString(v)
+		if !f(mapKey, mapValue) {
+			break
+		}
+	}
 }
 
-func (x *_VideoRenderingThread_Solution_2_list) Set(i int, value protoreflect.Value) {
+func (x *_VideoRenderingThread_Solution_2_map) Has(key protoreflect.MapKey) bool {
+	if x.m == nil {
+		return false
+	}
+	keyUnwrapped := key.String()
+	concreteValue := keyUnwrapped
+	_, ok := (*x.m)[concreteValue]
+	return ok
+}
+
+func (x *_VideoRenderingThread_Solution_2_map) Clear(key protoreflect.MapKey) {
+	if x.m == nil {
+		return
+	}
+	keyUnwrapped := key.String()
+	concreteKey := keyUnwrapped
+	delete(*x.m, concreteKey)
+}
+
+func (x *_VideoRenderingThread_Solution_2_map) Get(key protoreflect.MapKey) protoreflect.Value {
+	if x.m == nil {
+		return protoreflect.Value{}
+	}
+	keyUnwrapped := key.String()
+	concreteKey := keyUnwrapped
+	v, ok := (*x.m)[concreteKey]
+	if !ok {
+		return protoreflect.Value{}
+	}
+	return protoreflect.ValueOfString(v)
+}
+
+func (x *_VideoRenderingThread_Solution_2_map) Set(key protoreflect.MapKey, value protoreflect.Value) {
+	if !key.IsValid() || !value.IsValid() {
+		panic("invalid key or value provided")
+	}
+	keyUnwrapped := key.String()
+	concreteKey := keyUnwrapped
 	valueUnwrapped := value.String()
 	concreteValue := valueUnwrapped
-	(*x.list)[i] = concreteValue
+	(*x.m)[concreteKey] = concreteValue
 }
 
-func (x *_VideoRenderingThread_Solution_2_list) Append(value protoreflect.Value) {
-	valueUnwrapped := value.String()
-	concreteValue := valueUnwrapped
-	*x.list = append(*x.list, concreteValue)
+func (x *_VideoRenderingThread_Solution_2_map) Mutable(key protoreflect.MapKey) protoreflect.Value {
+	panic("should not call Mutable on protoreflect.Map whose value is not of type protoreflect.Message")
 }
 
-func (x *_VideoRenderingThread_Solution_2_list) AppendMutable() protoreflect.Value {
-	panic(fmt.Errorf("AppendMutable can not be called on message VideoRenderingThread_Solution at list field Files as it is not of Message kind"))
-}
-
-func (x *_VideoRenderingThread_Solution_2_list) Truncate(n int) {
-	*x.list = (*x.list)[:n]
-}
-
-func (x *_VideoRenderingThread_Solution_2_list) NewElement() protoreflect.Value {
+func (x *_VideoRenderingThread_Solution_2_map) NewValue() protoreflect.Value {
 	v := ""
 	return protoreflect.ValueOfString(v)
 }
 
-func (x *_VideoRenderingThread_Solution_2_list) IsValid() bool {
-	return x.list != nil
+func (x *_VideoRenderingThread_Solution_2_map) IsValid() bool {
+	return x.m != nil
 }
 
 var (
@@ -4459,7 +4560,7 @@ func (x *fastReflection_VideoRenderingThread_Solution) Range(f func(protoreflect
 		}
 	}
 	if len(x.Files) != 0 {
-		value := protoreflect.ValueOfList(&_VideoRenderingThread_Solution_2_list{list: &x.Files})
+		value := protoreflect.ValueOfMap(&_VideoRenderingThread_Solution_2_map{m: &x.Files})
 		if !f(fd_VideoRenderingThread_Solution_files, value) {
 			return
 		}
@@ -4524,10 +4625,10 @@ func (x *fastReflection_VideoRenderingThread_Solution) Get(descriptor protorefle
 		return protoreflect.ValueOfString(value)
 	case "janction.videoRendering.v1.VideoRenderingThread.Solution.files":
 		if len(x.Files) == 0 {
-			return protoreflect.ValueOfList(&_VideoRenderingThread_Solution_2_list{})
+			return protoreflect.ValueOfMap(&_VideoRenderingThread_Solution_2_map{})
 		}
-		listValue := &_VideoRenderingThread_Solution_2_list{list: &x.Files}
-		return protoreflect.ValueOfList(listValue)
+		mapValue := &_VideoRenderingThread_Solution_2_map{m: &x.Files}
+		return protoreflect.ValueOfMap(mapValue)
 	default:
 		if descriptor.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.VideoRenderingThread.Solution"))
@@ -4551,9 +4652,9 @@ func (x *fastReflection_VideoRenderingThread_Solution) Set(fd protoreflect.Field
 	case "janction.videoRendering.v1.VideoRenderingThread.Solution.proposed_by":
 		x.ProposedBy = value.Interface().(string)
 	case "janction.videoRendering.v1.VideoRenderingThread.Solution.files":
-		lv := value.List()
-		clv := lv.(*_VideoRenderingThread_Solution_2_list)
-		x.Files = *clv.list
+		mv := value.Map()
+		cmv := mv.(*_VideoRenderingThread_Solution_2_map)
+		x.Files = *cmv.m
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.VideoRenderingThread.Solution"))
@@ -4576,10 +4677,10 @@ func (x *fastReflection_VideoRenderingThread_Solution) Mutable(fd protoreflect.F
 	switch fd.FullName() {
 	case "janction.videoRendering.v1.VideoRenderingThread.Solution.files":
 		if x.Files == nil {
-			x.Files = []string{}
+			x.Files = make(map[string]string)
 		}
-		value := &_VideoRenderingThread_Solution_2_list{list: &x.Files}
-		return protoreflect.ValueOfList(value)
+		value := &_VideoRenderingThread_Solution_2_map{m: &x.Files}
+		return protoreflect.ValueOfMap(value)
 	case "janction.videoRendering.v1.VideoRenderingThread.Solution.proposed_by":
 		panic(fmt.Errorf("field proposed_by of message janction.videoRendering.v1.VideoRenderingThread.Solution is not mutable"))
 	default:
@@ -4598,8 +4699,8 @@ func (x *fastReflection_VideoRenderingThread_Solution) NewField(fd protoreflect.
 	case "janction.videoRendering.v1.VideoRenderingThread.Solution.proposed_by":
 		return protoreflect.ValueOfString("")
 	case "janction.videoRendering.v1.VideoRenderingThread.Solution.files":
-		list := []string{}
-		return protoreflect.ValueOfList(&_VideoRenderingThread_Solution_2_list{list: &list})
+		m := make(map[string]string)
+		return protoreflect.ValueOfMap(&_VideoRenderingThread_Solution_2_map{m: &m})
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.VideoRenderingThread.Solution"))
@@ -4674,9 +4775,24 @@ func (x *fastReflection_VideoRenderingThread_Solution) ProtoMethods() *protoifac
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
 		if len(x.Files) > 0 {
-			for _, s := range x.Files {
-				l = len(s)
-				n += 1 + l + runtime.Sov(uint64(l))
+			SiZeMaP := func(k string, v string) {
+				mapEntrySize := 1 + len(k) + runtime.Sov(uint64(len(k))) + 1 + len(v) + runtime.Sov(uint64(len(v)))
+				n += mapEntrySize + 1 + runtime.Sov(uint64(mapEntrySize))
+			}
+			if options.Deterministic {
+				sortme := make([]string, 0, len(x.Files))
+				for k := range x.Files {
+					sortme = append(sortme, k)
+				}
+				sort.Strings(sortme)
+				for _, k := range sortme {
+					v := x.Files[k]
+					SiZeMaP(k, v)
+				}
+			} else {
+				for k, v := range x.Files {
+					SiZeMaP(k, v)
+				}
 			}
 		}
 		if x.unknownFields != nil {
@@ -4709,12 +4825,46 @@ func (x *fastReflection_VideoRenderingThread_Solution) ProtoMethods() *protoifac
 			copy(dAtA[i:], x.unknownFields)
 		}
 		if len(x.Files) > 0 {
-			for iNdEx := len(x.Files) - 1; iNdEx >= 0; iNdEx-- {
-				i -= len(x.Files[iNdEx])
-				copy(dAtA[i:], x.Files[iNdEx])
-				i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Files[iNdEx])))
+			MaRsHaLmAp := func(k string, v string) (protoiface.MarshalOutput, error) {
+				baseI := i
+				i -= len(v)
+				copy(dAtA[i:], v)
+				i = runtime.EncodeVarint(dAtA, i, uint64(len(v)))
 				i--
 				dAtA[i] = 0x12
+				i -= len(k)
+				copy(dAtA[i:], k)
+				i = runtime.EncodeVarint(dAtA, i, uint64(len(k)))
+				i--
+				dAtA[i] = 0xa
+				i = runtime.EncodeVarint(dAtA, i, uint64(baseI-i))
+				i--
+				dAtA[i] = 0x12
+				return protoiface.MarshalOutput{}, nil
+			}
+			if options.Deterministic {
+				keysForFiles := make([]string, 0, len(x.Files))
+				for k := range x.Files {
+					keysForFiles = append(keysForFiles, string(k))
+				}
+				sort.Slice(keysForFiles, func(i, j int) bool {
+					return keysForFiles[i] < keysForFiles[j]
+				})
+				for iNdEx := len(keysForFiles) - 1; iNdEx >= 0; iNdEx-- {
+					v := x.Files[string(keysForFiles[iNdEx])]
+					out, err := MaRsHaLmAp(keysForFiles[iNdEx], v)
+					if err != nil {
+						return out, err
+					}
+				}
+			} else {
+				for k := range x.Files {
+					v := x.Files[k]
+					out, err := MaRsHaLmAp(k, v)
+					if err != nil {
+						return out, err
+					}
+				}
 			}
 		}
 		if len(x.ProposedBy) > 0 {
@@ -4809,7 +4959,7 @@ func (x *fastReflection_VideoRenderingThread_Solution) ProtoMethods() *protoifac
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Files", wireType)
 				}
-				var stringLen uint64
+				var msglen int
 				for shift := uint(0); ; shift += 7 {
 					if shift >= 64 {
 						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
@@ -4819,23 +4969,118 @@ func (x *fastReflection_VideoRenderingThread_Solution) ProtoMethods() *protoifac
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					stringLen |= uint64(b&0x7F) << shift
+					msglen |= int(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
 				}
-				intStringLen := int(stringLen)
-				if intStringLen < 0 {
+				if msglen < 0 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
 				}
-				postIndex := iNdEx + intStringLen
+				postIndex := iNdEx + msglen
 				if postIndex < 0 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
 				}
 				if postIndex > l {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 				}
-				x.Files = append(x.Files, string(dAtA[iNdEx:postIndex]))
+				if x.Files == nil {
+					x.Files = make(map[string]string)
+				}
+				var mapkey string
+				var mapvalue string
+				for iNdEx < postIndex {
+					entryPreIndex := iNdEx
+					var wire uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+						}
+						if iNdEx >= l {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						wire |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					fieldNum := int32(wire >> 3)
+					if fieldNum == 1 {
+						var stringLenmapkey uint64
+						for shift := uint(0); ; shift += 7 {
+							if shift >= 64 {
+								return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+							}
+							if iNdEx >= l {
+								return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+							}
+							b := dAtA[iNdEx]
+							iNdEx++
+							stringLenmapkey |= uint64(b&0x7F) << shift
+							if b < 0x80 {
+								break
+							}
+						}
+						intStringLenmapkey := int(stringLenmapkey)
+						if intStringLenmapkey < 0 {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+						}
+						postStringIndexmapkey := iNdEx + intStringLenmapkey
+						if postStringIndexmapkey < 0 {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+						}
+						if postStringIndexmapkey > l {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+						}
+						mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
+						iNdEx = postStringIndexmapkey
+					} else if fieldNum == 2 {
+						var stringLenmapvalue uint64
+						for shift := uint(0); ; shift += 7 {
+							if shift >= 64 {
+								return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+							}
+							if iNdEx >= l {
+								return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+							}
+							b := dAtA[iNdEx]
+							iNdEx++
+							stringLenmapvalue |= uint64(b&0x7F) << shift
+							if b < 0x80 {
+								break
+							}
+						}
+						intStringLenmapvalue := int(stringLenmapvalue)
+						if intStringLenmapvalue < 0 {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+						}
+						postStringIndexmapvalue := iNdEx + intStringLenmapvalue
+						if postStringIndexmapvalue < 0 {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+						}
+						if postStringIndexmapvalue > l {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+						}
+						mapvalue = string(dAtA[iNdEx:postStringIndexmapvalue])
+						iNdEx = postStringIndexmapvalue
+					} else {
+						iNdEx = entryPreIndex
+						skippy, err := runtime.Skip(dAtA[iNdEx:])
+						if err != nil {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+						}
+						if (skippy < 0) || (iNdEx+skippy) < 0 {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+						}
+						if (iNdEx + skippy) > postIndex {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+						}
+						iNdEx += skippy
+					}
+				}
+				x.Files[mapkey] = mapvalue
 				iNdEx = postIndex
 			default:
 				iNdEx = preIndex
@@ -6746,12 +6991,13 @@ type VideoRenderingThread struct {
 	unknownFields protoimpl.UnknownFields
 
 	ThreadId    string                             `protobuf:"bytes,1,opt,name=thread_id,json=threadId,proto3" json:"thread_id,omitempty"`
-	StartFrame  uint32                             `protobuf:"varint,2,opt,name=start_frame,json=startFrame,proto3" json:"start_frame,omitempty"`
-	EndFrame    uint32                             `protobuf:"varint,3,opt,name=end_frame,json=endFrame,proto3" json:"end_frame,omitempty"`
-	InProgress  bool                               `protobuf:"varint,4,opt,name=in_progress,json=inProgress,proto3" json:"in_progress,omitempty"`
-	Workers     []string                           `protobuf:"bytes,5,rep,name=workers,proto3" json:"workers,omitempty"`
-	Solution    *VideoRenderingThread_Solution     `protobuf:"bytes,6,opt,name=solution,proto3" json:"solution,omitempty"`
-	Validations []*VideoRenderingThread_Validation `protobuf:"bytes,7,rep,name=validations,proto3" json:"validations,omitempty"`
+	TaskId      string                             `protobuf:"bytes,2,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
+	StartFrame  uint32                             `protobuf:"varint,3,opt,name=start_frame,json=startFrame,proto3" json:"start_frame,omitempty"`
+	EndFrame    uint32                             `protobuf:"varint,4,opt,name=end_frame,json=endFrame,proto3" json:"end_frame,omitempty"`
+	InProgress  bool                               `protobuf:"varint,5,opt,name=in_progress,json=inProgress,proto3" json:"in_progress,omitempty"`
+	Workers     []string                           `protobuf:"bytes,6,rep,name=workers,proto3" json:"workers,omitempty"`
+	Solution    *VideoRenderingThread_Solution     `protobuf:"bytes,7,opt,name=solution,proto3" json:"solution,omitempty"`
+	Validations []*VideoRenderingThread_Validation `protobuf:"bytes,8,rep,name=validations,proto3" json:"validations,omitempty"`
 }
 
 func (x *VideoRenderingThread) Reset() {
@@ -6777,6 +7023,13 @@ func (*VideoRenderingThread) Descriptor() ([]byte, []int) {
 func (x *VideoRenderingThread) GetThreadId() string {
 	if x != nil {
 		return x.ThreadId
+	}
+	return ""
+}
+
+func (x *VideoRenderingThread) GetTaskId() string {
+	if x != nil {
+		return x.TaskId
 	}
 	return ""
 }
@@ -6967,8 +7220,8 @@ type VideoRenderingThread_Solution struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	ProposedBy string   `protobuf:"bytes,1,opt,name=proposed_by,json=proposedBy,proto3" json:"proposed_by,omitempty"`
-	Files      []string `protobuf:"bytes,2,rep,name=files,proto3" json:"files,omitempty"`
+	ProposedBy string            `protobuf:"bytes,1,opt,name=proposed_by,json=proposedBy,proto3" json:"proposed_by,omitempty"`
+	Files      map[string]string `protobuf:"bytes,2,rep,name=files,proto3" json:"files,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
 }
 
 func (x *VideoRenderingThread_Solution) Reset() {
@@ -6998,7 +7251,7 @@ func (x *VideoRenderingThread_Solution) GetProposedBy() string {
 	return ""
 }
 
-func (x *VideoRenderingThread_Solution) GetFiles() []string {
+func (x *VideoRenderingThread_Solution) GetFiles() map[string]string {
 	if x != nil {
 		return x.Files
 	}
@@ -7165,89 +7418,99 @@ var file_janction_videoRendering_v1_types_proto_rawDesc = []byte{
 	0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65,
 	0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x69, 0x64, 0x65, 0x6f,
 	0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x68, 0x72, 0x65, 0x61, 0x64, 0x52,
-	0x07, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x73, 0x22, 0xc3, 0x06, 0x0a, 0x14, 0x56, 0x69, 0x64,
+	0x07, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x73, 0x22, 0xdd, 0x07, 0x0a, 0x14, 0x56, 0x69, 0x64,
 	0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x68, 0x72, 0x65, 0x61,
 	0x64, 0x12, 0x1b, 0x0a, 0x09, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x01,
-	0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x49, 0x64, 0x12, 0x1f,
-	0x0a, 0x0b, 0x73, 0x74, 0x61, 0x72, 0x74, 0x5f, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20,
-	0x01, 0x28, 0x0d, 0x52, 0x0a, 0x73, 0x74, 0x61, 0x72, 0x74, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x12,
-	0x1b, 0x0a, 0x09, 0x65, 0x6e, 0x64, 0x5f, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01,
-	0x28, 0x0d, 0x52, 0x08, 0x65, 0x6e, 0x64, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x12, 0x1f, 0x0a, 0x0b,
-	0x69, 0x6e, 0x5f, 0x70, 0x72, 0x6f, 0x67, 0x72, 0x65, 0x73, 0x73, 0x18, 0x04, 0x20, 0x01, 0x28,
-	0x08, 0x52, 0x0a, 0x69, 0x6e, 0x50, 0x72, 0x6f, 0x67, 0x72, 0x65, 0x73, 0x73, 0x12, 0x18, 0x0a,
-	0x07, 0x77, 0x6f, 0x72, 0x6b, 0x65, 0x72, 0x73, 0x18, 0x05, 0x20, 0x03, 0x28, 0x09, 0x52, 0x07,
-	0x77, 0x6f, 0x72, 0x6b, 0x65, 0x72, 0x73, 0x12, 0x55, 0x0a, 0x08, 0x73, 0x6f, 0x6c, 0x75, 0x74,
-	0x69, 0x6f, 0x6e, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x39, 0x2e, 0x6a, 0x61, 0x6e, 0x63,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x49, 0x64, 0x12, 0x17,
+	0x0a, 0x07, 0x74, 0x61, 0x73, 0x6b, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x06, 0x74, 0x61, 0x73, 0x6b, 0x49, 0x64, 0x12, 0x1f, 0x0a, 0x0b, 0x73, 0x74, 0x61, 0x72, 0x74,
+	0x5f, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x0a, 0x73, 0x74,
+	0x61, 0x72, 0x74, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x12, 0x1b, 0x0a, 0x09, 0x65, 0x6e, 0x64, 0x5f,
+	0x66, 0x72, 0x61, 0x6d, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x08, 0x65, 0x6e, 0x64,
+	0x46, 0x72, 0x61, 0x6d, 0x65, 0x12, 0x1f, 0x0a, 0x0b, 0x69, 0x6e, 0x5f, 0x70, 0x72, 0x6f, 0x67,
+	0x72, 0x65, 0x73, 0x73, 0x18, 0x05, 0x20, 0x01, 0x28, 0x08, 0x52, 0x0a, 0x69, 0x6e, 0x50, 0x72,
+	0x6f, 0x67, 0x72, 0x65, 0x73, 0x73, 0x12, 0x18, 0x0a, 0x07, 0x77, 0x6f, 0x72, 0x6b, 0x65, 0x72,
+	0x73, 0x18, 0x06, 0x20, 0x03, 0x28, 0x09, 0x52, 0x07, 0x77, 0x6f, 0x72, 0x6b, 0x65, 0x72, 0x73,
+	0x12, 0x55, 0x0a, 0x08, 0x73, 0x6f, 0x6c, 0x75, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x07, 0x20, 0x01,
+	0x28, 0x0b, 0x32, 0x39, 0x2e, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69,
+	0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x2e,
+	0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x68,
+	0x72, 0x65, 0x61, 0x64, 0x2e, 0x53, 0x6f, 0x6c, 0x75, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x08, 0x73,
+	0x6f, 0x6c, 0x75, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x5d, 0x0a, 0x0b, 0x76, 0x61, 0x6c, 0x69, 0x64,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x18, 0x08, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x3b, 0x2e, 0x6a,
+	0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e,
+	0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52,
+	0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x68, 0x72, 0x65, 0x61, 0x64, 0x2e, 0x56,
+	0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x0b, 0x76, 0x61, 0x6c, 0x69, 0x64,
+	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x1a, 0xdb, 0x01, 0x0a, 0x08, 0x53, 0x6f, 0x6c, 0x75, 0x74,
+	0x69, 0x6f, 0x6e, 0x12, 0x39, 0x0a, 0x0b, 0x70, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x65, 0x64, 0x5f,
+	0x62, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f,
+	0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69,
+	0x6e, 0x67, 0x52, 0x0a, 0x70, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x65, 0x64, 0x42, 0x79, 0x12, 0x5a,
+	0x0a, 0x05, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x44, 0x2e,
+	0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65,
+	0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x69, 0x64, 0x65, 0x6f,
+	0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x68, 0x72, 0x65, 0x61, 0x64, 0x2e,
+	0x53, 0x6f, 0x6c, 0x75, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x46, 0x69, 0x6c, 0x65, 0x73, 0x45, 0x6e,
+	0x74, 0x72, 0x79, 0x52, 0x05, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x1a, 0x38, 0x0a, 0x0a, 0x46, 0x69,
+	0x6c, 0x65, 0x73, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18,
+	0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61,
+	0x6c, 0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65,
+	0x3a, 0x02, 0x38, 0x01, 0x1a, 0x81, 0x03, 0x0a, 0x0a, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74,
+	0x69, 0x6f, 0x6e, 0x12, 0x36, 0x0a, 0x09, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72,
+	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d,
+	0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67,
+	0x52, 0x09, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x1f, 0x0a, 0x0b, 0x73,
+	0x74, 0x61, 0x72, 0x74, 0x5f, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d,
+	0x52, 0x0a, 0x73, 0x74, 0x61, 0x72, 0x74, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x12, 0x1b, 0x0a, 0x09,
+	0x65, 0x6e, 0x64, 0x5f, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0d, 0x52,
+	0x08, 0x65, 0x6e, 0x64, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x12, 0x64, 0x0a, 0x06, 0x73, 0x74, 0x61,
+	0x74, 0x75, 0x73, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x4c, 0x2e, 0x6a, 0x61, 0x6e, 0x63,
 	0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72,
 	0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64,
-	0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x68, 0x72, 0x65, 0x61, 0x64, 0x2e, 0x53, 0x6f, 0x6c, 0x75,
-	0x74, 0x69, 0x6f, 0x6e, 0x52, 0x08, 0x73, 0x6f, 0x6c, 0x75, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x5d,
-	0x0a, 0x0b, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x18, 0x07, 0x20,
-	0x03, 0x28, 0x0b, 0x32, 0x3b, 0x2e, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76,
-	0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31,
-	0x2e, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54,
-	0x68, 0x72, 0x65, 0x61, 0x64, 0x2e, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x69, 0x6f, 0x6e,
-	0x52, 0x0b, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x1a, 0x5b, 0x0a,
-	0x08, 0x53, 0x6f, 0x6c, 0x75, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x39, 0x0a, 0x0b, 0x70, 0x72, 0x6f,
-	0x70, 0x6f, 0x73, 0x65, 0x64, 0x5f, 0x62, 0x79, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18,
-	0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65,
-	0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x0a, 0x70, 0x72, 0x6f, 0x70, 0x6f, 0x73,
-	0x65, 0x64, 0x42, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x18, 0x02, 0x20,
-	0x03, 0x28, 0x09, 0x52, 0x05, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x1a, 0x81, 0x03, 0x0a, 0x0a, 0x56,
-	0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x36, 0x0a, 0x09, 0x76, 0x61, 0x6c,
-	0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4,
-	0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73,
-	0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x09, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f,
-	0x72, 0x12, 0x1f, 0x0a, 0x0b, 0x73, 0x74, 0x61, 0x72, 0x74, 0x5f, 0x66, 0x72, 0x61, 0x6d, 0x65,
-	0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x0a, 0x73, 0x74, 0x61, 0x72, 0x74, 0x46, 0x72, 0x61,
-	0x6d, 0x65, 0x12, 0x1b, 0x0a, 0x09, 0x65, 0x6e, 0x64, 0x5f, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x18,
-	0x03, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x08, 0x65, 0x6e, 0x64, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x12,
-	0x64, 0x0a, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0e, 0x32,
-	0x4c, 0x2e, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f,
-	0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x69, 0x64,
-	0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x68, 0x72, 0x65, 0x61,
-	0x64, 0x2e, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x56, 0x61, 0x6c,
-	0x69, 0x64, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x06, 0x73,
-	0x74, 0x61, 0x74, 0x75, 0x73, 0x22, 0x96, 0x01, 0x0a, 0x10, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61,
-	0x74, 0x69, 0x6f, 0x6e, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x12, 0x1f, 0x0a, 0x1b, 0x56, 0x41,
-	0x4c, 0x49, 0x44, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x55, 0x53, 0x5f,
-	0x55, 0x4e, 0x44, 0x45, 0x46, 0x49, 0x4e, 0x45, 0x44, 0x10, 0x00, 0x12, 0x21, 0x0a, 0x1d, 0x56,
-	0x41, 0x4c, 0x49, 0x44, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x55, 0x53,
-	0x5f, 0x49, 0x4e, 0x5f, 0x50, 0x52, 0x4f, 0x47, 0x52, 0x45, 0x53, 0x53, 0x10, 0x01, 0x12, 0x1c,
-	0x0a, 0x18, 0x56, 0x41, 0x4c, 0x49, 0x44, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x53, 0x54, 0x41,
-	0x54, 0x55, 0x53, 0x5f, 0x50, 0x41, 0x53, 0x53, 0x45, 0x44, 0x10, 0x02, 0x12, 0x20, 0x0a, 0x1c,
-	0x56, 0x41, 0x4c, 0x49, 0x44, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x55,
-	0x53, 0x5f, 0x4e, 0x4f, 0x54, 0x5f, 0x50, 0x41, 0x53, 0x53, 0x45, 0x44, 0x10, 0x03, 0x22, 0x30,
-	0x0a, 0x16, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67,
-	0x54, 0x61, 0x73, 0x6b, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x16, 0x0a, 0x06, 0x6e, 0x65, 0x78, 0x74,
-	0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x06, 0x6e, 0x65, 0x78, 0x74, 0x49, 0x64,
-	0x22, 0x97, 0x01, 0x0a, 0x19, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x65, 0x64, 0x56, 0x69, 0x64, 0x65,
-	0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x61, 0x73, 0x6b, 0x12, 0x14,
-	0x0a, 0x05, 0x69, 0x6e, 0x64, 0x65, 0x78, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x69,
-	0x6e, 0x64, 0x65, 0x78, 0x12, 0x64, 0x0a, 0x12, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e,
-	0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x61, 0x73, 0x6b, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b,
-	0x32, 0x2e, 0x2e, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65,
-	0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x69,
-	0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x61, 0x73, 0x6b,
-	0x42, 0x04, 0xc8, 0xde, 0x1f, 0x00, 0x52, 0x12, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e,
-	0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x61, 0x73, 0x6b, 0x42, 0x8a, 0x02, 0x0a, 0x1e, 0x63,
-	0x6f, 0x6d, 0x2e, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65,
-	0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x42, 0x0a, 0x54,
-	0x79, 0x70, 0x65, 0x73, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x52, 0x67, 0x69, 0x74,
-	0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e,
-	0x2f, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2f,
-	0x61, 0x70, 0x69, 0x2f, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2f, 0x76, 0x69, 0x64,
-	0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2f, 0x76, 0x31, 0x3b, 0x76,
-	0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x76, 0x31, 0xa2,
-	0x02, 0x03, 0x4a, 0x56, 0x58, 0xaa, 0x02, 0x1a, 0x4a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e,
-	0x2e, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e,
-	0x56, 0x31, 0xca, 0x02, 0x1a, 0x4a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x5c, 0x56, 0x69,
-	0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x5c, 0x56, 0x31, 0xe2,
-	0x02, 0x26, 0x4a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x5c, 0x56, 0x69, 0x64, 0x65, 0x6f,
-	0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42,
-	0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0xea, 0x02, 0x1c, 0x4a, 0x61, 0x6e, 0x63, 0x74,
-	0x69, 0x6f, 0x6e, 0x3a, 0x3a, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72,
-	0x69, 0x6e, 0x67, 0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x68, 0x72, 0x65, 0x61, 0x64, 0x2e, 0x56, 0x61, 0x6c, 0x69,
+	0x64, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x22,
+	0x96, 0x01, 0x0a, 0x10, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x53, 0x74,
+	0x61, 0x74, 0x75, 0x73, 0x12, 0x1f, 0x0a, 0x1b, 0x56, 0x41, 0x4c, 0x49, 0x44, 0x41, 0x54, 0x49,
+	0x4f, 0x4e, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x55, 0x53, 0x5f, 0x55, 0x4e, 0x44, 0x45, 0x46, 0x49,
+	0x4e, 0x45, 0x44, 0x10, 0x00, 0x12, 0x21, 0x0a, 0x1d, 0x56, 0x41, 0x4c, 0x49, 0x44, 0x41, 0x54,
+	0x49, 0x4f, 0x4e, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x55, 0x53, 0x5f, 0x49, 0x4e, 0x5f, 0x50, 0x52,
+	0x4f, 0x47, 0x52, 0x45, 0x53, 0x53, 0x10, 0x01, 0x12, 0x1c, 0x0a, 0x18, 0x56, 0x41, 0x4c, 0x49,
+	0x44, 0x41, 0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x55, 0x53, 0x5f, 0x50, 0x41,
+	0x53, 0x53, 0x45, 0x44, 0x10, 0x02, 0x12, 0x20, 0x0a, 0x1c, 0x56, 0x41, 0x4c, 0x49, 0x44, 0x41,
+	0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x55, 0x53, 0x5f, 0x4e, 0x4f, 0x54, 0x5f,
+	0x50, 0x41, 0x53, 0x53, 0x45, 0x44, 0x10, 0x03, 0x22, 0x30, 0x0a, 0x16, 0x56, 0x69, 0x64, 0x65,
+	0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x61, 0x73, 0x6b, 0x49, 0x6e,
+	0x66, 0x6f, 0x12, 0x16, 0x0a, 0x06, 0x6e, 0x65, 0x78, 0x74, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01,
+	0x28, 0x04, 0x52, 0x06, 0x6e, 0x65, 0x78, 0x74, 0x49, 0x64, 0x22, 0x97, 0x01, 0x0a, 0x19, 0x49,
+	0x6e, 0x64, 0x65, 0x78, 0x65, 0x64, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65,
+	0x72, 0x69, 0x6e, 0x67, 0x54, 0x61, 0x73, 0x6b, 0x12, 0x14, 0x0a, 0x05, 0x69, 0x6e, 0x64, 0x65,
+	0x78, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x69, 0x6e, 0x64, 0x65, 0x78, 0x12, 0x64,
+	0x0a, 0x12, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67,
+	0x54, 0x61, 0x73, 0x6b, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2e, 0x2e, 0x6a, 0x61, 0x6e,
+	0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65,
+	0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e,
+	0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x61, 0x73, 0x6b, 0x42, 0x04, 0xc8, 0xde, 0x1f, 0x00,
+	0x52, 0x12, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67,
+	0x54, 0x61, 0x73, 0x6b, 0x42, 0x8a, 0x02, 0x0a, 0x1e, 0x63, 0x6f, 0x6d, 0x2e, 0x6a, 0x61, 0x6e,
+	0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65,
+	0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x42, 0x0a, 0x54, 0x79, 0x70, 0x65, 0x73, 0x50, 0x72,
+	0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x52, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
+	0x6d, 0x2f, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2f, 0x76, 0x69, 0x64, 0x65, 0x6f,
+	0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6a, 0x61,
+	0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2f, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64,
+	0x65, 0x72, 0x69, 0x6e, 0x67, 0x2f, 0x76, 0x31, 0x3b, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65,
+	0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x4a, 0x56, 0x58, 0xaa,
+	0x02, 0x1a, 0x4a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x56, 0x69, 0x64, 0x65, 0x6f,
+	0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x1a, 0x4a,
+	0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x5c, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e,
+	0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x5c, 0x56, 0x31, 0xe2, 0x02, 0x26, 0x4a, 0x61, 0x6e, 0x63,
+	0x74, 0x69, 0x6f, 0x6e, 0x5c, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72,
+	0x69, 0x6e, 0x67, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61,
+	0x74, 0x61, 0xea, 0x02, 0x1c, 0x4a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x3a, 0x3a, 0x56,
+	0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x3a, 0x3a, 0x56,
+	0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -7263,7 +7526,7 @@ func file_janction_videoRendering_v1_types_proto_rawDescGZIP() []byte {
 }
 
 var file_janction_videoRendering_v1_types_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
-var file_janction_videoRendering_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
+var file_janction_videoRendering_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 11)
 var file_janction_videoRendering_v1_types_proto_goTypes = []interface{}{
 	(Worker_WorkerStatus)(0),                              // 0: janction.videoRendering.v1.Worker.WorkerStatus
 	(VideoRenderingThread_Validation_ValidationStatus)(0), // 1: janction.videoRendering.v1.VideoRenderingThread.Validation.ValidationStatus
@@ -7277,6 +7540,7 @@ var file_janction_videoRendering_v1_types_proto_goTypes = []interface{}{
 	(*Worker_Reputation)(nil),               // 9: janction.videoRendering.v1.Worker.Reputation
 	(*VideoRenderingThread_Solution)(nil),   // 10: janction.videoRendering.v1.VideoRenderingThread.Solution
 	(*VideoRenderingThread_Validation)(nil), // 11: janction.videoRendering.v1.VideoRenderingThread.Validation
+	nil,                                     // 12: janction.videoRendering.v1.VideoRenderingThread.Solution.FilesEntry
 }
 var file_janction_videoRendering_v1_types_proto_depIdxs = []int32{
 	2,  // 0: janction.videoRendering.v1.GenesisState.params:type_name -> janction.videoRendering.v1.Params
@@ -7289,12 +7553,13 @@ var file_janction_videoRendering_v1_types_proto_depIdxs = []int32{
 	10, // 7: janction.videoRendering.v1.VideoRenderingThread.solution:type_name -> janction.videoRendering.v1.VideoRenderingThread.Solution
 	11, // 8: janction.videoRendering.v1.VideoRenderingThread.validations:type_name -> janction.videoRendering.v1.VideoRenderingThread.Validation
 	5,  // 9: janction.videoRendering.v1.IndexedVideoRenderingTask.videoRenderingTask:type_name -> janction.videoRendering.v1.VideoRenderingTask
-	1,  // 10: janction.videoRendering.v1.VideoRenderingThread.Validation.status:type_name -> janction.videoRendering.v1.VideoRenderingThread.Validation.ValidationStatus
-	11, // [11:11] is the sub-list for method output_type
-	11, // [11:11] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	12, // 10: janction.videoRendering.v1.VideoRenderingThread.Solution.files:type_name -> janction.videoRendering.v1.VideoRenderingThread.Solution.FilesEntry
+	1,  // 11: janction.videoRendering.v1.VideoRenderingThread.Validation.status:type_name -> janction.videoRendering.v1.VideoRenderingThread.Validation.ValidationStatus
+	12, // [12:12] is the sub-list for method output_type
+	12, // [12:12] is the sub-list for method input_type
+	12, // [12:12] is the sub-list for extension type_name
+	12, // [12:12] is the sub-list for extension extendee
+	0,  // [0:12] is the sub-list for field type_name
 }
 
 func init() { file_janction_videoRendering_v1_types_proto_init() }
@@ -7430,7 +7695,7 @@ func file_janction_videoRendering_v1_types_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_janction_videoRendering_v1_types_proto_rawDesc,
 			NumEnums:      2,
-			NumMessages:   10,
+			NumMessages:   11,
 			NumExtensions: 0,
 			NumServices:   0,
 		},

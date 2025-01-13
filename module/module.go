@@ -169,7 +169,7 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 
 				go thread.StartWork(worker.Address, task.Cid, workPath)
 			} else {
-				log.Printf("thread %v of task %v might be ready to evaluate?", thread.ThreadId, task.TaskId)
+				log.Printf("thread %v of task %v might be ready to evaluate.", thread.ThreadId, task.TaskId)
 			}
 
 		}
@@ -185,6 +185,8 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 
 	// we validate if this node is enabled to perform work
 	if k.Configuration.Enabled && k.Configuration.WorkerAddress != "" {
+		// TODO register worker
+
 		// we validate if the worker is idle
 		worker, _ := k.Workers.Get(ctx, k.Configuration.WorkerAddress)
 		if worker.Enabled && worker.CurrentTaskId == "" {
@@ -196,9 +198,6 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 				go task.SubscribeWorkerToTask(ctx, worker.Address)
 
 			}
-		} else {
-			// TODO validate the node is actually doing some work.
-			log.Printf(" worker %v is doing work ", worker.Address)
 		}
 	}
 

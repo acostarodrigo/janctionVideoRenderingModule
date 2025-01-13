@@ -12,6 +12,7 @@ import (
 	protoimpl "google.golang.org/protobuf/runtime/protoimpl"
 	io "io"
 	reflect "reflect"
+	sort "sort"
 	sync "sync"
 )
 
@@ -2791,6 +2792,1214 @@ func (x *fastReflection_MsgSubscribeWorkerToTaskResponse) ProtoMethods() *protoi
 	}
 }
 
+var _ protoreflect.Map = (*_MsgProposeSolution_4_map)(nil)
+
+type _MsgProposeSolution_4_map struct {
+	m *map[string]string
+}
+
+func (x *_MsgProposeSolution_4_map) Len() int {
+	if x.m == nil {
+		return 0
+	}
+	return len(*x.m)
+}
+
+func (x *_MsgProposeSolution_4_map) Range(f func(protoreflect.MapKey, protoreflect.Value) bool) {
+	if x.m == nil {
+		return
+	}
+	for k, v := range *x.m {
+		mapKey := (protoreflect.MapKey)(protoreflect.ValueOfString(k))
+		mapValue := protoreflect.ValueOfString(v)
+		if !f(mapKey, mapValue) {
+			break
+		}
+	}
+}
+
+func (x *_MsgProposeSolution_4_map) Has(key protoreflect.MapKey) bool {
+	if x.m == nil {
+		return false
+	}
+	keyUnwrapped := key.String()
+	concreteValue := keyUnwrapped
+	_, ok := (*x.m)[concreteValue]
+	return ok
+}
+
+func (x *_MsgProposeSolution_4_map) Clear(key protoreflect.MapKey) {
+	if x.m == nil {
+		return
+	}
+	keyUnwrapped := key.String()
+	concreteKey := keyUnwrapped
+	delete(*x.m, concreteKey)
+}
+
+func (x *_MsgProposeSolution_4_map) Get(key protoreflect.MapKey) protoreflect.Value {
+	if x.m == nil {
+		return protoreflect.Value{}
+	}
+	keyUnwrapped := key.String()
+	concreteKey := keyUnwrapped
+	v, ok := (*x.m)[concreteKey]
+	if !ok {
+		return protoreflect.Value{}
+	}
+	return protoreflect.ValueOfString(v)
+}
+
+func (x *_MsgProposeSolution_4_map) Set(key protoreflect.MapKey, value protoreflect.Value) {
+	if !key.IsValid() || !value.IsValid() {
+		panic("invalid key or value provided")
+	}
+	keyUnwrapped := key.String()
+	concreteKey := keyUnwrapped
+	valueUnwrapped := value.String()
+	concreteValue := valueUnwrapped
+	(*x.m)[concreteKey] = concreteValue
+}
+
+func (x *_MsgProposeSolution_4_map) Mutable(key protoreflect.MapKey) protoreflect.Value {
+	panic("should not call Mutable on protoreflect.Map whose value is not of type protoreflect.Message")
+}
+
+func (x *_MsgProposeSolution_4_map) NewValue() protoreflect.Value {
+	v := ""
+	return protoreflect.ValueOfString(v)
+}
+
+func (x *_MsgProposeSolution_4_map) IsValid() bool {
+	return x.m != nil
+}
+
+var (
+	md_MsgProposeSolution          protoreflect.MessageDescriptor
+	fd_MsgProposeSolution_creator  protoreflect.FieldDescriptor
+	fd_MsgProposeSolution_taskId   protoreflect.FieldDescriptor
+	fd_MsgProposeSolution_threadId protoreflect.FieldDescriptor
+	fd_MsgProposeSolution_solution protoreflect.FieldDescriptor
+)
+
+func init() {
+	file_janction_videoRendering_v1_tx_proto_init()
+	md_MsgProposeSolution = File_janction_videoRendering_v1_tx_proto.Messages().ByName("MsgProposeSolution")
+	fd_MsgProposeSolution_creator = md_MsgProposeSolution.Fields().ByName("creator")
+	fd_MsgProposeSolution_taskId = md_MsgProposeSolution.Fields().ByName("taskId")
+	fd_MsgProposeSolution_threadId = md_MsgProposeSolution.Fields().ByName("threadId")
+	fd_MsgProposeSolution_solution = md_MsgProposeSolution.Fields().ByName("solution")
+}
+
+var _ protoreflect.Message = (*fastReflection_MsgProposeSolution)(nil)
+
+type fastReflection_MsgProposeSolution MsgProposeSolution
+
+func (x *MsgProposeSolution) ProtoReflect() protoreflect.Message {
+	return (*fastReflection_MsgProposeSolution)(x)
+}
+
+func (x *MsgProposeSolution) slowProtoReflect() protoreflect.Message {
+	mi := &file_janction_videoRendering_v1_tx_proto_msgTypes[6]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+var _fastReflection_MsgProposeSolution_messageType fastReflection_MsgProposeSolution_messageType
+var _ protoreflect.MessageType = fastReflection_MsgProposeSolution_messageType{}
+
+type fastReflection_MsgProposeSolution_messageType struct{}
+
+func (x fastReflection_MsgProposeSolution_messageType) Zero() protoreflect.Message {
+	return (*fastReflection_MsgProposeSolution)(nil)
+}
+func (x fastReflection_MsgProposeSolution_messageType) New() protoreflect.Message {
+	return new(fastReflection_MsgProposeSolution)
+}
+func (x fastReflection_MsgProposeSolution_messageType) Descriptor() protoreflect.MessageDescriptor {
+	return md_MsgProposeSolution
+}
+
+// Descriptor returns message descriptor, which contains only the protobuf
+// type information for the message.
+func (x *fastReflection_MsgProposeSolution) Descriptor() protoreflect.MessageDescriptor {
+	return md_MsgProposeSolution
+}
+
+// Type returns the message type, which encapsulates both Go and protobuf
+// type information. If the Go type information is not needed,
+// it is recommended that the message descriptor be used instead.
+func (x *fastReflection_MsgProposeSolution) Type() protoreflect.MessageType {
+	return _fastReflection_MsgProposeSolution_messageType
+}
+
+// New returns a newly allocated and mutable empty message.
+func (x *fastReflection_MsgProposeSolution) New() protoreflect.Message {
+	return new(fastReflection_MsgProposeSolution)
+}
+
+// Interface unwraps the message reflection interface and
+// returns the underlying ProtoMessage interface.
+func (x *fastReflection_MsgProposeSolution) Interface() protoreflect.ProtoMessage {
+	return (*MsgProposeSolution)(x)
+}
+
+// Range iterates over every populated field in an undefined order,
+// calling f for each field descriptor and value encountered.
+// Range returns immediately if f returns false.
+// While iterating, mutating operations may only be performed
+// on the current field descriptor.
+func (x *fastReflection_MsgProposeSolution) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
+	if x.Creator != "" {
+		value := protoreflect.ValueOfString(x.Creator)
+		if !f(fd_MsgProposeSolution_creator, value) {
+			return
+		}
+	}
+	if x.TaskId != "" {
+		value := protoreflect.ValueOfString(x.TaskId)
+		if !f(fd_MsgProposeSolution_taskId, value) {
+			return
+		}
+	}
+	if x.ThreadId != "" {
+		value := protoreflect.ValueOfString(x.ThreadId)
+		if !f(fd_MsgProposeSolution_threadId, value) {
+			return
+		}
+	}
+	if len(x.Solution) != 0 {
+		value := protoreflect.ValueOfMap(&_MsgProposeSolution_4_map{m: &x.Solution})
+		if !f(fd_MsgProposeSolution_solution, value) {
+			return
+		}
+	}
+}
+
+// Has reports whether a field is populated.
+//
+// Some fields have the property of nullability where it is possible to
+// distinguish between the default value of a field and whether the field
+// was explicitly populated with the default value. Singular message fields,
+// member fields of a oneof, and proto2 scalar fields are nullable. Such
+// fields are populated only if explicitly set.
+//
+// In other cases (aside from the nullable cases above),
+// a proto3 scalar field is populated if it contains a non-zero value, and
+// a repeated field is populated if it is non-empty.
+func (x *fastReflection_MsgProposeSolution) Has(fd protoreflect.FieldDescriptor) bool {
+	switch fd.FullName() {
+	case "janction.videoRendering.v1.MsgProposeSolution.creator":
+		return x.Creator != ""
+	case "janction.videoRendering.v1.MsgProposeSolution.taskId":
+		return x.TaskId != ""
+	case "janction.videoRendering.v1.MsgProposeSolution.threadId":
+		return x.ThreadId != ""
+	case "janction.videoRendering.v1.MsgProposeSolution.solution":
+		return len(x.Solution) != 0
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.MsgProposeSolution"))
+		}
+		panic(fmt.Errorf("message janction.videoRendering.v1.MsgProposeSolution does not contain field %s", fd.FullName()))
+	}
+}
+
+// Clear clears the field such that a subsequent Has call reports false.
+//
+// Clearing an extension field clears both the extension type and value
+// associated with the given field number.
+//
+// Clear is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_MsgProposeSolution) Clear(fd protoreflect.FieldDescriptor) {
+	switch fd.FullName() {
+	case "janction.videoRendering.v1.MsgProposeSolution.creator":
+		x.Creator = ""
+	case "janction.videoRendering.v1.MsgProposeSolution.taskId":
+		x.TaskId = ""
+	case "janction.videoRendering.v1.MsgProposeSolution.threadId":
+		x.ThreadId = ""
+	case "janction.videoRendering.v1.MsgProposeSolution.solution":
+		x.Solution = nil
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.MsgProposeSolution"))
+		}
+		panic(fmt.Errorf("message janction.videoRendering.v1.MsgProposeSolution does not contain field %s", fd.FullName()))
+	}
+}
+
+// Get retrieves the value for a field.
+//
+// For unpopulated scalars, it returns the default value, where
+// the default value of a bytes scalar is guaranteed to be a copy.
+// For unpopulated composite types, it returns an empty, read-only view
+// of the value; to obtain a mutable reference, use Mutable.
+func (x *fastReflection_MsgProposeSolution) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
+	switch descriptor.FullName() {
+	case "janction.videoRendering.v1.MsgProposeSolution.creator":
+		value := x.Creator
+		return protoreflect.ValueOfString(value)
+	case "janction.videoRendering.v1.MsgProposeSolution.taskId":
+		value := x.TaskId
+		return protoreflect.ValueOfString(value)
+	case "janction.videoRendering.v1.MsgProposeSolution.threadId":
+		value := x.ThreadId
+		return protoreflect.ValueOfString(value)
+	case "janction.videoRendering.v1.MsgProposeSolution.solution":
+		if len(x.Solution) == 0 {
+			return protoreflect.ValueOfMap(&_MsgProposeSolution_4_map{})
+		}
+		mapValue := &_MsgProposeSolution_4_map{m: &x.Solution}
+		return protoreflect.ValueOfMap(mapValue)
+	default:
+		if descriptor.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.MsgProposeSolution"))
+		}
+		panic(fmt.Errorf("message janction.videoRendering.v1.MsgProposeSolution does not contain field %s", descriptor.FullName()))
+	}
+}
+
+// Set stores the value for a field.
+//
+// For a field belonging to a oneof, it implicitly clears any other field
+// that may be currently set within the same oneof.
+// For extension fields, it implicitly stores the provided ExtensionType.
+// When setting a composite type, it is unspecified whether the stored value
+// aliases the source's memory in any way. If the composite value is an
+// empty, read-only value, then it panics.
+//
+// Set is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_MsgProposeSolution) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
+	switch fd.FullName() {
+	case "janction.videoRendering.v1.MsgProposeSolution.creator":
+		x.Creator = value.Interface().(string)
+	case "janction.videoRendering.v1.MsgProposeSolution.taskId":
+		x.TaskId = value.Interface().(string)
+	case "janction.videoRendering.v1.MsgProposeSolution.threadId":
+		x.ThreadId = value.Interface().(string)
+	case "janction.videoRendering.v1.MsgProposeSolution.solution":
+		mv := value.Map()
+		cmv := mv.(*_MsgProposeSolution_4_map)
+		x.Solution = *cmv.m
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.MsgProposeSolution"))
+		}
+		panic(fmt.Errorf("message janction.videoRendering.v1.MsgProposeSolution does not contain field %s", fd.FullName()))
+	}
+}
+
+// Mutable returns a mutable reference to a composite type.
+//
+// If the field is unpopulated, it may allocate a composite value.
+// For a field belonging to a oneof, it implicitly clears any other field
+// that may be currently set within the same oneof.
+// For extension fields, it implicitly stores the provided ExtensionType
+// if not already stored.
+// It panics if the field does not contain a composite type.
+//
+// Mutable is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_MsgProposeSolution) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
+	switch fd.FullName() {
+	case "janction.videoRendering.v1.MsgProposeSolution.solution":
+		if x.Solution == nil {
+			x.Solution = make(map[string]string)
+		}
+		value := &_MsgProposeSolution_4_map{m: &x.Solution}
+		return protoreflect.ValueOfMap(value)
+	case "janction.videoRendering.v1.MsgProposeSolution.creator":
+		panic(fmt.Errorf("field creator of message janction.videoRendering.v1.MsgProposeSolution is not mutable"))
+	case "janction.videoRendering.v1.MsgProposeSolution.taskId":
+		panic(fmt.Errorf("field taskId of message janction.videoRendering.v1.MsgProposeSolution is not mutable"))
+	case "janction.videoRendering.v1.MsgProposeSolution.threadId":
+		panic(fmt.Errorf("field threadId of message janction.videoRendering.v1.MsgProposeSolution is not mutable"))
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.MsgProposeSolution"))
+		}
+		panic(fmt.Errorf("message janction.videoRendering.v1.MsgProposeSolution does not contain field %s", fd.FullName()))
+	}
+}
+
+// NewField returns a new value that is assignable to the field
+// for the given descriptor. For scalars, this returns the default value.
+// For lists, maps, and messages, this returns a new, empty, mutable value.
+func (x *fastReflection_MsgProposeSolution) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
+	switch fd.FullName() {
+	case "janction.videoRendering.v1.MsgProposeSolution.creator":
+		return protoreflect.ValueOfString("")
+	case "janction.videoRendering.v1.MsgProposeSolution.taskId":
+		return protoreflect.ValueOfString("")
+	case "janction.videoRendering.v1.MsgProposeSolution.threadId":
+		return protoreflect.ValueOfString("")
+	case "janction.videoRendering.v1.MsgProposeSolution.solution":
+		m := make(map[string]string)
+		return protoreflect.ValueOfMap(&_MsgProposeSolution_4_map{m: &m})
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.MsgProposeSolution"))
+		}
+		panic(fmt.Errorf("message janction.videoRendering.v1.MsgProposeSolution does not contain field %s", fd.FullName()))
+	}
+}
+
+// WhichOneof reports which field within the oneof is populated,
+// returning nil if none are populated.
+// It panics if the oneof descriptor does not belong to this message.
+func (x *fastReflection_MsgProposeSolution) WhichOneof(d protoreflect.OneofDescriptor) protoreflect.FieldDescriptor {
+	switch d.FullName() {
+	default:
+		panic(fmt.Errorf("%s is not a oneof field in janction.videoRendering.v1.MsgProposeSolution", d.FullName()))
+	}
+	panic("unreachable")
+}
+
+// GetUnknown retrieves the entire list of unknown fields.
+// The caller may only mutate the contents of the RawFields
+// if the mutated bytes are stored back into the message with SetUnknown.
+func (x *fastReflection_MsgProposeSolution) GetUnknown() protoreflect.RawFields {
+	return x.unknownFields
+}
+
+// SetUnknown stores an entire list of unknown fields.
+// The raw fields must be syntactically valid according to the wire format.
+// An implementation may panic if this is not the case.
+// Once stored, the caller must not mutate the content of the RawFields.
+// An empty RawFields may be passed to clear the fields.
+//
+// SetUnknown is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_MsgProposeSolution) SetUnknown(fields protoreflect.RawFields) {
+	x.unknownFields = fields
+}
+
+// IsValid reports whether the message is valid.
+//
+// An invalid message is an empty, read-only value.
+//
+// An invalid message often corresponds to a nil pointer of the concrete
+// message type, but the details are implementation dependent.
+// Validity is not part of the protobuf data model, and may not
+// be preserved in marshaling or other operations.
+func (x *fastReflection_MsgProposeSolution) IsValid() bool {
+	return x != nil
+}
+
+// ProtoMethods returns optional fastReflectionFeature-path implementations of various operations.
+// This method may return nil.
+//
+// The returned methods type is identical to
+// "google.golang.org/protobuf/runtime/protoiface".Methods.
+// Consult the protoiface package documentation for details.
+func (x *fastReflection_MsgProposeSolution) ProtoMethods() *protoiface.Methods {
+	size := func(input protoiface.SizeInput) protoiface.SizeOutput {
+		x := input.Message.Interface().(*MsgProposeSolution)
+		if x == nil {
+			return protoiface.SizeOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Size:              0,
+			}
+		}
+		options := runtime.SizeInputToOptions(input)
+		_ = options
+		var n int
+		var l int
+		_ = l
+		l = len(x.Creator)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.TaskId)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		l = len(x.ThreadId)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
+		}
+		if len(x.Solution) > 0 {
+			SiZeMaP := func(k string, v string) {
+				mapEntrySize := 1 + len(k) + runtime.Sov(uint64(len(k))) + 1 + len(v) + runtime.Sov(uint64(len(v)))
+				n += mapEntrySize + 1 + runtime.Sov(uint64(mapEntrySize))
+			}
+			if options.Deterministic {
+				sortme := make([]string, 0, len(x.Solution))
+				for k := range x.Solution {
+					sortme = append(sortme, k)
+				}
+				sort.Strings(sortme)
+				for _, k := range sortme {
+					v := x.Solution[k]
+					SiZeMaP(k, v)
+				}
+			} else {
+				for k, v := range x.Solution {
+					SiZeMaP(k, v)
+				}
+			}
+		}
+		if x.unknownFields != nil {
+			n += len(x.unknownFields)
+		}
+		return protoiface.SizeOutput{
+			NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+			Size:              n,
+		}
+	}
+
+	marshal := func(input protoiface.MarshalInput) (protoiface.MarshalOutput, error) {
+		x := input.Message.Interface().(*MsgProposeSolution)
+		if x == nil {
+			return protoiface.MarshalOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Buf:               input.Buf,
+			}, nil
+		}
+		options := runtime.MarshalInputToOptions(input)
+		_ = options
+		size := options.Size(x)
+		dAtA := make([]byte, size)
+		i := len(dAtA)
+		_ = i
+		var l int
+		_ = l
+		if x.unknownFields != nil {
+			i -= len(x.unknownFields)
+			copy(dAtA[i:], x.unknownFields)
+		}
+		if len(x.Solution) > 0 {
+			MaRsHaLmAp := func(k string, v string) (protoiface.MarshalOutput, error) {
+				baseI := i
+				i -= len(v)
+				copy(dAtA[i:], v)
+				i = runtime.EncodeVarint(dAtA, i, uint64(len(v)))
+				i--
+				dAtA[i] = 0x12
+				i -= len(k)
+				copy(dAtA[i:], k)
+				i = runtime.EncodeVarint(dAtA, i, uint64(len(k)))
+				i--
+				dAtA[i] = 0xa
+				i = runtime.EncodeVarint(dAtA, i, uint64(baseI-i))
+				i--
+				dAtA[i] = 0x22
+				return protoiface.MarshalOutput{}, nil
+			}
+			if options.Deterministic {
+				keysForSolution := make([]string, 0, len(x.Solution))
+				for k := range x.Solution {
+					keysForSolution = append(keysForSolution, string(k))
+				}
+				sort.Slice(keysForSolution, func(i, j int) bool {
+					return keysForSolution[i] < keysForSolution[j]
+				})
+				for iNdEx := len(keysForSolution) - 1; iNdEx >= 0; iNdEx-- {
+					v := x.Solution[string(keysForSolution[iNdEx])]
+					out, err := MaRsHaLmAp(keysForSolution[iNdEx], v)
+					if err != nil {
+						return out, err
+					}
+				}
+			} else {
+				for k := range x.Solution {
+					v := x.Solution[k]
+					out, err := MaRsHaLmAp(k, v)
+					if err != nil {
+						return out, err
+					}
+				}
+			}
+		}
+		if len(x.ThreadId) > 0 {
+			i -= len(x.ThreadId)
+			copy(dAtA[i:], x.ThreadId)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.ThreadId)))
+			i--
+			dAtA[i] = 0x1a
+		}
+		if len(x.TaskId) > 0 {
+			i -= len(x.TaskId)
+			copy(dAtA[i:], x.TaskId)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.TaskId)))
+			i--
+			dAtA[i] = 0x12
+		}
+		if len(x.Creator) > 0 {
+			i -= len(x.Creator)
+			copy(dAtA[i:], x.Creator)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Creator)))
+			i--
+			dAtA[i] = 0xa
+		}
+		if input.Buf != nil {
+			input.Buf = append(input.Buf, dAtA...)
+		} else {
+			input.Buf = dAtA
+		}
+		return protoiface.MarshalOutput{
+			NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+			Buf:               input.Buf,
+		}, nil
+	}
+	unmarshal := func(input protoiface.UnmarshalInput) (protoiface.UnmarshalOutput, error) {
+		x := input.Message.Interface().(*MsgProposeSolution)
+		if x == nil {
+			return protoiface.UnmarshalOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Flags:             input.Flags,
+			}, nil
+		}
+		options := runtime.UnmarshalInputToOptions(input)
+		_ = options
+		dAtA := input.Buf
+		l := len(dAtA)
+		iNdEx := 0
+		for iNdEx < l {
+			preIndex := iNdEx
+			var wire uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				wire |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			fieldNum := int32(wire >> 3)
+			wireType := int(wire & 0x7)
+			if wireType == 4 {
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: MsgProposeSolution: wiretype end group for non-group")
+			}
+			if fieldNum <= 0 {
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: MsgProposeSolution: illegal tag %d (wire type %d)", fieldNum, wire)
+			}
+			switch fieldNum {
+			case 1:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.Creator = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 2:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field TaskId", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.TaskId = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 3:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field ThreadId", wireType)
+				}
+				var stringLen uint64
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					stringLen |= uint64(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + intStringLen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				x.ThreadId = string(dAtA[iNdEx:postIndex])
+				iNdEx = postIndex
+			case 4:
+				if wireType != 2 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Solution", wireType)
+				}
+				var msglen int
+				for shift := uint(0); ; shift += 7 {
+					if shift >= 64 {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+					}
+					if iNdEx >= l {
+						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+					}
+					b := dAtA[iNdEx]
+					iNdEx++
+					msglen |= int(b&0x7F) << shift
+					if b < 0x80 {
+						break
+					}
+				}
+				if msglen < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				postIndex := iNdEx + msglen
+				if postIndex < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if postIndex > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				if x.Solution == nil {
+					x.Solution = make(map[string]string)
+				}
+				var mapkey string
+				var mapvalue string
+				for iNdEx < postIndex {
+					entryPreIndex := iNdEx
+					var wire uint64
+					for shift := uint(0); ; shift += 7 {
+						if shift >= 64 {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+						}
+						if iNdEx >= l {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+						}
+						b := dAtA[iNdEx]
+						iNdEx++
+						wire |= uint64(b&0x7F) << shift
+						if b < 0x80 {
+							break
+						}
+					}
+					fieldNum := int32(wire >> 3)
+					if fieldNum == 1 {
+						var stringLenmapkey uint64
+						for shift := uint(0); ; shift += 7 {
+							if shift >= 64 {
+								return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+							}
+							if iNdEx >= l {
+								return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+							}
+							b := dAtA[iNdEx]
+							iNdEx++
+							stringLenmapkey |= uint64(b&0x7F) << shift
+							if b < 0x80 {
+								break
+							}
+						}
+						intStringLenmapkey := int(stringLenmapkey)
+						if intStringLenmapkey < 0 {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+						}
+						postStringIndexmapkey := iNdEx + intStringLenmapkey
+						if postStringIndexmapkey < 0 {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+						}
+						if postStringIndexmapkey > l {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+						}
+						mapkey = string(dAtA[iNdEx:postStringIndexmapkey])
+						iNdEx = postStringIndexmapkey
+					} else if fieldNum == 2 {
+						var stringLenmapvalue uint64
+						for shift := uint(0); ; shift += 7 {
+							if shift >= 64 {
+								return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+							}
+							if iNdEx >= l {
+								return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+							}
+							b := dAtA[iNdEx]
+							iNdEx++
+							stringLenmapvalue |= uint64(b&0x7F) << shift
+							if b < 0x80 {
+								break
+							}
+						}
+						intStringLenmapvalue := int(stringLenmapvalue)
+						if intStringLenmapvalue < 0 {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+						}
+						postStringIndexmapvalue := iNdEx + intStringLenmapvalue
+						if postStringIndexmapvalue < 0 {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+						}
+						if postStringIndexmapvalue > l {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+						}
+						mapvalue = string(dAtA[iNdEx:postStringIndexmapvalue])
+						iNdEx = postStringIndexmapvalue
+					} else {
+						iNdEx = entryPreIndex
+						skippy, err := runtime.Skip(dAtA[iNdEx:])
+						if err != nil {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+						}
+						if (skippy < 0) || (iNdEx+skippy) < 0 {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+						}
+						if (iNdEx + skippy) > postIndex {
+							return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+						}
+						iNdEx += skippy
+					}
+				}
+				x.Solution[mapkey] = mapvalue
+				iNdEx = postIndex
+			default:
+				iNdEx = preIndex
+				skippy, err := runtime.Skip(dAtA[iNdEx:])
+				if err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				if (skippy < 0) || (iNdEx+skippy) < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if (iNdEx + skippy) > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				if !options.DiscardUnknown {
+					x.unknownFields = append(x.unknownFields, dAtA[iNdEx:iNdEx+skippy]...)
+				}
+				iNdEx += skippy
+			}
+		}
+
+		if iNdEx > l {
+			return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+		}
+		return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, nil
+	}
+	return &protoiface.Methods{
+		NoUnkeyedLiterals: struct{}{},
+		Flags:             protoiface.SupportMarshalDeterministic | protoiface.SupportUnmarshalDiscardUnknown,
+		Size:              size,
+		Marshal:           marshal,
+		Unmarshal:         unmarshal,
+		Merge:             nil,
+		CheckInitialized:  nil,
+	}
+}
+
+var (
+	md_MsgProposeSolutionResponse protoreflect.MessageDescriptor
+)
+
+func init() {
+	file_janction_videoRendering_v1_tx_proto_init()
+	md_MsgProposeSolutionResponse = File_janction_videoRendering_v1_tx_proto.Messages().ByName("MsgProposeSolutionResponse")
+}
+
+var _ protoreflect.Message = (*fastReflection_MsgProposeSolutionResponse)(nil)
+
+type fastReflection_MsgProposeSolutionResponse MsgProposeSolutionResponse
+
+func (x *MsgProposeSolutionResponse) ProtoReflect() protoreflect.Message {
+	return (*fastReflection_MsgProposeSolutionResponse)(x)
+}
+
+func (x *MsgProposeSolutionResponse) slowProtoReflect() protoreflect.Message {
+	mi := &file_janction_videoRendering_v1_tx_proto_msgTypes[7]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+var _fastReflection_MsgProposeSolutionResponse_messageType fastReflection_MsgProposeSolutionResponse_messageType
+var _ protoreflect.MessageType = fastReflection_MsgProposeSolutionResponse_messageType{}
+
+type fastReflection_MsgProposeSolutionResponse_messageType struct{}
+
+func (x fastReflection_MsgProposeSolutionResponse_messageType) Zero() protoreflect.Message {
+	return (*fastReflection_MsgProposeSolutionResponse)(nil)
+}
+func (x fastReflection_MsgProposeSolutionResponse_messageType) New() protoreflect.Message {
+	return new(fastReflection_MsgProposeSolutionResponse)
+}
+func (x fastReflection_MsgProposeSolutionResponse_messageType) Descriptor() protoreflect.MessageDescriptor {
+	return md_MsgProposeSolutionResponse
+}
+
+// Descriptor returns message descriptor, which contains only the protobuf
+// type information for the message.
+func (x *fastReflection_MsgProposeSolutionResponse) Descriptor() protoreflect.MessageDescriptor {
+	return md_MsgProposeSolutionResponse
+}
+
+// Type returns the message type, which encapsulates both Go and protobuf
+// type information. If the Go type information is not needed,
+// it is recommended that the message descriptor be used instead.
+func (x *fastReflection_MsgProposeSolutionResponse) Type() protoreflect.MessageType {
+	return _fastReflection_MsgProposeSolutionResponse_messageType
+}
+
+// New returns a newly allocated and mutable empty message.
+func (x *fastReflection_MsgProposeSolutionResponse) New() protoreflect.Message {
+	return new(fastReflection_MsgProposeSolutionResponse)
+}
+
+// Interface unwraps the message reflection interface and
+// returns the underlying ProtoMessage interface.
+func (x *fastReflection_MsgProposeSolutionResponse) Interface() protoreflect.ProtoMessage {
+	return (*MsgProposeSolutionResponse)(x)
+}
+
+// Range iterates over every populated field in an undefined order,
+// calling f for each field descriptor and value encountered.
+// Range returns immediately if f returns false.
+// While iterating, mutating operations may only be performed
+// on the current field descriptor.
+func (x *fastReflection_MsgProposeSolutionResponse) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
+}
+
+// Has reports whether a field is populated.
+//
+// Some fields have the property of nullability where it is possible to
+// distinguish between the default value of a field and whether the field
+// was explicitly populated with the default value. Singular message fields,
+// member fields of a oneof, and proto2 scalar fields are nullable. Such
+// fields are populated only if explicitly set.
+//
+// In other cases (aside from the nullable cases above),
+// a proto3 scalar field is populated if it contains a non-zero value, and
+// a repeated field is populated if it is non-empty.
+func (x *fastReflection_MsgProposeSolutionResponse) Has(fd protoreflect.FieldDescriptor) bool {
+	switch fd.FullName() {
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.MsgProposeSolutionResponse"))
+		}
+		panic(fmt.Errorf("message janction.videoRendering.v1.MsgProposeSolutionResponse does not contain field %s", fd.FullName()))
+	}
+}
+
+// Clear clears the field such that a subsequent Has call reports false.
+//
+// Clearing an extension field clears both the extension type and value
+// associated with the given field number.
+//
+// Clear is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_MsgProposeSolutionResponse) Clear(fd protoreflect.FieldDescriptor) {
+	switch fd.FullName() {
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.MsgProposeSolutionResponse"))
+		}
+		panic(fmt.Errorf("message janction.videoRendering.v1.MsgProposeSolutionResponse does not contain field %s", fd.FullName()))
+	}
+}
+
+// Get retrieves the value for a field.
+//
+// For unpopulated scalars, it returns the default value, where
+// the default value of a bytes scalar is guaranteed to be a copy.
+// For unpopulated composite types, it returns an empty, read-only view
+// of the value; to obtain a mutable reference, use Mutable.
+func (x *fastReflection_MsgProposeSolutionResponse) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
+	switch descriptor.FullName() {
+	default:
+		if descriptor.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.MsgProposeSolutionResponse"))
+		}
+		panic(fmt.Errorf("message janction.videoRendering.v1.MsgProposeSolutionResponse does not contain field %s", descriptor.FullName()))
+	}
+}
+
+// Set stores the value for a field.
+//
+// For a field belonging to a oneof, it implicitly clears any other field
+// that may be currently set within the same oneof.
+// For extension fields, it implicitly stores the provided ExtensionType.
+// When setting a composite type, it is unspecified whether the stored value
+// aliases the source's memory in any way. If the composite value is an
+// empty, read-only value, then it panics.
+//
+// Set is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_MsgProposeSolutionResponse) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
+	switch fd.FullName() {
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.MsgProposeSolutionResponse"))
+		}
+		panic(fmt.Errorf("message janction.videoRendering.v1.MsgProposeSolutionResponse does not contain field %s", fd.FullName()))
+	}
+}
+
+// Mutable returns a mutable reference to a composite type.
+//
+// If the field is unpopulated, it may allocate a composite value.
+// For a field belonging to a oneof, it implicitly clears any other field
+// that may be currently set within the same oneof.
+// For extension fields, it implicitly stores the provided ExtensionType
+// if not already stored.
+// It panics if the field does not contain a composite type.
+//
+// Mutable is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_MsgProposeSolutionResponse) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
+	switch fd.FullName() {
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.MsgProposeSolutionResponse"))
+		}
+		panic(fmt.Errorf("message janction.videoRendering.v1.MsgProposeSolutionResponse does not contain field %s", fd.FullName()))
+	}
+}
+
+// NewField returns a new value that is assignable to the field
+// for the given descriptor. For scalars, this returns the default value.
+// For lists, maps, and messages, this returns a new, empty, mutable value.
+func (x *fastReflection_MsgProposeSolutionResponse) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
+	switch fd.FullName() {
+	default:
+		if fd.IsExtension() {
+			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.MsgProposeSolutionResponse"))
+		}
+		panic(fmt.Errorf("message janction.videoRendering.v1.MsgProposeSolutionResponse does not contain field %s", fd.FullName()))
+	}
+}
+
+// WhichOneof reports which field within the oneof is populated,
+// returning nil if none are populated.
+// It panics if the oneof descriptor does not belong to this message.
+func (x *fastReflection_MsgProposeSolutionResponse) WhichOneof(d protoreflect.OneofDescriptor) protoreflect.FieldDescriptor {
+	switch d.FullName() {
+	default:
+		panic(fmt.Errorf("%s is not a oneof field in janction.videoRendering.v1.MsgProposeSolutionResponse", d.FullName()))
+	}
+	panic("unreachable")
+}
+
+// GetUnknown retrieves the entire list of unknown fields.
+// The caller may only mutate the contents of the RawFields
+// if the mutated bytes are stored back into the message with SetUnknown.
+func (x *fastReflection_MsgProposeSolutionResponse) GetUnknown() protoreflect.RawFields {
+	return x.unknownFields
+}
+
+// SetUnknown stores an entire list of unknown fields.
+// The raw fields must be syntactically valid according to the wire format.
+// An implementation may panic if this is not the case.
+// Once stored, the caller must not mutate the content of the RawFields.
+// An empty RawFields may be passed to clear the fields.
+//
+// SetUnknown is a mutating operation and unsafe for concurrent use.
+func (x *fastReflection_MsgProposeSolutionResponse) SetUnknown(fields protoreflect.RawFields) {
+	x.unknownFields = fields
+}
+
+// IsValid reports whether the message is valid.
+//
+// An invalid message is an empty, read-only value.
+//
+// An invalid message often corresponds to a nil pointer of the concrete
+// message type, but the details are implementation dependent.
+// Validity is not part of the protobuf data model, and may not
+// be preserved in marshaling or other operations.
+func (x *fastReflection_MsgProposeSolutionResponse) IsValid() bool {
+	return x != nil
+}
+
+// ProtoMethods returns optional fastReflectionFeature-path implementations of various operations.
+// This method may return nil.
+//
+// The returned methods type is identical to
+// "google.golang.org/protobuf/runtime/protoiface".Methods.
+// Consult the protoiface package documentation for details.
+func (x *fastReflection_MsgProposeSolutionResponse) ProtoMethods() *protoiface.Methods {
+	size := func(input protoiface.SizeInput) protoiface.SizeOutput {
+		x := input.Message.Interface().(*MsgProposeSolutionResponse)
+		if x == nil {
+			return protoiface.SizeOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Size:              0,
+			}
+		}
+		options := runtime.SizeInputToOptions(input)
+		_ = options
+		var n int
+		var l int
+		_ = l
+		if x.unknownFields != nil {
+			n += len(x.unknownFields)
+		}
+		return protoiface.SizeOutput{
+			NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+			Size:              n,
+		}
+	}
+
+	marshal := func(input protoiface.MarshalInput) (protoiface.MarshalOutput, error) {
+		x := input.Message.Interface().(*MsgProposeSolutionResponse)
+		if x == nil {
+			return protoiface.MarshalOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Buf:               input.Buf,
+			}, nil
+		}
+		options := runtime.MarshalInputToOptions(input)
+		_ = options
+		size := options.Size(x)
+		dAtA := make([]byte, size)
+		i := len(dAtA)
+		_ = i
+		var l int
+		_ = l
+		if x.unknownFields != nil {
+			i -= len(x.unknownFields)
+			copy(dAtA[i:], x.unknownFields)
+		}
+		if input.Buf != nil {
+			input.Buf = append(input.Buf, dAtA...)
+		} else {
+			input.Buf = dAtA
+		}
+		return protoiface.MarshalOutput{
+			NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+			Buf:               input.Buf,
+		}, nil
+	}
+	unmarshal := func(input protoiface.UnmarshalInput) (protoiface.UnmarshalOutput, error) {
+		x := input.Message.Interface().(*MsgProposeSolutionResponse)
+		if x == nil {
+			return protoiface.UnmarshalOutput{
+				NoUnkeyedLiterals: input.NoUnkeyedLiterals,
+				Flags:             input.Flags,
+			}, nil
+		}
+		options := runtime.UnmarshalInputToOptions(input)
+		_ = options
+		dAtA := input.Buf
+		l := len(dAtA)
+		iNdEx := 0
+		for iNdEx < l {
+			preIndex := iNdEx
+			var wire uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
+				}
+				if iNdEx >= l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				wire |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			fieldNum := int32(wire >> 3)
+			wireType := int(wire & 0x7)
+			if wireType == 4 {
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: MsgProposeSolutionResponse: wiretype end group for non-group")
+			}
+			if fieldNum <= 0 {
+				return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: MsgProposeSolutionResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+			}
+			switch fieldNum {
+			default:
+				iNdEx = preIndex
+				skippy, err := runtime.Skip(dAtA[iNdEx:])
+				if err != nil {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, err
+				}
+				if (skippy < 0) || (iNdEx+skippy) < 0 {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
+				}
+				if (iNdEx + skippy) > l {
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+				}
+				if !options.DiscardUnknown {
+					x.unknownFields = append(x.unknownFields, dAtA[iNdEx:iNdEx+skippy]...)
+				}
+				iNdEx += skippy
+			}
+		}
+
+		if iNdEx > l {
+			return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
+		}
+		return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, nil
+	}
+	return &protoiface.Methods{
+		NoUnkeyedLiterals: struct{}{},
+		Flags:             protoiface.SupportMarshalDeterministic | protoiface.SupportUnmarshalDiscardUnknown,
+		Size:              size,
+		Marshal:           marshal,
+		Unmarshal:         unmarshal,
+		Merge:             nil,
+		CheckInitialized:  nil,
+	}
+}
+
 // Code generated by protoc-gen-go. DO NOT EDIT.
 // versions:
 // 	protoc-gen-go v1.27.0
@@ -3056,6 +4265,94 @@ func (x *MsgSubscribeWorkerToTaskResponse) GetThreadId() string {
 	return ""
 }
 
+// Msg to Propose a solution to an specific thread
+// Actual solution is a map of hashes
+type MsgProposeSolution struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	Creator  string            `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
+	TaskId   string            `protobuf:"bytes,2,opt,name=taskId,proto3" json:"taskId,omitempty"`
+	ThreadId string            `protobuf:"bytes,3,opt,name=threadId,proto3" json:"threadId,omitempty"`
+	Solution map[string]string `protobuf:"bytes,4,rep,name=solution,proto3" json:"solution,omitempty" protobuf_key:"bytes,1,opt,name=key,proto3" protobuf_val:"bytes,2,opt,name=value,proto3"`
+}
+
+func (x *MsgProposeSolution) Reset() {
+	*x = MsgProposeSolution{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_janction_videoRendering_v1_tx_proto_msgTypes[6]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *MsgProposeSolution) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MsgProposeSolution) ProtoMessage() {}
+
+// Deprecated: Use MsgProposeSolution.ProtoReflect.Descriptor instead.
+func (*MsgProposeSolution) Descriptor() ([]byte, []int) {
+	return file_janction_videoRendering_v1_tx_proto_rawDescGZIP(), []int{6}
+}
+
+func (x *MsgProposeSolution) GetCreator() string {
+	if x != nil {
+		return x.Creator
+	}
+	return ""
+}
+
+func (x *MsgProposeSolution) GetTaskId() string {
+	if x != nil {
+		return x.TaskId
+	}
+	return ""
+}
+
+func (x *MsgProposeSolution) GetThreadId() string {
+	if x != nil {
+		return x.ThreadId
+	}
+	return ""
+}
+
+func (x *MsgProposeSolution) GetSolution() map[string]string {
+	if x != nil {
+		return x.Solution
+	}
+	return nil
+}
+
+// no response needed to a proposed solution
+type MsgProposeSolutionResponse struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+}
+
+func (x *MsgProposeSolutionResponse) Reset() {
+	*x = MsgProposeSolutionResponse{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_janction_videoRendering_v1_tx_proto_msgTypes[7]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *MsgProposeSolutionResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MsgProposeSolutionResponse) ProtoMessage() {}
+
+// Deprecated: Use MsgProposeSolutionResponse.ProtoReflect.Descriptor instead.
+func (*MsgProposeSolutionResponse) Descriptor() ([]byte, []int) {
+	return file_janction_videoRendering_v1_tx_proto_rawDescGZIP(), []int{7}
+}
+
 var File_janction_videoRendering_v1_tx_proto protoreflect.FileDescriptor
 
 var file_janction_videoRendering_v1_tx_proto_rawDesc = []byte{
@@ -3101,50 +4398,76 @@ var file_janction_videoRendering_v1_tx_proto_rawDesc = []byte{
 	0x62, 0x73, 0x63, 0x72, 0x69, 0x62, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x65, 0x72, 0x54, 0x6f, 0x54,
 	0x61, 0x73, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x74,
 	0x68, 0x72, 0x65, 0x61, 0x64, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x74,
-	0x68, 0x72, 0x65, 0x61, 0x64, 0x49, 0x64, 0x32, 0x9a, 0x03, 0x0a, 0x03, 0x4d, 0x73, 0x67, 0x12,
-	0x94, 0x01, 0x0a, 0x18, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52,
-	0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x61, 0x73, 0x6b, 0x12, 0x37, 0x2e, 0x6a,
-	0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e,
-	0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x43, 0x72, 0x65,
-	0x61, 0x74, 0x65, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e,
-	0x67, 0x54, 0x61, 0x73, 0x6b, 0x1a, 0x3f, 0x2e, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e,
-	0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e,
-	0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x56, 0x69, 0x64, 0x65,
-	0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x61, 0x73, 0x6b, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x67, 0x0a, 0x09, 0x41, 0x64, 0x64, 0x57, 0x6f, 0x72,
-	0x6b, 0x65, 0x72, 0x12, 0x28, 0x2e, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76,
-	0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31,
-	0x2e, 0x4d, 0x73, 0x67, 0x41, 0x64, 0x64, 0x57, 0x6f, 0x72, 0x6b, 0x65, 0x72, 0x1a, 0x30, 0x2e,
+	0x68, 0x72, 0x65, 0x61, 0x64, 0x49, 0x64, 0x22, 0x87, 0x02, 0x0a, 0x12, 0x4d, 0x73, 0x67, 0x50,
+	0x72, 0x6f, 0x70, 0x6f, 0x73, 0x65, 0x53, 0x6f, 0x6c, 0x75, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x18,
+	0x0a, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52,
+	0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x16, 0x0a, 0x06, 0x74, 0x61, 0x73, 0x6b,
+	0x49, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x06, 0x74, 0x61, 0x73, 0x6b, 0x49, 0x64,
+	0x12, 0x1a, 0x0a, 0x08, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x49, 0x64, 0x18, 0x03, 0x20, 0x01,
+	0x28, 0x09, 0x52, 0x08, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x49, 0x64, 0x12, 0x58, 0x0a, 0x08,
+	0x73, 0x6f, 0x6c, 0x75, 0x74, 0x69, 0x6f, 0x6e, 0x18, 0x04, 0x20, 0x03, 0x28, 0x0b, 0x32, 0x3c,
+	0x2e, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52,
+	0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x50,
+	0x72, 0x6f, 0x70, 0x6f, 0x73, 0x65, 0x53, 0x6f, 0x6c, 0x75, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x53,
+	0x6f, 0x6c, 0x75, 0x74, 0x69, 0x6f, 0x6e, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x52, 0x08, 0x73, 0x6f,
+	0x6c, 0x75, 0x74, 0x69, 0x6f, 0x6e, 0x1a, 0x3b, 0x0a, 0x0d, 0x53, 0x6f, 0x6c, 0x75, 0x74, 0x69,
+	0x6f, 0x6e, 0x45, 0x6e, 0x74, 0x72, 0x79, 0x12, 0x10, 0x0a, 0x03, 0x6b, 0x65, 0x79, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x6b, 0x65, 0x79, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c,
+	0x75, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x75, 0x65, 0x3a,
+	0x02, 0x38, 0x01, 0x3a, 0x0c, 0x82, 0xe7, 0xb0, 0x2a, 0x07, 0x63, 0x72, 0x65, 0x61, 0x74, 0x6f,
+	0x72, 0x22, 0x1c, 0x0a, 0x1a, 0x4d, 0x73, 0x67, 0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x65, 0x53,
+	0x6f, 0x6c, 0x75, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x32,
+	0x95, 0x04, 0x0a, 0x03, 0x4d, 0x73, 0x67, 0x12, 0x94, 0x01, 0x0a, 0x18, 0x43, 0x72, 0x65, 0x61,
+	0x74, 0x65, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67,
+	0x54, 0x61, 0x73, 0x6b, 0x12, 0x37, 0x2e, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e,
+	0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76,
+	0x31, 0x2e, 0x4d, 0x73, 0x67, 0x43, 0x72, 0x65, 0x61, 0x74, 0x65, 0x56, 0x69, 0x64, 0x65, 0x6f,
+	0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x61, 0x73, 0x6b, 0x1a, 0x3f, 0x2e,
 	0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65,
-	0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x41, 0x64,
-	0x64, 0x57, 0x6f, 0x72, 0x6b, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12,
-	0x8b, 0x01, 0x0a, 0x15, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x62, 0x65, 0x57, 0x6f, 0x72,
-	0x6b, 0x65, 0x72, 0x54, 0x6f, 0x54, 0x61, 0x73, 0x6b, 0x12, 0x34, 0x2e, 0x6a, 0x61, 0x6e, 0x63,
-	0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72,
-	0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72,
-	0x69, 0x62, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x65, 0x72, 0x54, 0x6f, 0x54, 0x61, 0x73, 0x6b, 0x1a,
-	0x3c, 0x2e, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f,
-	0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67,
-	0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x62, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x65, 0x72, 0x54,
-	0x6f, 0x54, 0x61, 0x73, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x1a, 0x05, 0x80,
-	0xe7, 0xb0, 0x2a, 0x01, 0x42, 0x87, 0x02, 0x0a, 0x1e, 0x63, 0x6f, 0x6d, 0x2e, 0x6a, 0x61, 0x6e,
-	0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65,
-	0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x42, 0x07, 0x54, 0x78, 0x50, 0x72, 0x6f, 0x74, 0x6f,
-	0x50, 0x01, 0x5a, 0x52, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6a,
-	0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2f, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e,
-	0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6a, 0x61, 0x6e, 0x63, 0x74,
-	0x69, 0x6f, 0x6e, 0x2f, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69,
-	0x6e, 0x67, 0x2f, 0x76, 0x31, 0x3b, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65,
-	0x72, 0x69, 0x6e, 0x67, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x4a, 0x56, 0x58, 0xaa, 0x02, 0x1a, 0x4a,
-	0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e,
-	0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x1a, 0x4a, 0x61, 0x6e, 0x63,
+	0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x43, 0x72,
+	0x65, 0x61, 0x74, 0x65, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69,
+	0x6e, 0x67, 0x54, 0x61, 0x73, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x67,
+	0x0a, 0x09, 0x41, 0x64, 0x64, 0x57, 0x6f, 0x72, 0x6b, 0x65, 0x72, 0x12, 0x28, 0x2e, 0x6a, 0x61,
+	0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64,
+	0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x41, 0x64, 0x64, 0x57,
+	0x6f, 0x72, 0x6b, 0x65, 0x72, 0x1a, 0x30, 0x2e, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e,
+	0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e,
+	0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x41, 0x64, 0x64, 0x57, 0x6f, 0x72, 0x6b, 0x65, 0x72, 0x52,
+	0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x8b, 0x01, 0x0a, 0x15, 0x53, 0x75, 0x62, 0x73,
+	0x63, 0x72, 0x69, 0x62, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x65, 0x72, 0x54, 0x6f, 0x54, 0x61, 0x73,
+	0x6b, 0x12, 0x34, 0x2e, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64,
+	0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x2e, 0x4d,
+	0x73, 0x67, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x62, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x65,
+	0x72, 0x54, 0x6f, 0x54, 0x61, 0x73, 0x6b, 0x1a, 0x3c, 0x2e, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69,
+	0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e,
+	0x67, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x62,
+	0x65, 0x57, 0x6f, 0x72, 0x6b, 0x65, 0x72, 0x54, 0x6f, 0x54, 0x61, 0x73, 0x6b, 0x52, 0x65, 0x73,
+	0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x79, 0x0a, 0x0f, 0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x65,
+	0x53, 0x6f, 0x6c, 0x75, 0x74, 0x69, 0x6f, 0x6e, 0x12, 0x2e, 0x2e, 0x6a, 0x61, 0x6e, 0x63, 0x74,
+	0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69,
+	0x6e, 0x67, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x65,
+	0x53, 0x6f, 0x6c, 0x75, 0x74, 0x69, 0x6f, 0x6e, 0x1a, 0x36, 0x2e, 0x6a, 0x61, 0x6e, 0x63, 0x74,
+	0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69,
+	0x6e, 0x67, 0x2e, 0x76, 0x31, 0x2e, 0x4d, 0x73, 0x67, 0x50, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x65,
+	0x53, 0x6f, 0x6c, 0x75, 0x74, 0x69, 0x6f, 0x6e, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65,
+	0x1a, 0x05, 0x80, 0xe7, 0xb0, 0x2a, 0x01, 0x42, 0x87, 0x02, 0x0a, 0x1e, 0x63, 0x6f, 0x6d, 0x2e,
+	0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65,
+	0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x42, 0x07, 0x54, 0x78, 0x50, 0x72,
+	0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a, 0x52, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f,
+	0x6d, 0x2f, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2f, 0x76, 0x69, 0x64, 0x65, 0x6f,
+	0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6a, 0x61,
+	0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2f, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64,
+	0x65, 0x72, 0x69, 0x6e, 0x67, 0x2f, 0x76, 0x31, 0x3b, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65,
+	0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x4a, 0x56, 0x58, 0xaa,
+	0x02, 0x1a, 0x4a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x56, 0x69, 0x64, 0x65, 0x6f,
+	0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x1a, 0x4a,
+	0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x5c, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e,
+	0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x5c, 0x56, 0x31, 0xe2, 0x02, 0x26, 0x4a, 0x61, 0x6e, 0x63,
 	0x74, 0x69, 0x6f, 0x6e, 0x5c, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72,
-	0x69, 0x6e, 0x67, 0x5c, 0x56, 0x31, 0xe2, 0x02, 0x26, 0x4a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f,
-	0x6e, 0x5c, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67,
-	0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0xea,
-	0x02, 0x1c, 0x4a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x3a, 0x3a, 0x56, 0x69, 0x64, 0x65,
-	0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06,
-	0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x69, 0x6e, 0x67, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61,
+	0x74, 0x61, 0xea, 0x02, 0x1c, 0x4a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x3a, 0x3a, 0x56,
+	0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x3a, 0x3a, 0x56,
+	0x31, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
 }
 
 var (
@@ -3159,7 +4482,7 @@ func file_janction_videoRendering_v1_tx_proto_rawDescGZIP() []byte {
 	return file_janction_videoRendering_v1_tx_proto_rawDescData
 }
 
-var file_janction_videoRendering_v1_tx_proto_msgTypes = make([]protoimpl.MessageInfo, 6)
+var file_janction_videoRendering_v1_tx_proto_msgTypes = make([]protoimpl.MessageInfo, 9)
 var file_janction_videoRendering_v1_tx_proto_goTypes = []interface{}{
 	(*MsgCreateVideoRenderingTask)(nil),         // 0: janction.videoRendering.v1.MsgCreateVideoRenderingTask
 	(*MsgCreateVideoRenderingTaskResponse)(nil), // 1: janction.videoRendering.v1.MsgCreateVideoRenderingTaskResponse
@@ -3167,19 +4490,25 @@ var file_janction_videoRendering_v1_tx_proto_goTypes = []interface{}{
 	(*MsgAddWorkerResponse)(nil),                // 3: janction.videoRendering.v1.MsgAddWorkerResponse
 	(*MsgSubscribeWorkerToTask)(nil),            // 4: janction.videoRendering.v1.MsgSubscribeWorkerToTask
 	(*MsgSubscribeWorkerToTaskResponse)(nil),    // 5: janction.videoRendering.v1.MsgSubscribeWorkerToTaskResponse
+	(*MsgProposeSolution)(nil),                  // 6: janction.videoRendering.v1.MsgProposeSolution
+	(*MsgProposeSolutionResponse)(nil),          // 7: janction.videoRendering.v1.MsgProposeSolutionResponse
+	nil,                                         // 8: janction.videoRendering.v1.MsgProposeSolution.SolutionEntry
 }
 var file_janction_videoRendering_v1_tx_proto_depIdxs = []int32{
-	0, // 0: janction.videoRendering.v1.Msg.CreateVideoRenderingTask:input_type -> janction.videoRendering.v1.MsgCreateVideoRenderingTask
-	2, // 1: janction.videoRendering.v1.Msg.AddWorker:input_type -> janction.videoRendering.v1.MsgAddWorker
-	4, // 2: janction.videoRendering.v1.Msg.SubscribeWorkerToTask:input_type -> janction.videoRendering.v1.MsgSubscribeWorkerToTask
-	1, // 3: janction.videoRendering.v1.Msg.CreateVideoRenderingTask:output_type -> janction.videoRendering.v1.MsgCreateVideoRenderingTaskResponse
-	3, // 4: janction.videoRendering.v1.Msg.AddWorker:output_type -> janction.videoRendering.v1.MsgAddWorkerResponse
-	5, // 5: janction.videoRendering.v1.Msg.SubscribeWorkerToTask:output_type -> janction.videoRendering.v1.MsgSubscribeWorkerToTaskResponse
-	3, // [3:6] is the sub-list for method output_type
-	0, // [0:3] is the sub-list for method input_type
-	0, // [0:0] is the sub-list for extension type_name
-	0, // [0:0] is the sub-list for extension extendee
-	0, // [0:0] is the sub-list for field type_name
+	8, // 0: janction.videoRendering.v1.MsgProposeSolution.solution:type_name -> janction.videoRendering.v1.MsgProposeSolution.SolutionEntry
+	0, // 1: janction.videoRendering.v1.Msg.CreateVideoRenderingTask:input_type -> janction.videoRendering.v1.MsgCreateVideoRenderingTask
+	2, // 2: janction.videoRendering.v1.Msg.AddWorker:input_type -> janction.videoRendering.v1.MsgAddWorker
+	4, // 3: janction.videoRendering.v1.Msg.SubscribeWorkerToTask:input_type -> janction.videoRendering.v1.MsgSubscribeWorkerToTask
+	6, // 4: janction.videoRendering.v1.Msg.ProposeSolution:input_type -> janction.videoRendering.v1.MsgProposeSolution
+	1, // 5: janction.videoRendering.v1.Msg.CreateVideoRenderingTask:output_type -> janction.videoRendering.v1.MsgCreateVideoRenderingTaskResponse
+	3, // 6: janction.videoRendering.v1.Msg.AddWorker:output_type -> janction.videoRendering.v1.MsgAddWorkerResponse
+	5, // 7: janction.videoRendering.v1.Msg.SubscribeWorkerToTask:output_type -> janction.videoRendering.v1.MsgSubscribeWorkerToTaskResponse
+	7, // 8: janction.videoRendering.v1.Msg.ProposeSolution:output_type -> janction.videoRendering.v1.MsgProposeSolutionResponse
+	5, // [5:9] is the sub-list for method output_type
+	1, // [1:5] is the sub-list for method input_type
+	1, // [1:1] is the sub-list for extension type_name
+	1, // [1:1] is the sub-list for extension extendee
+	0, // [0:1] is the sub-list for field type_name
 }
 
 func init() { file_janction_videoRendering_v1_tx_proto_init() }
@@ -3261,6 +4590,30 @@ func file_janction_videoRendering_v1_tx_proto_init() {
 				return nil
 			}
 		}
+		file_janction_videoRendering_v1_tx_proto_msgTypes[6].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*MsgProposeSolution); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_janction_videoRendering_v1_tx_proto_msgTypes[7].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*MsgProposeSolutionResponse); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
 	}
 	type x struct{}
 	out := protoimpl.TypeBuilder{
@@ -3268,7 +4621,7 @@ func file_janction_videoRendering_v1_tx_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_janction_videoRendering_v1_tx_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   6,
+			NumMessages:   9,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

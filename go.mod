@@ -16,6 +16,7 @@ require (
 	github.com/cosmos/gogoproto v1.7.0
 	github.com/golang/protobuf v1.5.4
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
+	github.com/ipfs/go-cid v0.4.1
 	github.com/ipfs/go-ipfs-api v0.7.0
 	google.golang.org/genproto/googleapis/api v0.0.0-20240814211410-ddb44dafa142
 	google.golang.org/grpc v1.67.1
@@ -98,7 +99,6 @@ require (
 	github.com/improbable-eng/grpc-web v0.15.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/ipfs/boxo v0.12.0 // indirect
-	github.com/ipfs/go-cid v0.4.1 // indirect
 	github.com/jmhodges/levigo v1.0.0 // indirect
 	github.com/klauspost/compress v1.17.9 // indirect
 	github.com/klauspost/cpuid/v2 v2.2.3 // indirect

@@ -15,14 +15,14 @@ func GetEmptyVideoRenderingTaskList() []IndexedVideoRenderingTask {
 	return []IndexedVideoRenderingTask{}
 }
 
-func (t *VideoRenderingTask) GenerateThreads() (res []*VideoRenderingThread) {
+func (t *VideoRenderingTask) GenerateThreads(taskId string) (res []*VideoRenderingThread) {
 	// Split frames among the threads
 	frameRanges := splitFrames(int(t.StartFrame), int(t.EndFrame), int(t.ThreadAmount))
 
 	// Print the result
 
 	for i, r := range frameRanges {
-		thread := VideoRenderingThread{ThreadId: t.TaskId + strconv.FormatInt(int64(i), 10), StartFrame: uint32(r.StartFrame), EndFrame: uint32(r.EndFrame)}
+		thread := VideoRenderingThread{ThreadId: t.TaskId + strconv.FormatInt(int64(i), 10), StartFrame: uint32(r.StartFrame), EndFrame: uint32(r.EndFrame), TaskId: taskId}
 		res = append(res, &thread)
 	}
 

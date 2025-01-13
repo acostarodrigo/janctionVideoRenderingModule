@@ -2,10 +2,14 @@ package vm
 
 import (
 	"context"
+	"crypto/sha256"
+	"encoding/hex"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"strings"
 )
 
@@ -83,12 +87,12 @@ func RenderVideoThread(ctx context.Context, cid string, s uint64, e uint64, id s
 }
 
 // CountFilesInDirectory counts the number of files in a given directory
-func CountFilesInDirectory(directoryPath string) (int, error) {
+func CountFilesInDirectory(directoryPath string) int {
 	output := path.Join(directoryPath, "output")
 	// Read the directory contents
 	files, err := os.ReadDir(output)
 	if err != nil {
-		return 0, err
+		return 0
 	}
 
 	// Count only files (not subdirectories)
@@ -98,5 +102,54 @@ func CountFilesInDirectory(directoryPath string) (int, error) {
 			fileCount++
 		}
 	}
-	return fileCount, nil
+	return fileCount
+}
+
+// HashFilesInDirectory calculates the SHA-256 hashes of all PNG files in a directory
+func HashFilesInDirectory(rootPath string) (map[string]string, error) {
+	directoryPath := path.Join(rootPath, "output")
+	// Map to store file names and their corresponding hashes
+	hashes := make(map[string]string)
+
+	// Walk through the directory
+	err := filepath.Walk(directoryPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
+
+		// Skip directories
+		if info.IsDir() {
+			return nil
+		}
+
+		// Check if the file has a .png extension
+		if filepath.Ext(info.Name()) == ".png" {
+			// Open the file
+			file, err := os.Open(path)
+			if err != nil {
+				return err
+			}
+			defer file.Close()
+
+			// Compute the hash
+			hasher := sha256.New()
+			if _, err := io.Copy(hasher, file); err != nil {
+				return err
+			}
+
+			// Convert the hash to a hex string
+			hash := hex.EncodeToString(hasher.Sum(nil))
+
+			// Store the hash in the map
+			hashes[info.Name()] = hash
+		}
+
+		return nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	return hashes, nil
 }

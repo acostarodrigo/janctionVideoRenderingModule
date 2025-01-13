@@ -22,6 +22,7 @@ const (
 	Msg_CreateVideoRenderingTask_FullMethodName = "/janction.videoRendering.v1.Msg/CreateVideoRenderingTask"
 	Msg_AddWorker_FullMethodName                = "/janction.videoRendering.v1.Msg/AddWorker"
 	Msg_SubscribeWorkerToTask_FullMethodName    = "/janction.videoRendering.v1.Msg/SubscribeWorkerToTask"
+	Msg_ProposeSolution_FullMethodName          = "/janction.videoRendering.v1.Msg/ProposeSolution"
 )
 
 // MsgClient is the client API for Msg service.
@@ -33,6 +34,8 @@ type MsgClient interface {
 	// Adds a new worker
 	AddWorker(ctx context.Context, in *MsgAddWorker, opts ...grpc.CallOption) (*MsgAddWorkerResponse, error)
 	SubscribeWorkerToTask(ctx context.Context, in *MsgSubscribeWorkerToTask, opts ...grpc.CallOption) (*MsgSubscribeWorkerToTaskResponse, error)
+	// Propose a solution for the test of the nodes to validate
+	ProposeSolution(ctx context.Context, in *MsgProposeSolution, opts ...grpc.CallOption) (*MsgProposeSolutionResponse, error)
 }
 
 type msgClient struct {
@@ -70,6 +73,15 @@ func (c *msgClient) SubscribeWorkerToTask(ctx context.Context, in *MsgSubscribeW
 	return out, nil
 }
 
+func (c *msgClient) ProposeSolution(ctx context.Context, in *MsgProposeSolution, opts ...grpc.CallOption) (*MsgProposeSolutionResponse, error) {
+	out := new(MsgProposeSolutionResponse)
+	err := c.cc.Invoke(ctx, Msg_ProposeSolution_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // MsgServer is the server API for Msg service.
 // All implementations must embed UnimplementedMsgServer
 // for forward compatibility
@@ -79,6 +91,8 @@ type MsgServer interface {
 	// Adds a new worker
 	AddWorker(context.Context, *MsgAddWorker) (*MsgAddWorkerResponse, error)
 	SubscribeWorkerToTask(context.Context, *MsgSubscribeWorkerToTask) (*MsgSubscribeWorkerToTaskResponse, error)
+	// Propose a solution for the test of the nodes to validate
+	ProposeSolution(context.Context, *MsgProposeSolution) (*MsgProposeSolutionResponse, error)
 	mustEmbedUnimplementedMsgServer()
 }
 
@@ -94,6 +108,9 @@ func (UnimplementedMsgServer) AddWorker(context.Context, *MsgAddWorker) (*MsgAdd
 }
 func (UnimplementedMsgServer) SubscribeWorkerToTask(context.Context, *MsgSubscribeWorkerToTask) (*MsgSubscribeWorkerToTaskResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SubscribeWorkerToTask not implemented")
+}
+func (UnimplementedMsgServer) ProposeSolution(context.Context, *MsgProposeSolution) (*MsgProposeSolutionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method ProposeSolution not implemented")
 }
 func (UnimplementedMsgServer) mustEmbedUnimplementedMsgServer() {}
 
@@ -162,6 +179,24 @@ func _Msg_SubscribeWorkerToTask_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_ProposeSolution_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgProposeSolution)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).ProposeSolution(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_ProposeSolution_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).ProposeSolution(ctx, req.(*MsgProposeSolution))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // Msg_ServiceDesc is the grpc.ServiceDesc for Msg service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -180,6 +215,10 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SubscribeWorkerToTask",
 			Handler:    _Msg_SubscribeWorkerToTask_Handler,
+		},
+		{
+			MethodName: "ProposeSolution",
+			Handler:    _Msg_ProposeSolution_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

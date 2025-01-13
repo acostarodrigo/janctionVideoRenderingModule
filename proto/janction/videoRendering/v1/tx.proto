@@ -69,10 +69,12 @@ message MsgSubscribeWorkerToTaskResponse {
 message MsgProposeSolution {
   option (cosmos.msg.v1.signer) = "creator";
   string creator = 1;
-  string task_id = 2;
-  string thread_id = 3;
+  string taskId = 2;
+  string threadId = 3;
   map<string, string> solution = 4;
 }
+
+
 
 // no response needed to a proposed solution
 message MsgProposeSolutionResponse {

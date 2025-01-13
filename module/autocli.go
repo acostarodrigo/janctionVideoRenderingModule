@@ -43,7 +43,7 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "AddWorker",
-					Use:       "add-worker [address]",
+					Use:       "add-worker [address] --from [workerAddress]",
 					Short:     "Registers a new worker that will perform video rendering tasks",
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{ProtoField: "address"},
@@ -56,6 +56,16 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{ProtoField: "address"},
 						{ProtoField: "taskId"},
+					},
+				},
+				{
+					RpcMethod: "ProposeSolution",
+					Use:       "propose-solution [taskId] [threadId] [solution] --from [workerAddress]",
+					Short:     "Proposes a solution to a thread.",
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "taskId"},
+						{ProtoField: "threadId"},
+						{ProtoField: "solution"},
 					},
 				},
 			},

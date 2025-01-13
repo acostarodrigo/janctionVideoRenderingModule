@@ -6,6 +6,8 @@ option go_package = "github.com/janction/videoRendering";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
 
+
+
 // Params defines the parameters of the module.
 message Params {
   string video_rendering_key_name = 1;
@@ -52,6 +54,9 @@ message Worker {
   uint32 current_thread_index = 6;
 }
 
+
+
+
 /*
   Video Rendering Task
   @cid the IPFS CID submitted by a task requester
@@ -83,11 +88,14 @@ message VideoRenderingTask {
     Solution solution = 7;
     repeated Validation validations = 8;
     
+    
 
     message Solution {
       string proposed_by = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
       map<string, string> files = 2;
     }
+
+    
 
     message Validation {
       enum ValidationStatus {
