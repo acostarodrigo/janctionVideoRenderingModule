@@ -3,7 +3,9 @@ package vm
 import (
 	"context"
 	"fmt"
+	"os"
 	"os/exec"
+	"path"
 	"strings"
 )
 
@@ -78,4 +80,23 @@ func RenderVideoThread(ctx context.Context, cid string, s uint64, e uint64, id s
 	}
 
 	return nil
+}
+
+// CountFilesInDirectory counts the number of files in a given directory
+func CountFilesInDirectory(directoryPath string) (int, error) {
+	output := path.Join(directoryPath, "output")
+	// Read the directory contents
+	files, err := os.ReadDir(output)
+	if err != nil {
+		return 0, err
+	}
+
+	// Count only files (not subdirectories)
+	fileCount := 0
+	for _, file := range files {
+		if !file.IsDir() {
+			fileCount++
+		}
+	}
+	return fileCount, nil
 }

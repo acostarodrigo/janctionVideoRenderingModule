@@ -12,17 +12,31 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string)
 	ctx := context.Background()
 
 	isRunning := vm.IsContainerRunning(ctx, t.ThreadId)
-	log.Printf("Docker container for thread %v is running?: %v", t.ThreadId, isRunning)
 	if !isRunning {
-		err := ipfs.IPFSGet(cid, path)
+		// task is not running,
+		// it could have finished? before we start it we check if we already have all the files to propose a solution
+		count, err := vm.CountFilesInDirectory(path)
 		if err != nil {
-			log.Printf("Error getting cid %s", cid)
 			return err
 		}
+		if count == (int(t.EndFrame)-int(t.StartFrame))+1 {
+			// we have a solution!!
+			log.Printf("Solution submitted for thread %s", t.ThreadId)
+			return nil
 
-		err = vm.RenderVideoThread(ctx, cid, uint64(t.StartFrame), uint64(t.EndFrame), t.ThreadId, path)
-		if err != nil {
-			return err
+		} else {
+			// we don't have a solution, start working
+			err = ipfs.IPFSGet(cid, path)
+			if err != nil {
+				log.Printf("Error getting cid %s", cid)
+				return err
+			}
+
+			err = vm.RenderVideoThread(ctx, cid, uint64(t.StartFrame), uint64(t.EndFrame), t.ThreadId, path)
+			if err != nil {
+				return err
+			}
+
 		}
 	} else {
 		// Container is running, so we update worker status
