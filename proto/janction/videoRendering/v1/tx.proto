@@ -71,7 +71,7 @@ message MsgProposeSolution {
   string creator = 1;
   string taskId = 2;
   string threadId = 3;
-  map<string, string> solution = 4;
+  repeated string solution = 4;
 }
 
 

@@ -5,6 +5,7 @@ import (
 	"log"
 	"slices"
 	"strconv"
+	"strings"
 
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ipfs/go-cid"
@@ -109,11 +110,6 @@ func (ms msgServer) SubscribeWorkerToTask(ctx context.Context, msg *videoRenderi
 }
 
 func (ms msgServer) ProposeSolution(ctx context.Context, msg *videoRendering.MsgProposeSolution) (*videoRendering.MsgProposeSolutionResponse, error) {
-	log.Println("Get solution...")
-	for key, value := range msg.Solution {
-		log.Printf("Found %s with %s", key, value)
-	}
-
 	// creator of the solution must be a valid worker
 	worker, err := ms.k.Workers.Get(ctx, msg.Creator)
 	if err != nil {
@@ -145,13 +141,25 @@ func (ms msgServer) ProposeSolution(ctx context.Context, msg *videoRendering.Msg
 				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "Worker %s is not valid at thread %s", msg.Creator, msg.ThreadId)
 			}
 
-			// we have passed all validations, lets add the solution to the thread
+			// solution len must be equal to the frames generated
+			if len(msg.Solution) != (int(v.EndFrame) - int(v.StartFrame) + 1) {
+				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "amount of files in solution is incorrect, %v ", len(msg.Solution))
+			}
 
-			task.Threads[i].Solution = &videoRendering.VideoRenderingThread_Solution{ProposedBy: msg.Creator, Files: msg.Solution}
+			// we have passed all validations, lets add the solution to the thread
+			parsedSolution := make(map[string]string)
+			for _, pair := range msg.Solution {
+				parts := strings.SplitN(pair, "=", 2)
+				if len(parts) != 2 {
+					return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "invalid solution format; expected key=value")
+				}
+				parsedSolution[parts[0]] = parts[1]
+			}
+			task.Threads[i].Solution = &videoRendering.VideoRenderingThread_Solution{ProposedBy: msg.Creator, Files: parsedSolution}
 			err = ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
 			if err != nil {
 				log.Printf("unable to propose solution %s", err.Error())
-				panic(err)
+				return nil, err
 			}
 			log.Printf("Proposing solution %s", msg.Solution)
 		}

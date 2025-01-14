@@ -33,6 +33,8 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					RpcMethod: "CreateVideoRenderingTask",
 					Use:       "create-video-rendering-task [cid] [startFrame] [endFrame] [threads] [reward]",
 					Short:     "Creates a new video Rendering task",
+					Long:      "", // TODO Add long
+					Example:   "", // TODO add exampe
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{ProtoField: "cid"},
 						{ProtoField: "startFrame"},
@@ -45,6 +47,8 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					RpcMethod: "AddWorker",
 					Use:       "add-worker [address] --from [workerAddress]",
 					Short:     "Registers a new worker that will perform video rendering tasks",
+					Long:      "", // TODO Add long
+					Example:   "", // TODO add exampe
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{ProtoField: "address"},
 					},
@@ -53,6 +57,8 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					RpcMethod: "SubscribeWorkerToTask",
 					Use:       "subscribe-worker-to-task [address] [taskId] --from [workerAddress]",
 					Short:     "Subscribes an existing enabled worker to perform work in the specified task",
+					Long:      "", // TODO Add long
+					Example:   "", // TODO add exampe
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{ProtoField: "address"},
 						{ProtoField: "taskId"},
@@ -62,10 +68,12 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					RpcMethod: "ProposeSolution",
 					Use:       "propose-solution [taskId] [threadId] [solution] --from [workerAddress]",
 					Short:     "Proposes a solution to a thread.",
+					Long:      "", // TODO Add long
+					Example:   "", // TODO add exampe
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{ProtoField: "taskId"},
 						{ProtoField: "threadId"},
-						{ProtoField: "solution"},
+						{ProtoField: "solution", Varargs: true},
 					},
 				},
 			},
