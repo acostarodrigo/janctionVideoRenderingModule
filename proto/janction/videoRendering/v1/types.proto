@@ -92,7 +92,7 @@ message VideoRenderingTask {
 
     message Solution {
       string proposed_by = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-      map<string, string> files = 2;
+      repeated string files = 2;
     }
 
     
