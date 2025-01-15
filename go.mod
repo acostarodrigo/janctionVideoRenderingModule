@@ -18,6 +18,7 @@ require (
 	github.com/grpc-ecosystem/grpc-gateway v1.16.0
 	github.com/ipfs/go-cid v0.4.1
 	github.com/ipfs/go-ipfs-api v0.7.0
+	github.com/mattn/go-sqlite3 v1.14.24
 	google.golang.org/genproto/googleapis/api v0.0.0-20240814211410-ddb44dafa142
 	google.golang.org/grpc v1.67.1
 	google.golang.org/protobuf v1.36.0

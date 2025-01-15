@@ -1113,13 +1113,13 @@ func (x *fastReflection_MsgCreateVideoRenderingTaskResponse) ProtoMethods() *pro
 
 var (
 	md_MsgAddWorker         protoreflect.MessageDescriptor
-	fd_MsgAddWorker_address protoreflect.FieldDescriptor
+	fd_MsgAddWorker_creator protoreflect.FieldDescriptor
 )
 
 func init() {
 	file_janction_videoRendering_v1_tx_proto_init()
 	md_MsgAddWorker = File_janction_videoRendering_v1_tx_proto.Messages().ByName("MsgAddWorker")
-	fd_MsgAddWorker_address = md_MsgAddWorker.Fields().ByName("address")
+	fd_MsgAddWorker_creator = md_MsgAddWorker.Fields().ByName("creator")
 }
 
 var _ protoreflect.Message = (*fastReflection_MsgAddWorker)(nil)
@@ -1187,9 +1187,9 @@ func (x *fastReflection_MsgAddWorker) Interface() protoreflect.ProtoMessage {
 // While iterating, mutating operations may only be performed
 // on the current field descriptor.
 func (x *fastReflection_MsgAddWorker) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
-	if x.Address != "" {
-		value := protoreflect.ValueOfString(x.Address)
-		if !f(fd_MsgAddWorker_address, value) {
+	if x.Creator != "" {
+		value := protoreflect.ValueOfString(x.Creator)
+		if !f(fd_MsgAddWorker_creator, value) {
 			return
 		}
 	}
@@ -1208,8 +1208,8 @@ func (x *fastReflection_MsgAddWorker) Range(f func(protoreflect.FieldDescriptor,
 // a repeated field is populated if it is non-empty.
 func (x *fastReflection_MsgAddWorker) Has(fd protoreflect.FieldDescriptor) bool {
 	switch fd.FullName() {
-	case "janction.videoRendering.v1.MsgAddWorker.address":
-		return x.Address != ""
+	case "janction.videoRendering.v1.MsgAddWorker.creator":
+		return x.Creator != ""
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.MsgAddWorker"))
@@ -1226,8 +1226,8 @@ func (x *fastReflection_MsgAddWorker) Has(fd protoreflect.FieldDescriptor) bool 
 // Clear is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_MsgAddWorker) Clear(fd protoreflect.FieldDescriptor) {
 	switch fd.FullName() {
-	case "janction.videoRendering.v1.MsgAddWorker.address":
-		x.Address = ""
+	case "janction.videoRendering.v1.MsgAddWorker.creator":
+		x.Creator = ""
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.MsgAddWorker"))
@@ -1244,8 +1244,8 @@ func (x *fastReflection_MsgAddWorker) Clear(fd protoreflect.FieldDescriptor) {
 // of the value; to obtain a mutable reference, use Mutable.
 func (x *fastReflection_MsgAddWorker) Get(descriptor protoreflect.FieldDescriptor) protoreflect.Value {
 	switch descriptor.FullName() {
-	case "janction.videoRendering.v1.MsgAddWorker.address":
-		value := x.Address
+	case "janction.videoRendering.v1.MsgAddWorker.creator":
+		value := x.Creator
 		return protoreflect.ValueOfString(value)
 	default:
 		if descriptor.IsExtension() {
@@ -1267,8 +1267,8 @@ func (x *fastReflection_MsgAddWorker) Get(descriptor protoreflect.FieldDescripto
 // Set is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_MsgAddWorker) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
 	switch fd.FullName() {
-	case "janction.videoRendering.v1.MsgAddWorker.address":
-		x.Address = value.Interface().(string)
+	case "janction.videoRendering.v1.MsgAddWorker.creator":
+		x.Creator = value.Interface().(string)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.MsgAddWorker"))
@@ -1289,8 +1289,8 @@ func (x *fastReflection_MsgAddWorker) Set(fd protoreflect.FieldDescriptor, value
 // Mutable is a mutating operation and unsafe for concurrent use.
 func (x *fastReflection_MsgAddWorker) Mutable(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "janction.videoRendering.v1.MsgAddWorker.address":
-		panic(fmt.Errorf("field address of message janction.videoRendering.v1.MsgAddWorker is not mutable"))
+	case "janction.videoRendering.v1.MsgAddWorker.creator":
+		panic(fmt.Errorf("field creator of message janction.videoRendering.v1.MsgAddWorker is not mutable"))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.MsgAddWorker"))
@@ -1304,7 +1304,7 @@ func (x *fastReflection_MsgAddWorker) Mutable(fd protoreflect.FieldDescriptor) p
 // For lists, maps, and messages, this returns a new, empty, mutable value.
 func (x *fastReflection_MsgAddWorker) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
-	case "janction.videoRendering.v1.MsgAddWorker.address":
+	case "janction.videoRendering.v1.MsgAddWorker.creator":
 		return protoreflect.ValueOfString("")
 	default:
 		if fd.IsExtension() {
@@ -1375,7 +1375,7 @@ func (x *fastReflection_MsgAddWorker) ProtoMethods() *protoiface.Methods {
 		var n int
 		var l int
 		_ = l
-		l = len(x.Address)
+		l = len(x.Creator)
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
@@ -1408,10 +1408,10 @@ func (x *fastReflection_MsgAddWorker) ProtoMethods() *protoiface.Methods {
 			i -= len(x.unknownFields)
 			copy(dAtA[i:], x.unknownFields)
 		}
-		if len(x.Address) > 0 {
-			i -= len(x.Address)
-			copy(dAtA[i:], x.Address)
-			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Address)))
+		if len(x.Creator) > 0 {
+			i -= len(x.Creator)
+			copy(dAtA[i:], x.Creator)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Creator)))
 			i--
 			dAtA[i] = 0xa
 		}
@@ -1466,7 +1466,7 @@ func (x *fastReflection_MsgAddWorker) ProtoMethods() *protoiface.Methods {
 			switch fieldNum {
 			case 1:
 				if wireType != 2 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Address", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Creator", wireType)
 				}
 				var stringLen uint64
 				for shift := uint(0); ; shift += 7 {
@@ -1494,7 +1494,7 @@ func (x *fastReflection_MsgAddWorker) ProtoMethods() *protoiface.Methods {
 				if postIndex > l {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 				}
-				x.Address = string(dAtA[iNdEx:postIndex])
+				x.Creator = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
 			default:
 				iNdEx = preIndex
@@ -3950,7 +3950,7 @@ type MsgAddWorker struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Address string `protobuf:"bytes,1,opt,name=address,proto3" json:"address,omitempty"`
+	Creator string `protobuf:"bytes,1,opt,name=creator,proto3" json:"creator,omitempty"`
 }
 
 func (x *MsgAddWorker) Reset() {
@@ -3973,9 +3973,9 @@ func (*MsgAddWorker) Descriptor() ([]byte, []int) {
 	return file_janction_videoRendering_v1_tx_proto_rawDescGZIP(), []int{2}
 }
 
-func (x *MsgAddWorker) GetAddress() string {
+func (x *MsgAddWorker) GetCreator() string {
 	if x != nil {
-		return x.Address
+		return x.Creator
 	}
 	return ""
 }
@@ -4203,10 +4203,10 @@ var file_janction_videoRendering_v1_tx_proto_rawDesc = []byte{
 	0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x61, 0x73, 0x6b, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e,
 	0x73, 0x65, 0x12, 0x17, 0x0a, 0x07, 0x74, 0x61, 0x73, 0x6b, 0x5f, 0x69, 0x64, 0x18, 0x01, 0x20,
 	0x01, 0x28, 0x09, 0x52, 0x06, 0x74, 0x61, 0x73, 0x6b, 0x49, 0x64, 0x22, 0x36, 0x0a, 0x0c, 0x4d,
-	0x73, 0x67, 0x41, 0x64, 0x64, 0x57, 0x6f, 0x72, 0x6b, 0x65, 0x72, 0x12, 0x18, 0x0a, 0x07, 0x61,
-	0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x61, 0x64,
-	0x64, 0x72, 0x65, 0x73, 0x73, 0x3a, 0x0c, 0x82, 0xe7, 0xb0, 0x2a, 0x07, 0x61, 0x64, 0x64, 0x72,
-	0x65, 0x73, 0x73, 0x22, 0x16, 0x0a, 0x14, 0x4d, 0x73, 0x67, 0x41, 0x64, 0x64, 0x57, 0x6f, 0x72,
+	0x73, 0x67, 0x41, 0x64, 0x64, 0x57, 0x6f, 0x72, 0x6b, 0x65, 0x72, 0x12, 0x18, 0x0a, 0x07, 0x63,
+	0x72, 0x65, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x63, 0x72,
+	0x65, 0x61, 0x74, 0x6f, 0x72, 0x3a, 0x0c, 0x82, 0xe7, 0xb0, 0x2a, 0x07, 0x63, 0x72, 0x65, 0x61,
+	0x74, 0x6f, 0x72, 0x22, 0x16, 0x0a, 0x14, 0x4d, 0x73, 0x67, 0x41, 0x64, 0x64, 0x57, 0x6f, 0x72,
 	0x6b, 0x65, 0x72, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x22, 0x5a, 0x0a, 0x18, 0x4d,
 	0x73, 0x67, 0x53, 0x75, 0x62, 0x73, 0x63, 0x72, 0x69, 0x62, 0x65, 0x57, 0x6f, 0x72, 0x6b, 0x65,
 	0x72, 0x54, 0x6f, 0x54, 0x61, 0x73, 0x6b, 0x12, 0x18, 0x0a, 0x07, 0x61, 0x64, 0x64, 0x72, 0x65,

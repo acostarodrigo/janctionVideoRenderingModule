@@ -58,22 +58,22 @@ func (ms msgServer) CreateVideoRenderingTask(ctx context.Context, msg *videoRend
 }
 
 func (ms msgServer) AddWorker(ctx context.Context, msg *videoRendering.MsgAddWorker) (*videoRendering.MsgAddWorkerResponse, error) {
-	found, err := ms.k.Workers.Has(ctx, msg.Address)
+	found, err := ms.k.Workers.Has(ctx, msg.Creator)
 	if err != nil {
 		return nil, err
 	}
 
 	if found {
-		log.Printf("Worker %v already exists.", msg.Address)
-		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerAlreadyRegistered.Error(), "worker (%s) is already registered", msg.Address)
+		log.Printf("Worker %v already exists.", msg.Creator)
+		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerAlreadyRegistered.Error(), "worker (%s) is already registered", msg.Creator)
 	}
 
 	// worker is not previously registered, so we move on
 	// TODO I'm facking a stacked value of 100 for future use
 	reputation := videoRendering.Worker_Reputation{Points: 0, Stacked: 100}
-	worker := videoRendering.Worker{Address: msg.Address, Reputation: &reputation, Status: videoRendering.Worker_WORKER_STATUS_IDLE, Enabled: true}
+	worker := videoRendering.Worker{Address: msg.Creator, Reputation: &reputation, Status: videoRendering.Worker_WORKER_STATUS_IDLE, Enabled: true}
 
-	ms.k.Workers.Set(ctx, msg.Address, worker)
+	ms.k.Workers.Set(ctx, msg.Creator, worker)
 	return &videoRendering.MsgAddWorkerResponse{}, nil
 }
 
@@ -117,6 +117,7 @@ func (ms msgServer) ProposeSolution(ctx context.Context, msg *videoRendering.Msg
 	}
 
 	if !worker.Enabled {
+		log.Printf("workers %s is not enabled to propose a solution", msg.Creator)
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "workers %s is not enabled to propose a solution", msg.Creator)
 	}
 
@@ -127,6 +128,7 @@ func (ms msgServer) ProposeSolution(ctx context.Context, msg *videoRendering.Msg
 
 	// task must exists and be in progress
 	if !task.InProgress {
+		log.Printf("Task %s is not valid to accept solutions", msg.TaskId)
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "Task %s is not valid to accept solutions", msg.TaskId)
 	}
 
@@ -134,15 +136,18 @@ func (ms msgServer) ProposeSolution(ctx context.Context, msg *videoRendering.Msg
 		// TODO threads might be better as map instead of slice
 		if v.ThreadId == msg.ThreadId {
 			if v.Solution != nil {
-				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "Thread %s already has a solution", msg.ThreadId)
+				log.Printf("thread %s already has a solution", msg.ThreadId)
+				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "thread %s already has a solution", msg.ThreadId)
 			}
 			// worker must be a valid registered worker in the thread with a solution
 			if !slices.Contains(v.Workers, msg.Creator) {
+				log.Printf("Worker %s is not valid at thread %s", msg.Creator, msg.ThreadId)
 				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "Worker %s is not valid at thread %s", msg.Creator, msg.ThreadId)
 			}
 
 			// solution len must be equal to the frames generated
 			if len(msg.Solution) != (int(v.EndFrame) - int(v.StartFrame) + 1) {
+				log.Printf("amount of files in solution is incorrect, %v ", len(msg.Solution))
 				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "amount of files in solution is incorrect, %v ", len(msg.Solution))
 			}
 
@@ -151,11 +156,15 @@ func (ms msgServer) ProposeSolution(ctx context.Context, msg *videoRendering.Msg
 			for _, pair := range msg.Solution {
 				parts := strings.SplitN(pair, "=", 2)
 				if len(parts) != 2 {
+					log.Printf("invalid solution format; expected key=value")
 					return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "invalid solution format; expected key=value")
 				}
 				parsedSolution[parts[0]] = parts[1]
 			}
-			task.Threads[i].Solution = &videoRendering.VideoRenderingThread_Solution{ProposedBy: msg.Creator, Files: parsedSolution}
+
+			// TODO parse file names equals thread's frames
+
+			task.Threads[i].Solution = &videoRendering.VideoRenderingThread_Solution{ProposedBy: msg.Creator, Files: msg.Solution}
 			err = ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
 			if err != nil {
 				log.Printf("unable to propose solution %s", err.Error())
@@ -165,5 +174,5 @@ func (ms msgServer) ProposeSolution(ctx context.Context, msg *videoRendering.Msg
 		}
 	}
 
-	return nil, nil
+	return &videoRendering.MsgProposeSolutionResponse{}, nil
 }

@@ -155,7 +155,7 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 	k := am.keeper
 	if k.Configuration.Enabled && k.Configuration.WorkerAddress != "" {
 		worker, _ := k.Workers.Get(ctx, k.Configuration.WorkerAddress)
-		if worker.Enabled && worker.CurrentTaskId != "" && worker.Status == videoRendering.Worker_WORKER_STATUS_IDLE {
+		if worker.Enabled && worker.CurrentTaskId != "" {
 			// we have to start some work!
 			task, err := k.VideoRenderingTasks.Get(ctx, worker.CurrentTaskId)
 			if err != nil {
@@ -163,13 +163,23 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 				return nil
 			}
 			thread := *task.Threads[worker.CurrentThreadIndex]
-			if thread.Solution == nil {
+			dbThread, _ := k.DB.ReadThread(thread.ThreadId)
+			log.Printf("local thread is %s, %v, %v, %v, %v", dbThread.ID, dbThread.WorkStarted, dbThread.WorkCompleted, dbThread.SolutionProposed, dbThread.VerificationStarted)
+
+			if thread.Solution == nil && !dbThread.WorkStarted {
 				log.Printf("thread %v of task %v started", thread.ThreadId, task.TaskId)
 				workPath := filepath.Join(k.Configuration.RootPath, "renders", thread.ThreadId)
+				go thread.StartWork(worker.Address, task.Cid, workPath, &k.DB)
+			}
 
-				go thread.StartWork(worker.Address, task.Cid, workPath)
-			} else {
-				log.Printf("thread %v of task %v might be ready to evaluate.", thread.ThreadId, task.TaskId)
+			if thread.Solution == nil && dbThread.WorkCompleted && !dbThread.SolutionProposed {
+				log.Printf("thread %v of task %v started", thread.ThreadId, task.TaskId)
+				workPath := filepath.Join(k.Configuration.RootPath, "renders", thread.ThreadId)
+				go thread.ProposeSolution(ctx, worker.Address, workPath, &k.DB)
+			}
+
+			if thread.Solution != nil && dbThread.WorkCompleted && dbThread.SolutionProposed && !dbThread.VerificationStarted {
+				// start verification
 			}
 
 		}

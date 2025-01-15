@@ -2,7 +2,11 @@ package db
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
+	"io/fs"
+	"os"
+	"path/filepath"
 
 	_ "github.com/mattn/go-sqlite3" // SQLite driver
 )
@@ -11,6 +15,7 @@ import (
 type Thread struct {
 	ID                  string
 	WorkStarted         bool
+	WorkCompleted       bool
 	SolutionProposed    bool
 	VerificationStarted bool
 }
@@ -22,7 +27,13 @@ type DB struct {
 
 // Init initializes the SQLite database and creates the threads table.
 func Init(databasePath string) (*DB, error) {
-	db, err := sql.Open("sqlite3", databasePath)
+	// if the path doesn't exists, it might be that client wasn't yet initialized, so we don't create it
+	_, err := os.Stat(databasePath)
+	if errors.Is(err, fs.ErrNotExist) {
+		return &DB{}, nil
+	}
+
+	db, err := sql.Open("sqlite3", filepath.Join(databasePath, "videoRendering.db"))
 	if err != nil {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
@@ -30,9 +41,10 @@ func Init(databasePath string) (*DB, error) {
 	createTable := `
     CREATE TABLE IF NOT EXISTS threads (
         id TEXT PRIMARY KEY,
-		work_started BOOL,
-		solution_proposed BOOL,
-		verification_started BOOL
+		work_started BOOLEAN,
+		work_completed BOOLEAN,
+		solution_proposed BOOLEAN,
+		verification_started BOOLEAN
     );`
 
 	if _, err := db.Exec(createTable); err != nil {
@@ -49,7 +61,7 @@ func (db *DB) Close() error {
 
 // Createthread inserts a new thread into the database.
 func (db *DB) AddThread(id string) error {
-	insertQuery := `INSERT INTO threads (id, work_started, solution_proposed, verification_started) VALUES (?, false, false, false)`
+	insertQuery := `INSERT INTO threads (id, work_started, work_completed, solution_proposed, verification_started) VALUES (?, false, false, false, false)`
 	_, err := db.conn.Exec(insertQuery, id)
 	if err != nil {
 		return fmt.Errorf("failed to insert thread: %w", err)
@@ -60,13 +72,15 @@ func (db *DB) AddThread(id string) error {
 
 // Readthread retrieves a thread by ID.
 func (db *DB) ReadThread(id string) (*Thread, error) {
-	query := `SELECT * FROM threads WHERE id = ?`
+	query := `SELECT id, work_started, work_completed, solution_proposed, verification_started  FROM threads WHERE id = ?`
 	row := db.conn.QueryRow(query, id)
 
 	var thread Thread
-	if err := row.Scan(&thread.ID, &thread.WorkStarted, &thread.SolutionProposed, &thread.VerificationStarted); err != nil {
+	if err := row.Scan(&thread.ID, &thread.WorkStarted, &thread.WorkCompleted, &thread.SolutionProposed, &thread.VerificationStarted); err != nil {
 		if err == sql.ErrNoRows {
-			return nil, nil
+			// thead doesn't exists, so we insert it
+			db.AddThread(id)
+			return &Thread{ID: id, WorkStarted: false, WorkCompleted: false, SolutionProposed: false, VerificationStarted: false}, nil
 		}
 		return nil, fmt.Errorf("failed to read thread: %w", err)
 	}
@@ -75,9 +89,9 @@ func (db *DB) ReadThread(id string) (*Thread, error) {
 }
 
 // Updatethread updates a task's information.
-func (db *DB) UpdateThread(id string, workStarted, solProposed, verificationStarted bool) error {
-	updateQuery := `UPDATE threads SET work_started = ?, solution_proposed = ?, verification_started = ? WHERE id = ?`
-	_, err := db.conn.Exec(updateQuery, id, workStarted, solProposed, verificationStarted)
+func (db *DB) UpdateThread(id string, workStarted, workCompleted, solProposed, verificationStarted bool) error {
+	updateQuery := `UPDATE threads SET work_started = ?, work_completed = ?, solution_proposed = ?, verification_started = ? WHERE id = ?`
+	_, err := db.conn.Exec(updateQuery, workStarted, workCompleted, solProposed, verificationStarted, id)
 	if err != nil {
 		return fmt.Errorf("failed to update thread: %w", err)
 	}

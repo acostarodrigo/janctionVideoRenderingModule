@@ -2,7 +2,6 @@ package keeper
 
 import (
 	"fmt"
-	"path/filepath"
 
 	"cosmossdk.io/collections"
 	"cosmossdk.io/core/address"
@@ -37,7 +36,7 @@ func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService s
 	}
 
 	// we initialize the database
-	db, err := db.Init(filepath.Join(path, "videoRendering.db"))
+	db, err := db.Init(path)
 	if err != nil {
 		panic(err)
 	}

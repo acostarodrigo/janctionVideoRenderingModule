@@ -46,8 +46,8 @@ message MsgCreateVideoRenderingTaskResponse {
 }
 
 message MsgAddWorker {
-  option (cosmos.msg.v1.signer) = "address";
-  string address = 1;
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1;
 }
 
 message MsgAddWorkerResponse {
