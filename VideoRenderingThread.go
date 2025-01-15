@@ -153,9 +153,11 @@ func ParseSequenceFromOutput(output string) (string, error) {
 
 func (t VideoRenderingThread) Verify(ctx context.Context, workerAddress string, rootPath string, db *db.DB) error {
 	// we will verify any file we already have rendered.
-	// db.UpdateThread(t.ThreadId, true, true, true, true)
+	db.UpdateThread(t.ThreadId, true, true, true, true)
+
 	files := vm.CountFilesInDirectory(rootPath)
 	if files == 0 {
+		log.Printf("found %v files in path %s", files, rootPath)
 		return nil
 	}
 
@@ -163,6 +165,7 @@ func (t VideoRenderingThread) Verify(ctx context.Context, workerAddress string, 
 	myWork, err := vm.HashFilesInDirectory(rootPath)
 
 	if err != nil {
+		log.Printf("Error getting hashes. Err: %s", err.Error())
 		return err
 	}
 
@@ -175,15 +178,16 @@ func (t VideoRenderingThread) Verify(ctx context.Context, workerAddress string, 
 		}
 	}
 
-	submitValidation(workerAddress, int64(files), valid)
+	submitValidation(workerAddress, t.TaskId, t.ThreadId, int64(files), valid)
 
 	return nil
 }
 
-func submitValidation(validator string, amount_files int64, valid bool) error {
+func submitValidation(validator string, taskId, threadId string, amount_files int64, valid bool) error {
 	executableName := "minid"
-	cmd := exec.Command(executableName, "tx", "submit-validation", strconv.FormatInt(amount_files, 10), strconv.FormatBool(valid), "--from", validator, "--yes")
+	cmd := exec.Command(executableName, "tx", "videoRendering", "submit-validation", taskId, threadId, strconv.FormatInt(amount_files, 10), strconv.FormatBool(valid), "--from", validator, "--yes")
 	_, err := cmd.Output()
+	log.Printf("executing %s", cmd.String())
 	if err != nil {
 		return err
 	}

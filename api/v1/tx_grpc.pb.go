@@ -23,7 +23,7 @@ const (
 	Msg_AddWorker_FullMethodName                = "/janction.videoRendering.v1.Msg/AddWorker"
 	Msg_SubscribeWorkerToTask_FullMethodName    = "/janction.videoRendering.v1.Msg/SubscribeWorkerToTask"
 	Msg_ProposeSolution_FullMethodName          = "/janction.videoRendering.v1.Msg/ProposeSolution"
-	Msg_ValidateSolution_FullMethodName         = "/janction.videoRendering.v1.Msg/ValidateSolution"
+	Msg_SubmitValidation_FullMethodName         = "/janction.videoRendering.v1.Msg/SubmitValidation"
 )
 
 // MsgClient is the client API for Msg service.
@@ -38,7 +38,7 @@ type MsgClient interface {
 	// Propose a solution for the test of the nodes to validate
 	ProposeSolution(ctx context.Context, in *MsgProposeSolution, opts ...grpc.CallOption) (*MsgProposeSolutionResponse, error)
 	// Propose a solution for the test of the nodes to validate
-	ValidateSolution(ctx context.Context, in *MsgValidateSolution, opts ...grpc.CallOption) (*MsgValidateSolutionResponse, error)
+	SubmitValidation(ctx context.Context, in *MsgSubmitValidation, opts ...grpc.CallOption) (*MsgSubmitValidationResponse, error)
 }
 
 type msgClient struct {
@@ -85,9 +85,9 @@ func (c *msgClient) ProposeSolution(ctx context.Context, in *MsgProposeSolution,
 	return out, nil
 }
 
-func (c *msgClient) ValidateSolution(ctx context.Context, in *MsgValidateSolution, opts ...grpc.CallOption) (*MsgValidateSolutionResponse, error) {
-	out := new(MsgValidateSolutionResponse)
-	err := c.cc.Invoke(ctx, Msg_ValidateSolution_FullMethodName, in, out, opts...)
+func (c *msgClient) SubmitValidation(ctx context.Context, in *MsgSubmitValidation, opts ...grpc.CallOption) (*MsgSubmitValidationResponse, error) {
+	out := new(MsgSubmitValidationResponse)
+	err := c.cc.Invoke(ctx, Msg_SubmitValidation_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -106,7 +106,7 @@ type MsgServer interface {
 	// Propose a solution for the test of the nodes to validate
 	ProposeSolution(context.Context, *MsgProposeSolution) (*MsgProposeSolutionResponse, error)
 	// Propose a solution for the test of the nodes to validate
-	ValidateSolution(context.Context, *MsgValidateSolution) (*MsgValidateSolutionResponse, error)
+	SubmitValidation(context.Context, *MsgSubmitValidation) (*MsgSubmitValidationResponse, error)
 	mustEmbedUnimplementedMsgServer()
 }
 
@@ -126,8 +126,8 @@ func (UnimplementedMsgServer) SubscribeWorkerToTask(context.Context, *MsgSubscri
 func (UnimplementedMsgServer) ProposeSolution(context.Context, *MsgProposeSolution) (*MsgProposeSolutionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ProposeSolution not implemented")
 }
-func (UnimplementedMsgServer) ValidateSolution(context.Context, *MsgValidateSolution) (*MsgValidateSolutionResponse, error) {
-	return nil, status.Errorf(codes.Unimplemented, "method ValidateSolution not implemented")
+func (UnimplementedMsgServer) SubmitValidation(context.Context, *MsgSubmitValidation) (*MsgSubmitValidationResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method SubmitValidation not implemented")
 }
 func (UnimplementedMsgServer) mustEmbedUnimplementedMsgServer() {}
 
@@ -214,20 +214,20 @@ func _Msg_ProposeSolution_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _Msg_ValidateSolution_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(MsgValidateSolution)
+func _Msg_SubmitValidation_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgSubmitValidation)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(MsgServer).ValidateSolution(ctx, in)
+		return srv.(MsgServer).SubmitValidation(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: Msg_ValidateSolution_FullMethodName,
+		FullMethod: Msg_SubmitValidation_FullMethodName,
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MsgServer).ValidateSolution(ctx, req.(*MsgValidateSolution))
+		return srv.(MsgServer).SubmitValidation(ctx, req.(*MsgSubmitValidation))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -256,8 +256,8 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 			Handler:    _Msg_ProposeSolution_Handler,
 		},
 		{
-			MethodName: "ValidateSolution",
-			Handler:    _Msg_ValidateSolution_Handler,
+			MethodName: "SubmitValidation",
+			Handler:    _Msg_SubmitValidation_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

@@ -177,7 +177,7 @@ func (ms msgServer) ProposeSolution(ctx context.Context, msg *videoRendering.Msg
 	return &videoRendering.MsgProposeSolutionResponse{}, nil
 }
 
-func (ms msgServer) ValidateSolution(ctx context.Context, msg *videoRendering.MsgValidateSolution) (*videoRendering.MsgValidateSolutionResponse, error) {
+func (ms msgServer) SubmitValidation(ctx context.Context, msg *videoRendering.MsgSubmitValidation) (*videoRendering.MsgSubmitValidationResponse, error) {
 	// validation must be from a worker on the thread
 	task, err := ms.k.VideoRenderingTasks.Get(ctx, msg.TaskId)
 
@@ -192,31 +192,35 @@ func (ms msgServer) ValidateSolution(ctx context.Context, msg *videoRendering.Ms
 	}
 
 	if !worker.Enabled {
+		log.Printf("worker is not allowed to validate solutions")
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "worker is not allowed to validate solutions")
 	}
 
 	if worker.CurrentTaskId != msg.TaskId {
+		log.Printf("worker is not working on task")
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "worker is not working on task")
 	}
 
 	if !task.InProgress {
-		// task is already settled
+		log.Printf("task is already completed. No more validations accepted")
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "task is already completed. No more validations accepted")
 	}
 
 	thread := task.Threads[worker.CurrentThreadIndex]
 	if thread.ThreadId != msg.ThreadId {
+		log.Printf("worker is not working on thread")
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "worker is not working on thread")
 	}
 
 	// this shouldn't happen.
 	if !slices.Contains(thread.Workers, msg.Creator) {
+		log.Printf("worker is not working on thread")
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "worker is not working on thread")
 	}
 
-	validation := videoRendering.VideoRenderingThread_Validation{Validator: msg.Creator, AmountFiles: msg.AmountFiles, Valid: msg.Valid}
+	validation := videoRendering.VideoRenderingThread_Validation{Validator: msg.Creator, AmountFiles: msg.FilesAmount, Valid: msg.Valid}
 	task.Threads[worker.CurrentThreadIndex].Validations = append(thread.Validations, &validation)
 	ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
 
-	return &videoRendering.MsgValidateSolutionResponse{}, nil
+	return &videoRendering.MsgSubmitValidationResponse{}, nil
 }

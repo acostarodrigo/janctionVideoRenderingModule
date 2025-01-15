@@ -13,6 +13,7 @@ func RegisterInterfaces(registry types.InterfaceRegistry) {
 		&MsgAddWorker{},
 		&MsgSubscribeWorkerToTask{},
 		&MsgProposeSolution{},
+		&MsgSubmitValidation{},
 	)
 	msgservice.RegisterMsgServiceDesc(registry, &_Msg_serviceDesc)
 }

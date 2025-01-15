@@ -74,6 +74,19 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 						{ProtoField: "solution", Varargs: true},
 					},
 				},
+				{
+					RpcMethod: "SubmitValidation",
+					Use:       "submit-validation [taskId] [threadId] [filesAmount] [valid] --from [workerAddress]",
+					Short:     "Submit a validation to a proposed solution",
+					Long:      "", // TODO Add long
+					Example:   "", // TODO add exampe
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "taskId"},
+						{ProtoField: "threadId"},
+						{ProtoField: "filesAmount"},
+						{ProtoField: "valid"},
+					},
+				},
 			},
 		},
 	}
