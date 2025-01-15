@@ -166,20 +166,21 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 			dbThread, _ := k.DB.ReadThread(thread.ThreadId)
 			log.Printf("local thread is %s, %v, %v, %v, %v", dbThread.ID, dbThread.WorkStarted, dbThread.WorkCompleted, dbThread.SolutionProposed, dbThread.VerificationStarted)
 
+			workPath := filepath.Join(k.Configuration.RootPath, "renders", thread.ThreadId)
+
 			if thread.Solution == nil && !dbThread.WorkStarted {
 				log.Printf("thread %v of task %v started", thread.ThreadId, task.TaskId)
-				workPath := filepath.Join(k.Configuration.RootPath, "renders", thread.ThreadId)
 				go thread.StartWork(worker.Address, task.Cid, workPath, &k.DB)
 			}
 
 			if thread.Solution == nil && dbThread.WorkCompleted && !dbThread.SolutionProposed {
 				log.Printf("thread %v of task %v started", thread.ThreadId, task.TaskId)
-				workPath := filepath.Join(k.Configuration.RootPath, "renders", thread.ThreadId)
 				go thread.ProposeSolution(ctx, worker.Address, workPath, &k.DB)
 			}
 
-			if thread.Solution != nil && dbThread.WorkCompleted && dbThread.SolutionProposed && !dbThread.VerificationStarted {
+			if thread.Solution != nil  && !dbThread.VerificationStarted {
 				// start verification
+				go thread.Verify(ctx, worker.Address, workPath, &k.DB)
 			}
 
 		}

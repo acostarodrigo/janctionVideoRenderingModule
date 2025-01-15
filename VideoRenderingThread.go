@@ -6,6 +6,8 @@ import (
 	fmt "fmt"
 	"log"
 	"os/exec"
+	"strconv"
+	"strings"
 
 	"github.com/janction/videoRendering/db"
 	"github.com/janction/videoRendering/ipfs"
@@ -62,12 +64,6 @@ func (t VideoRenderingThread) ProposeSolution(ctx context.Context, workerAddress
 		return err
 	}
 
-	// // TODO call cmd with message subscribeWorkerToTask
-	// sequence, err := GetAccountSequence(workerAddress)
-	// if err != nil {
-	// 	log.Printf("Error fetching sequence number: %s", err.Error())
-	// 	return err
-	// }
 	executableName := "minid"
 	// Base arguments
 	args := []string{
@@ -105,6 +101,22 @@ func MapToKeyValueFormat(inputMap map[string]string) []string {
 	return parts
 }
 
+func transformSliceToMap(input []string) (map[string]string, error) {
+	result := make(map[string]string)
+
+	for _, item := range input {
+		parts := strings.SplitN(item, "=", 2) // Split into 2 parts: filename and hash
+		if len(parts) != 2 {
+			return nil, fmt.Errorf("invalid format: %s", item)
+		}
+		filename := parts[0]
+		hash := parts[1]
+		result[filename] = hash
+	}
+
+	return result, nil
+}
+
 func GetAccountSequence(account string) (string, error) {
 	executableName := "minid"
 	cmd := exec.Command(executableName, "query", "auth", "account", account, "--output", "json")
@@ -137,4 +149,43 @@ func ParseSequenceFromOutput(output string) (string, error) {
 	}
 
 	return response.Account.Value.Sequence, nil
+}
+
+func (t VideoRenderingThread) Verify(ctx context.Context, workerAddress string, rootPath string, db *db.DB) error {
+	// we will verify any file we already have rendered.
+	// db.UpdateThread(t.ThreadId, true, true, true, true)
+	files := vm.CountFilesInDirectory(rootPath)
+	if files == 0 {
+		return nil
+	}
+
+	// we do have some work, lets compare it with the solution
+	myWork, err := vm.HashFilesInDirectory(rootPath)
+
+	if err != nil {
+		return err
+	}
+
+	solution, _ := transformSliceToMap(t.Solution.Files)
+	var valid bool = true
+	for filename, hash := range solution {
+		if myWork[filename] != hash {
+			valid = false
+			break
+		}
+	}
+
+	submitValidation(workerAddress, int64(files), valid)
+
+	return nil
+}
+
+func submitValidation(validator string, amount_files int64, valid bool) error {
+	executableName := "minid"
+	cmd := exec.Command(executableName, "tx", "submit-validation", strconv.FormatInt(amount_files, 10), strconv.FormatBool(valid), "--from", validator, "--yes")
+	_, err := cmd.Output()
+	if err != nil {
+		return err
+	}
+	return nil
 }

@@ -95,20 +95,10 @@ message VideoRenderingTask {
       repeated string files = 2;
     }
 
-    
-
     message Validation {
-      enum ValidationStatus {
-        VALIDATION_STATUS_UNDEFINED = 0;
-        VALIDATION_STATUS_IN_PROGRESS = 1;
-        VALIDATION_STATUS_PASSED = 2;
-        VALIDATION_STATUS_NOT_PASSED = 3;
-      }
       string validator = 1[(cosmos_proto.scalar) = "cosmos.AddressString"];
-      uint32 start_frame = 2;
-      uint32 end_frame = 3;
-      ValidationStatus status = 4;
-
+      uint32 amount_files = 2;
+      bool valid = 3;
     }
   }
 

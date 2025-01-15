@@ -4937,20 +4937,18 @@ func (x *fastReflection_VideoRenderingThread_Solution) ProtoMethods() *protoifac
 }
 
 var (
-	md_VideoRenderingThread_Validation             protoreflect.MessageDescriptor
-	fd_VideoRenderingThread_Validation_validator   protoreflect.FieldDescriptor
-	fd_VideoRenderingThread_Validation_start_frame protoreflect.FieldDescriptor
-	fd_VideoRenderingThread_Validation_end_frame   protoreflect.FieldDescriptor
-	fd_VideoRenderingThread_Validation_status      protoreflect.FieldDescriptor
+	md_VideoRenderingThread_Validation              protoreflect.MessageDescriptor
+	fd_VideoRenderingThread_Validation_validator    protoreflect.FieldDescriptor
+	fd_VideoRenderingThread_Validation_amount_files protoreflect.FieldDescriptor
+	fd_VideoRenderingThread_Validation_valid        protoreflect.FieldDescriptor
 )
 
 func init() {
 	file_janction_videoRendering_v1_types_proto_init()
 	md_VideoRenderingThread_Validation = File_janction_videoRendering_v1_types_proto.Messages().ByName("VideoRenderingThread").Messages().ByName("Validation")
 	fd_VideoRenderingThread_Validation_validator = md_VideoRenderingThread_Validation.Fields().ByName("validator")
-	fd_VideoRenderingThread_Validation_start_frame = md_VideoRenderingThread_Validation.Fields().ByName("start_frame")
-	fd_VideoRenderingThread_Validation_end_frame = md_VideoRenderingThread_Validation.Fields().ByName("end_frame")
-	fd_VideoRenderingThread_Validation_status = md_VideoRenderingThread_Validation.Fields().ByName("status")
+	fd_VideoRenderingThread_Validation_amount_files = md_VideoRenderingThread_Validation.Fields().ByName("amount_files")
+	fd_VideoRenderingThread_Validation_valid = md_VideoRenderingThread_Validation.Fields().ByName("valid")
 }
 
 var _ protoreflect.Message = (*fastReflection_VideoRenderingThread_Validation)(nil)
@@ -5024,21 +5022,15 @@ func (x *fastReflection_VideoRenderingThread_Validation) Range(f func(protorefle
 			return
 		}
 	}
-	if x.StartFrame != uint32(0) {
-		value := protoreflect.ValueOfUint32(x.StartFrame)
-		if !f(fd_VideoRenderingThread_Validation_start_frame, value) {
+	if x.AmountFiles != uint32(0) {
+		value := protoreflect.ValueOfUint32(x.AmountFiles)
+		if !f(fd_VideoRenderingThread_Validation_amount_files, value) {
 			return
 		}
 	}
-	if x.EndFrame != uint32(0) {
-		value := protoreflect.ValueOfUint32(x.EndFrame)
-		if !f(fd_VideoRenderingThread_Validation_end_frame, value) {
-			return
-		}
-	}
-	if x.Status != 0 {
-		value := protoreflect.ValueOfEnum((protoreflect.EnumNumber)(x.Status))
-		if !f(fd_VideoRenderingThread_Validation_status, value) {
+	if x.Valid != false {
+		value := protoreflect.ValueOfBool(x.Valid)
+		if !f(fd_VideoRenderingThread_Validation_valid, value) {
 			return
 		}
 	}
@@ -5059,12 +5051,10 @@ func (x *fastReflection_VideoRenderingThread_Validation) Has(fd protoreflect.Fie
 	switch fd.FullName() {
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.validator":
 		return x.Validator != ""
-	case "janction.videoRendering.v1.VideoRenderingThread.Validation.start_frame":
-		return x.StartFrame != uint32(0)
-	case "janction.videoRendering.v1.VideoRenderingThread.Validation.end_frame":
-		return x.EndFrame != uint32(0)
-	case "janction.videoRendering.v1.VideoRenderingThread.Validation.status":
-		return x.Status != 0
+	case "janction.videoRendering.v1.VideoRenderingThread.Validation.amount_files":
+		return x.AmountFiles != uint32(0)
+	case "janction.videoRendering.v1.VideoRenderingThread.Validation.valid":
+		return x.Valid != false
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.VideoRenderingThread.Validation"))
@@ -5083,12 +5073,10 @@ func (x *fastReflection_VideoRenderingThread_Validation) Clear(fd protoreflect.F
 	switch fd.FullName() {
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.validator":
 		x.Validator = ""
-	case "janction.videoRendering.v1.VideoRenderingThread.Validation.start_frame":
-		x.StartFrame = uint32(0)
-	case "janction.videoRendering.v1.VideoRenderingThread.Validation.end_frame":
-		x.EndFrame = uint32(0)
-	case "janction.videoRendering.v1.VideoRenderingThread.Validation.status":
-		x.Status = 0
+	case "janction.videoRendering.v1.VideoRenderingThread.Validation.amount_files":
+		x.AmountFiles = uint32(0)
+	case "janction.videoRendering.v1.VideoRenderingThread.Validation.valid":
+		x.Valid = false
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.VideoRenderingThread.Validation"))
@@ -5108,15 +5096,12 @@ func (x *fastReflection_VideoRenderingThread_Validation) Get(descriptor protoref
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.validator":
 		value := x.Validator
 		return protoreflect.ValueOfString(value)
-	case "janction.videoRendering.v1.VideoRenderingThread.Validation.start_frame":
-		value := x.StartFrame
+	case "janction.videoRendering.v1.VideoRenderingThread.Validation.amount_files":
+		value := x.AmountFiles
 		return protoreflect.ValueOfUint32(value)
-	case "janction.videoRendering.v1.VideoRenderingThread.Validation.end_frame":
-		value := x.EndFrame
-		return protoreflect.ValueOfUint32(value)
-	case "janction.videoRendering.v1.VideoRenderingThread.Validation.status":
-		value := x.Status
-		return protoreflect.ValueOfEnum((protoreflect.EnumNumber)(value))
+	case "janction.videoRendering.v1.VideoRenderingThread.Validation.valid":
+		value := x.Valid
+		return protoreflect.ValueOfBool(value)
 	default:
 		if descriptor.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.VideoRenderingThread.Validation"))
@@ -5139,12 +5124,10 @@ func (x *fastReflection_VideoRenderingThread_Validation) Set(fd protoreflect.Fie
 	switch fd.FullName() {
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.validator":
 		x.Validator = value.Interface().(string)
-	case "janction.videoRendering.v1.VideoRenderingThread.Validation.start_frame":
-		x.StartFrame = uint32(value.Uint())
-	case "janction.videoRendering.v1.VideoRenderingThread.Validation.end_frame":
-		x.EndFrame = uint32(value.Uint())
-	case "janction.videoRendering.v1.VideoRenderingThread.Validation.status":
-		x.Status = (VideoRenderingThread_Validation_ValidationStatus)(value.Enum())
+	case "janction.videoRendering.v1.VideoRenderingThread.Validation.amount_files":
+		x.AmountFiles = uint32(value.Uint())
+	case "janction.videoRendering.v1.VideoRenderingThread.Validation.valid":
+		x.Valid = value.Bool()
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.VideoRenderingThread.Validation"))
@@ -5167,12 +5150,10 @@ func (x *fastReflection_VideoRenderingThread_Validation) Mutable(fd protoreflect
 	switch fd.FullName() {
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.validator":
 		panic(fmt.Errorf("field validator of message janction.videoRendering.v1.VideoRenderingThread.Validation is not mutable"))
-	case "janction.videoRendering.v1.VideoRenderingThread.Validation.start_frame":
-		panic(fmt.Errorf("field start_frame of message janction.videoRendering.v1.VideoRenderingThread.Validation is not mutable"))
-	case "janction.videoRendering.v1.VideoRenderingThread.Validation.end_frame":
-		panic(fmt.Errorf("field end_frame of message janction.videoRendering.v1.VideoRenderingThread.Validation is not mutable"))
-	case "janction.videoRendering.v1.VideoRenderingThread.Validation.status":
-		panic(fmt.Errorf("field status of message janction.videoRendering.v1.VideoRenderingThread.Validation is not mutable"))
+	case "janction.videoRendering.v1.VideoRenderingThread.Validation.amount_files":
+		panic(fmt.Errorf("field amount_files of message janction.videoRendering.v1.VideoRenderingThread.Validation is not mutable"))
+	case "janction.videoRendering.v1.VideoRenderingThread.Validation.valid":
+		panic(fmt.Errorf("field valid of message janction.videoRendering.v1.VideoRenderingThread.Validation is not mutable"))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.VideoRenderingThread.Validation"))
@@ -5188,12 +5169,10 @@ func (x *fastReflection_VideoRenderingThread_Validation) NewField(fd protoreflec
 	switch fd.FullName() {
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.validator":
 		return protoreflect.ValueOfString("")
-	case "janction.videoRendering.v1.VideoRenderingThread.Validation.start_frame":
+	case "janction.videoRendering.v1.VideoRenderingThread.Validation.amount_files":
 		return protoreflect.ValueOfUint32(uint32(0))
-	case "janction.videoRendering.v1.VideoRenderingThread.Validation.end_frame":
-		return protoreflect.ValueOfUint32(uint32(0))
-	case "janction.videoRendering.v1.VideoRenderingThread.Validation.status":
-		return protoreflect.ValueOfEnum(0)
+	case "janction.videoRendering.v1.VideoRenderingThread.Validation.valid":
+		return protoreflect.ValueOfBool(false)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.VideoRenderingThread.Validation"))
@@ -5267,14 +5246,11 @@ func (x *fastReflection_VideoRenderingThread_Validation) ProtoMethods() *protoif
 		if l > 0 {
 			n += 1 + l + runtime.Sov(uint64(l))
 		}
-		if x.StartFrame != 0 {
-			n += 1 + runtime.Sov(uint64(x.StartFrame))
+		if x.AmountFiles != 0 {
+			n += 1 + runtime.Sov(uint64(x.AmountFiles))
 		}
-		if x.EndFrame != 0 {
-			n += 1 + runtime.Sov(uint64(x.EndFrame))
-		}
-		if x.Status != 0 {
-			n += 1 + runtime.Sov(uint64(x.Status))
+		if x.Valid {
+			n += 2
 		}
 		if x.unknownFields != nil {
 			n += len(x.unknownFields)
@@ -5305,18 +5281,18 @@ func (x *fastReflection_VideoRenderingThread_Validation) ProtoMethods() *protoif
 			i -= len(x.unknownFields)
 			copy(dAtA[i:], x.unknownFields)
 		}
-		if x.Status != 0 {
-			i = runtime.EncodeVarint(dAtA, i, uint64(x.Status))
+		if x.Valid {
 			i--
-			dAtA[i] = 0x20
-		}
-		if x.EndFrame != 0 {
-			i = runtime.EncodeVarint(dAtA, i, uint64(x.EndFrame))
+			if x.Valid {
+				dAtA[i] = 1
+			} else {
+				dAtA[i] = 0
+			}
 			i--
 			dAtA[i] = 0x18
 		}
-		if x.StartFrame != 0 {
-			i = runtime.EncodeVarint(dAtA, i, uint64(x.StartFrame))
+		if x.AmountFiles != 0 {
+			i = runtime.EncodeVarint(dAtA, i, uint64(x.AmountFiles))
 			i--
 			dAtA[i] = 0x10
 		}
@@ -5410,9 +5386,9 @@ func (x *fastReflection_VideoRenderingThread_Validation) ProtoMethods() *protoif
 				iNdEx = postIndex
 			case 2:
 				if wireType != 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field StartFrame", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field AmountFiles", wireType)
 				}
-				x.StartFrame = 0
+				x.AmountFiles = 0
 				for shift := uint(0); ; shift += 7 {
 					if shift >= 64 {
 						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
@@ -5422,16 +5398,16 @@ func (x *fastReflection_VideoRenderingThread_Validation) ProtoMethods() *protoif
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.StartFrame |= uint32(b&0x7F) << shift
+					x.AmountFiles |= uint32(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
 				}
 			case 3:
 				if wireType != 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field EndFrame", wireType)
+					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Valid", wireType)
 				}
-				x.EndFrame = 0
+				var v int
 				for shift := uint(0); ; shift += 7 {
 					if shift >= 64 {
 						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
@@ -5441,30 +5417,12 @@ func (x *fastReflection_VideoRenderingThread_Validation) ProtoMethods() *protoif
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.EndFrame |= uint32(b&0x7F) << shift
+					v |= int(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
 				}
-			case 4:
-				if wireType != 0 {
-					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Status", wireType)
-				}
-				x.Status = 0
-				for shift := uint(0); ; shift += 7 {
-					if shift >= 64 {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
-					}
-					if iNdEx >= l {
-						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
-					}
-					b := dAtA[iNdEx]
-					iNdEx++
-					x.Status |= VideoRenderingThread_Validation_ValidationStatus(b&0x7F) << shift
-					if b < 0x80 {
-						break
-					}
-				}
+				x.Valid = bool(v != 0)
 			default:
 				iNdEx = preIndex
 				skippy, err := runtime.Skip(dAtA[iNdEx:])
@@ -6474,58 +6432,6 @@ func (Worker_WorkerStatus) EnumDescriptor() ([]byte, []int) {
 	return file_janction_videoRendering_v1_types_proto_rawDescGZIP(), []int{2, 0}
 }
 
-type VideoRenderingThread_Validation_ValidationStatus int32
-
-const (
-	VideoRenderingThread_Validation_VALIDATION_STATUS_UNDEFINED   VideoRenderingThread_Validation_ValidationStatus = 0
-	VideoRenderingThread_Validation_VALIDATION_STATUS_IN_PROGRESS VideoRenderingThread_Validation_ValidationStatus = 1
-	VideoRenderingThread_Validation_VALIDATION_STATUS_PASSED      VideoRenderingThread_Validation_ValidationStatus = 2
-	VideoRenderingThread_Validation_VALIDATION_STATUS_NOT_PASSED  VideoRenderingThread_Validation_ValidationStatus = 3
-)
-
-// Enum value maps for VideoRenderingThread_Validation_ValidationStatus.
-var (
-	VideoRenderingThread_Validation_ValidationStatus_name = map[int32]string{
-		0: "VALIDATION_STATUS_UNDEFINED",
-		1: "VALIDATION_STATUS_IN_PROGRESS",
-		2: "VALIDATION_STATUS_PASSED",
-		3: "VALIDATION_STATUS_NOT_PASSED",
-	}
-	VideoRenderingThread_Validation_ValidationStatus_value = map[string]int32{
-		"VALIDATION_STATUS_UNDEFINED":   0,
-		"VALIDATION_STATUS_IN_PROGRESS": 1,
-		"VALIDATION_STATUS_PASSED":      2,
-		"VALIDATION_STATUS_NOT_PASSED":  3,
-	}
-)
-
-func (x VideoRenderingThread_Validation_ValidationStatus) Enum() *VideoRenderingThread_Validation_ValidationStatus {
-	p := new(VideoRenderingThread_Validation_ValidationStatus)
-	*p = x
-	return p
-}
-
-func (x VideoRenderingThread_Validation_ValidationStatus) String() string {
-	return protoimpl.X.EnumStringOf(x.Descriptor(), protoreflect.EnumNumber(x))
-}
-
-func (VideoRenderingThread_Validation_ValidationStatus) Descriptor() protoreflect.EnumDescriptor {
-	return file_janction_videoRendering_v1_types_proto_enumTypes[1].Descriptor()
-}
-
-func (VideoRenderingThread_Validation_ValidationStatus) Type() protoreflect.EnumType {
-	return &file_janction_videoRendering_v1_types_proto_enumTypes[1]
-}
-
-func (x VideoRenderingThread_Validation_ValidationStatus) Number() protoreflect.EnumNumber {
-	return protoreflect.EnumNumber(x)
-}
-
-// Deprecated: Use VideoRenderingThread_Validation_ValidationStatus.Descriptor instead.
-func (VideoRenderingThread_Validation_ValidationStatus) EnumDescriptor() ([]byte, []int) {
-	return file_janction_videoRendering_v1_types_proto_rawDescGZIP(), []int{4, 1, 0}
-}
-
 // Params defines the parameters of the module.
 type Params struct {
 	state         protoimpl.MessageState
@@ -7082,10 +6988,9 @@ type VideoRenderingThread_Validation struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Validator  string                                           `protobuf:"bytes,1,opt,name=validator,proto3" json:"validator,omitempty"`
-	StartFrame uint32                                           `protobuf:"varint,2,opt,name=start_frame,json=startFrame,proto3" json:"start_frame,omitempty"`
-	EndFrame   uint32                                           `protobuf:"varint,3,opt,name=end_frame,json=endFrame,proto3" json:"end_frame,omitempty"`
-	Status     VideoRenderingThread_Validation_ValidationStatus `protobuf:"varint,4,opt,name=status,proto3,enum=janction.videoRendering.v1.VideoRenderingThread_Validation_ValidationStatus" json:"status,omitempty"`
+	Validator   string `protobuf:"bytes,1,opt,name=validator,proto3" json:"validator,omitempty"`
+	AmountFiles uint32 `protobuf:"varint,2,opt,name=amount_files,json=amountFiles,proto3" json:"amount_files,omitempty"`
+	Valid       bool   `protobuf:"varint,3,opt,name=valid,proto3" json:"valid,omitempty"`
 }
 
 func (x *VideoRenderingThread_Validation) Reset() {
@@ -7115,25 +7020,18 @@ func (x *VideoRenderingThread_Validation) GetValidator() string {
 	return ""
 }
 
-func (x *VideoRenderingThread_Validation) GetStartFrame() uint32 {
+func (x *VideoRenderingThread_Validation) GetAmountFiles() uint32 {
 	if x != nil {
-		return x.StartFrame
+		return x.AmountFiles
 	}
 	return 0
 }
 
-func (x *VideoRenderingThread_Validation) GetEndFrame() uint32 {
+func (x *VideoRenderingThread_Validation) GetValid() bool {
 	if x != nil {
-		return x.EndFrame
+		return x.Valid
 	}
-	return 0
-}
-
-func (x *VideoRenderingThread_Validation) GetStatus() VideoRenderingThread_Validation_ValidationStatus {
-	if x != nil {
-		return x.Status
-	}
-	return VideoRenderingThread_Validation_VALIDATION_STATUS_UNDEFINED
+	return false
 }
 
 var File_janction_videoRendering_v1_types_proto protoreflect.FileDescriptor
@@ -7237,7 +7135,7 @@ var file_janction_videoRendering_v1_types_proto_rawDesc = []byte{
 	0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65,
 	0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x69, 0x64, 0x65, 0x6f,
 	0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x68, 0x72, 0x65, 0x61, 0x64, 0x52,
-	0x07, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x73, 0x22, 0xdc, 0x06, 0x0a, 0x14, 0x56, 0x69, 0x64,
+	0x07, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x73, 0x22, 0xd7, 0x04, 0x0a, 0x14, 0x56, 0x69, 0x64,
 	0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x68, 0x72, 0x65, 0x61,
 	0x64, 0x12, 0x1b, 0x0a, 0x09, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x5f, 0x69, 0x64, 0x18, 0x01,
 	0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x49, 0x64, 0x12, 0x17,
@@ -7267,61 +7165,45 @@ var file_janction_videoRendering_v1_types_proto_rawDesc = []byte{
 	0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e,
 	0x67, 0x52, 0x0a, 0x70, 0x72, 0x6f, 0x70, 0x6f, 0x73, 0x65, 0x64, 0x42, 0x79, 0x12, 0x14, 0x0a,
 	0x05, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x09, 0x52, 0x05, 0x66, 0x69,
-	0x6c, 0x65, 0x73, 0x1a, 0x81, 0x03, 0x0a, 0x0a, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x69,
-	0x6f, 0x6e, 0x12, 0x36, 0x0a, 0x09, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x18,
-	0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f,
-	0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52,
-	0x09, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x1f, 0x0a, 0x0b, 0x73, 0x74,
-	0x61, 0x72, 0x74, 0x5f, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52,
-	0x0a, 0x73, 0x74, 0x61, 0x72, 0x74, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x12, 0x1b, 0x0a, 0x09, 0x65,
-	0x6e, 0x64, 0x5f, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x08,
-	0x65, 0x6e, 0x64, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x12, 0x64, 0x0a, 0x06, 0x73, 0x74, 0x61, 0x74,
-	0x75, 0x73, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0e, 0x32, 0x4c, 0x2e, 0x6a, 0x61, 0x6e, 0x63, 0x74,
-	0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69,
-	0x6e, 0x67, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65,
-	0x72, 0x69, 0x6e, 0x67, 0x54, 0x68, 0x72, 0x65, 0x61, 0x64, 0x2e, 0x56, 0x61, 0x6c, 0x69, 0x64,
-	0x61, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x69, 0x6f, 0x6e,
-	0x53, 0x74, 0x61, 0x74, 0x75, 0x73, 0x52, 0x06, 0x73, 0x74, 0x61, 0x74, 0x75, 0x73, 0x22, 0x96,
-	0x01, 0x0a, 0x10, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x53, 0x74, 0x61,
-	0x74, 0x75, 0x73, 0x12, 0x1f, 0x0a, 0x1b, 0x56, 0x41, 0x4c, 0x49, 0x44, 0x41, 0x54, 0x49, 0x4f,
-	0x4e, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x55, 0x53, 0x5f, 0x55, 0x4e, 0x44, 0x45, 0x46, 0x49, 0x4e,
-	0x45, 0x44, 0x10, 0x00, 0x12, 0x21, 0x0a, 0x1d, 0x56, 0x41, 0x4c, 0x49, 0x44, 0x41, 0x54, 0x49,
-	0x4f, 0x4e, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x55, 0x53, 0x5f, 0x49, 0x4e, 0x5f, 0x50, 0x52, 0x4f,
-	0x47, 0x52, 0x45, 0x53, 0x53, 0x10, 0x01, 0x12, 0x1c, 0x0a, 0x18, 0x56, 0x41, 0x4c, 0x49, 0x44,
-	0x41, 0x54, 0x49, 0x4f, 0x4e, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x55, 0x53, 0x5f, 0x50, 0x41, 0x53,
-	0x53, 0x45, 0x44, 0x10, 0x02, 0x12, 0x20, 0x0a, 0x1c, 0x56, 0x41, 0x4c, 0x49, 0x44, 0x41, 0x54,
-	0x49, 0x4f, 0x4e, 0x5f, 0x53, 0x54, 0x41, 0x54, 0x55, 0x53, 0x5f, 0x4e, 0x4f, 0x54, 0x5f, 0x50,
-	0x41, 0x53, 0x53, 0x45, 0x44, 0x10, 0x03, 0x22, 0x30, 0x0a, 0x16, 0x56, 0x69, 0x64, 0x65, 0x6f,
-	0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x61, 0x73, 0x6b, 0x49, 0x6e, 0x66,
-	0x6f, 0x12, 0x16, 0x0a, 0x06, 0x6e, 0x65, 0x78, 0x74, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28,
-	0x04, 0x52, 0x06, 0x6e, 0x65, 0x78, 0x74, 0x49, 0x64, 0x22, 0x97, 0x01, 0x0a, 0x19, 0x49, 0x6e,
-	0x64, 0x65, 0x78, 0x65, 0x64, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72,
-	0x69, 0x6e, 0x67, 0x54, 0x61, 0x73, 0x6b, 0x12, 0x14, 0x0a, 0x05, 0x69, 0x6e, 0x64, 0x65, 0x78,
-	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x69, 0x6e, 0x64, 0x65, 0x78, 0x12, 0x64, 0x0a,
-	0x12, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54,
-	0x61, 0x73, 0x6b, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x2e, 0x2e, 0x6a, 0x61, 0x6e, 0x63,
-	0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72,
-	0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x2e, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64,
-	0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x61, 0x73, 0x6b, 0x42, 0x04, 0xc8, 0xde, 0x1f, 0x00, 0x52,
-	0x12, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54,
-	0x61, 0x73, 0x6b, 0x42, 0x8a, 0x02, 0x0a, 0x1e, 0x63, 0x6f, 0x6d, 0x2e, 0x6a, 0x61, 0x6e, 0x63,
-	0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72,
-	0x69, 0x6e, 0x67, 0x2e, 0x76, 0x31, 0x42, 0x0a, 0x54, 0x79, 0x70, 0x65, 0x73, 0x50, 0x72, 0x6f,
-	0x74, 0x6f, 0x50, 0x01, 0x5a, 0x52, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d,
-	0x2f, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2f, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52,
-	0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6a, 0x61, 0x6e,
-	0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2f, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65,
-	0x72, 0x69, 0x6e, 0x67, 0x2f, 0x76, 0x31, 0x3b, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e,
-	0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x4a, 0x56, 0x58, 0xaa, 0x02,
-	0x1a, 0x4a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52,
-	0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x1a, 0x4a, 0x61,
-	0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x5c, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64,
-	0x65, 0x72, 0x69, 0x6e, 0x67, 0x5c, 0x56, 0x31, 0xe2, 0x02, 0x26, 0x4a, 0x61, 0x6e, 0x63, 0x74,
-	0x69, 0x6f, 0x6e, 0x5c, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69,
-	0x6e, 0x67, 0x5c, 0x56, 0x31, 0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74,
-	0x61, 0xea, 0x02, 0x1c, 0x4a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x3a, 0x3a, 0x56, 0x69,
-	0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x3a, 0x3a, 0x56, 0x31,
-	0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x6c, 0x65, 0x73, 0x1a, 0x7d, 0x0a, 0x0a, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x69, 0x6f,
+	0x6e, 0x12, 0x36, 0x0a, 0x09, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x18, 0x01,
+	0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73,
+	0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x09,
+	0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x21, 0x0a, 0x0c, 0x61, 0x6d, 0x6f,
+	0x75, 0x6e, 0x74, 0x5f, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52,
+	0x0b, 0x61, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x46, 0x69, 0x6c, 0x65, 0x73, 0x12, 0x14, 0x0a, 0x05,
+	0x76, 0x61, 0x6c, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x08, 0x52, 0x05, 0x76, 0x61, 0x6c,
+	0x69, 0x64, 0x22, 0x30, 0x0a, 0x16, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65,
+	0x72, 0x69, 0x6e, 0x67, 0x54, 0x61, 0x73, 0x6b, 0x49, 0x6e, 0x66, 0x6f, 0x12, 0x16, 0x0a, 0x06,
+	0x6e, 0x65, 0x78, 0x74, 0x49, 0x64, 0x18, 0x01, 0x20, 0x01, 0x28, 0x04, 0x52, 0x06, 0x6e, 0x65,
+	0x78, 0x74, 0x49, 0x64, 0x22, 0x97, 0x01, 0x0a, 0x19, 0x49, 0x6e, 0x64, 0x65, 0x78, 0x65, 0x64,
+	0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x61,
+	0x73, 0x6b, 0x12, 0x14, 0x0a, 0x05, 0x69, 0x6e, 0x64, 0x65, 0x78, 0x18, 0x01, 0x20, 0x01, 0x28,
+	0x09, 0x52, 0x05, 0x69, 0x6e, 0x64, 0x65, 0x78, 0x12, 0x64, 0x0a, 0x12, 0x76, 0x69, 0x64, 0x65,
+	0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x61, 0x73, 0x6b, 0x18, 0x02,
+	0x20, 0x01, 0x28, 0x0b, 0x32, 0x2e, 0x2e, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e,
+	0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76,
+	0x31, 0x2e, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67,
+	0x54, 0x61, 0x73, 0x6b, 0x42, 0x04, 0xc8, 0xde, 0x1f, 0x00, 0x52, 0x12, 0x76, 0x69, 0x64, 0x65,
+	0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x61, 0x73, 0x6b, 0x42, 0x8a,
+	0x02, 0x0a, 0x1e, 0x63, 0x6f, 0x6d, 0x2e, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x2e,
+	0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2e, 0x76,
+	0x31, 0x42, 0x0a, 0x54, 0x79, 0x70, 0x65, 0x73, 0x50, 0x72, 0x6f, 0x74, 0x6f, 0x50, 0x01, 0x5a,
+	0x52, 0x67, 0x69, 0x74, 0x68, 0x75, 0x62, 0x2e, 0x63, 0x6f, 0x6d, 0x2f, 0x6a, 0x61, 0x6e, 0x63,
+	0x74, 0x69, 0x6f, 0x6e, 0x2f, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72,
+	0x69, 0x6e, 0x67, 0x2f, 0x61, 0x70, 0x69, 0x2f, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e,
+	0x2f, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x2f,
+	0x76, 0x31, 0x3b, 0x76, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e,
+	0x67, 0x76, 0x31, 0xa2, 0x02, 0x03, 0x4a, 0x56, 0x58, 0xaa, 0x02, 0x1a, 0x4a, 0x61, 0x6e, 0x63,
+	0x74, 0x69, 0x6f, 0x6e, 0x2e, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72,
+	0x69, 0x6e, 0x67, 0x2e, 0x56, 0x31, 0xca, 0x02, 0x1a, 0x4a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f,
+	0x6e, 0x5c, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67,
+	0x5c, 0x56, 0x31, 0xe2, 0x02, 0x26, 0x4a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x5c, 0x56,
+	0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x5c, 0x56, 0x31,
+	0x5c, 0x47, 0x50, 0x42, 0x4d, 0x65, 0x74, 0x61, 0x64, 0x61, 0x74, 0x61, 0xea, 0x02, 0x1c, 0x4a,
+	0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f, 0x6e, 0x3a, 0x3a, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65,
+	0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x3a, 0x3a, 0x56, 0x31, 0x62, 0x06, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x33,
 }
 
 var (
@@ -7336,39 +7218,37 @@ func file_janction_videoRendering_v1_types_proto_rawDescGZIP() []byte {
 	return file_janction_videoRendering_v1_types_proto_rawDescData
 }
 
-var file_janction_videoRendering_v1_types_proto_enumTypes = make([]protoimpl.EnumInfo, 2)
+var file_janction_videoRendering_v1_types_proto_enumTypes = make([]protoimpl.EnumInfo, 1)
 var file_janction_videoRendering_v1_types_proto_msgTypes = make([]protoimpl.MessageInfo, 10)
 var file_janction_videoRendering_v1_types_proto_goTypes = []interface{}{
-	(Worker_WorkerStatus)(0),                              // 0: janction.videoRendering.v1.Worker.WorkerStatus
-	(VideoRenderingThread_Validation_ValidationStatus)(0), // 1: janction.videoRendering.v1.VideoRenderingThread.Validation.ValidationStatus
-	(*Params)(nil),                          // 2: janction.videoRendering.v1.Params
-	(*GenesisState)(nil),                    // 3: janction.videoRendering.v1.GenesisState
-	(*Worker)(nil),                          // 4: janction.videoRendering.v1.Worker
-	(*VideoRenderingTask)(nil),              // 5: janction.videoRendering.v1.VideoRenderingTask
-	(*VideoRenderingThread)(nil),            // 6: janction.videoRendering.v1.VideoRenderingThread
-	(*VideoRenderingTaskInfo)(nil),          // 7: janction.videoRendering.v1.VideoRenderingTaskInfo
-	(*IndexedVideoRenderingTask)(nil),       // 8: janction.videoRendering.v1.IndexedVideoRenderingTask
-	(*Worker_Reputation)(nil),               // 9: janction.videoRendering.v1.Worker.Reputation
-	(*VideoRenderingThread_Solution)(nil),   // 10: janction.videoRendering.v1.VideoRenderingThread.Solution
-	(*VideoRenderingThread_Validation)(nil), // 11: janction.videoRendering.v1.VideoRenderingThread.Validation
+	(Worker_WorkerStatus)(0),                // 0: janction.videoRendering.v1.Worker.WorkerStatus
+	(*Params)(nil),                          // 1: janction.videoRendering.v1.Params
+	(*GenesisState)(nil),                    // 2: janction.videoRendering.v1.GenesisState
+	(*Worker)(nil),                          // 3: janction.videoRendering.v1.Worker
+	(*VideoRenderingTask)(nil),              // 4: janction.videoRendering.v1.VideoRenderingTask
+	(*VideoRenderingThread)(nil),            // 5: janction.videoRendering.v1.VideoRenderingThread
+	(*VideoRenderingTaskInfo)(nil),          // 6: janction.videoRendering.v1.VideoRenderingTaskInfo
+	(*IndexedVideoRenderingTask)(nil),       // 7: janction.videoRendering.v1.IndexedVideoRenderingTask
+	(*Worker_Reputation)(nil),               // 8: janction.videoRendering.v1.Worker.Reputation
+	(*VideoRenderingThread_Solution)(nil),   // 9: janction.videoRendering.v1.VideoRenderingThread.Solution
+	(*VideoRenderingThread_Validation)(nil), // 10: janction.videoRendering.v1.VideoRenderingThread.Validation
 }
 var file_janction_videoRendering_v1_types_proto_depIdxs = []int32{
-	2,  // 0: janction.videoRendering.v1.GenesisState.params:type_name -> janction.videoRendering.v1.Params
-	7,  // 1: janction.videoRendering.v1.GenesisState.videoRenderingTaskInfo:type_name -> janction.videoRendering.v1.VideoRenderingTaskInfo
-	8,  // 2: janction.videoRendering.v1.GenesisState.videoRenderingTaskList:type_name -> janction.videoRendering.v1.IndexedVideoRenderingTask
-	4,  // 3: janction.videoRendering.v1.GenesisState.workers:type_name -> janction.videoRendering.v1.Worker
+	1,  // 0: janction.videoRendering.v1.GenesisState.params:type_name -> janction.videoRendering.v1.Params
+	6,  // 1: janction.videoRendering.v1.GenesisState.videoRenderingTaskInfo:type_name -> janction.videoRendering.v1.VideoRenderingTaskInfo
+	7,  // 2: janction.videoRendering.v1.GenesisState.videoRenderingTaskList:type_name -> janction.videoRendering.v1.IndexedVideoRenderingTask
+	3,  // 3: janction.videoRendering.v1.GenesisState.workers:type_name -> janction.videoRendering.v1.Worker
 	0,  // 4: janction.videoRendering.v1.Worker.status:type_name -> janction.videoRendering.v1.Worker.WorkerStatus
-	9,  // 5: janction.videoRendering.v1.Worker.reputation:type_name -> janction.videoRendering.v1.Worker.Reputation
-	6,  // 6: janction.videoRendering.v1.VideoRenderingTask.threads:type_name -> janction.videoRendering.v1.VideoRenderingThread
-	10, // 7: janction.videoRendering.v1.VideoRenderingThread.solution:type_name -> janction.videoRendering.v1.VideoRenderingThread.Solution
-	11, // 8: janction.videoRendering.v1.VideoRenderingThread.validations:type_name -> janction.videoRendering.v1.VideoRenderingThread.Validation
-	5,  // 9: janction.videoRendering.v1.IndexedVideoRenderingTask.videoRenderingTask:type_name -> janction.videoRendering.v1.VideoRenderingTask
-	1,  // 10: janction.videoRendering.v1.VideoRenderingThread.Validation.status:type_name -> janction.videoRendering.v1.VideoRenderingThread.Validation.ValidationStatus
-	11, // [11:11] is the sub-list for method output_type
-	11, // [11:11] is the sub-list for method input_type
-	11, // [11:11] is the sub-list for extension type_name
-	11, // [11:11] is the sub-list for extension extendee
-	0,  // [0:11] is the sub-list for field type_name
+	8,  // 5: janction.videoRendering.v1.Worker.reputation:type_name -> janction.videoRendering.v1.Worker.Reputation
+	5,  // 6: janction.videoRendering.v1.VideoRenderingTask.threads:type_name -> janction.videoRendering.v1.VideoRenderingThread
+	9,  // 7: janction.videoRendering.v1.VideoRenderingThread.solution:type_name -> janction.videoRendering.v1.VideoRenderingThread.Solution
+	10, // 8: janction.videoRendering.v1.VideoRenderingThread.validations:type_name -> janction.videoRendering.v1.VideoRenderingThread.Validation
+	4,  // 9: janction.videoRendering.v1.IndexedVideoRenderingTask.videoRenderingTask:type_name -> janction.videoRendering.v1.VideoRenderingTask
+	10, // [10:10] is the sub-list for method output_type
+	10, // [10:10] is the sub-list for method input_type
+	10, // [10:10] is the sub-list for extension type_name
+	10, // [10:10] is the sub-list for extension extendee
+	0,  // [0:10] is the sub-list for field type_name
 }
 
 func init() { file_janction_videoRendering_v1_types_proto_init() }
@@ -7503,7 +7383,7 @@ func file_janction_videoRendering_v1_types_proto_init() {
 		File: protoimpl.DescBuilder{
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_janction_videoRendering_v1_types_proto_rawDesc,
-			NumEnums:      2,
+			NumEnums:      1,
 			NumMessages:   10,
 			NumExtensions: 0,
 			NumServices:   0,
