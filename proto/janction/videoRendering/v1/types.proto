@@ -97,7 +97,7 @@ message VideoRenderingTask {
 
     message Validation {
       string validator = 1[(cosmos_proto.scalar) = "cosmos.AddressString"];
-      uint32 amount_files = 2;
+      uint64 amount_files = 2;
       bool valid = 3;
     }
   }

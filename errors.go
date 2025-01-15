@@ -13,4 +13,6 @@ var (
 	ErrInvalidVideoRenderingTask = errors.Register(ModuleName, 20, "invalid video rendering task")
 
 	ErrInvalidSolution = errors.Register(ModuleName, 30, "proposed solution is invalid")
+
+	ErrInvalidVerification = errors.Register(ModuleName, 40, "verification to solution is invalid")
 )

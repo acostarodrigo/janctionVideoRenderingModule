@@ -5022,8 +5022,8 @@ func (x *fastReflection_VideoRenderingThread_Validation) Range(f func(protorefle
 			return
 		}
 	}
-	if x.AmountFiles != uint32(0) {
-		value := protoreflect.ValueOfUint32(x.AmountFiles)
+	if x.AmountFiles != uint64(0) {
+		value := protoreflect.ValueOfUint64(x.AmountFiles)
 		if !f(fd_VideoRenderingThread_Validation_amount_files, value) {
 			return
 		}
@@ -5052,7 +5052,7 @@ func (x *fastReflection_VideoRenderingThread_Validation) Has(fd protoreflect.Fie
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.validator":
 		return x.Validator != ""
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.amount_files":
-		return x.AmountFiles != uint32(0)
+		return x.AmountFiles != uint64(0)
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.valid":
 		return x.Valid != false
 	default:
@@ -5074,7 +5074,7 @@ func (x *fastReflection_VideoRenderingThread_Validation) Clear(fd protoreflect.F
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.validator":
 		x.Validator = ""
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.amount_files":
-		x.AmountFiles = uint32(0)
+		x.AmountFiles = uint64(0)
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.valid":
 		x.Valid = false
 	default:
@@ -5098,7 +5098,7 @@ func (x *fastReflection_VideoRenderingThread_Validation) Get(descriptor protoref
 		return protoreflect.ValueOfString(value)
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.amount_files":
 		value := x.AmountFiles
-		return protoreflect.ValueOfUint32(value)
+		return protoreflect.ValueOfUint64(value)
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.valid":
 		value := x.Valid
 		return protoreflect.ValueOfBool(value)
@@ -5125,7 +5125,7 @@ func (x *fastReflection_VideoRenderingThread_Validation) Set(fd protoreflect.Fie
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.validator":
 		x.Validator = value.Interface().(string)
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.amount_files":
-		x.AmountFiles = uint32(value.Uint())
+		x.AmountFiles = value.Uint()
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.valid":
 		x.Valid = value.Bool()
 	default:
@@ -5170,7 +5170,7 @@ func (x *fastReflection_VideoRenderingThread_Validation) NewField(fd protoreflec
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.validator":
 		return protoreflect.ValueOfString("")
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.amount_files":
-		return protoreflect.ValueOfUint32(uint32(0))
+		return protoreflect.ValueOfUint64(uint64(0))
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.valid":
 		return protoreflect.ValueOfBool(false)
 	default:
@@ -5398,7 +5398,7 @@ func (x *fastReflection_VideoRenderingThread_Validation) ProtoMethods() *protoif
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.AmountFiles |= uint32(b&0x7F) << shift
+					x.AmountFiles |= uint64(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -6989,7 +6989,7 @@ type VideoRenderingThread_Validation struct {
 	unknownFields protoimpl.UnknownFields
 
 	Validator   string `protobuf:"bytes,1,opt,name=validator,proto3" json:"validator,omitempty"`
-	AmountFiles uint32 `protobuf:"varint,2,opt,name=amount_files,json=amountFiles,proto3" json:"amount_files,omitempty"`
+	AmountFiles uint64 `protobuf:"varint,2,opt,name=amount_files,json=amountFiles,proto3" json:"amount_files,omitempty"`
 	Valid       bool   `protobuf:"varint,3,opt,name=valid,proto3" json:"valid,omitempty"`
 }
 
@@ -7020,7 +7020,7 @@ func (x *VideoRenderingThread_Validation) GetValidator() string {
 	return ""
 }
 
-func (x *VideoRenderingThread_Validation) GetAmountFiles() uint32 {
+func (x *VideoRenderingThread_Validation) GetAmountFiles() uint64 {
 	if x != nil {
 		return x.AmountFiles
 	}
@@ -7170,7 +7170,7 @@ var file_janction_videoRendering_v1_types_proto_rawDesc = []byte{
 	0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73,
 	0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x09,
 	0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x12, 0x21, 0x0a, 0x0c, 0x61, 0x6d, 0x6f,
-	0x75, 0x6e, 0x74, 0x5f, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0d, 0x52,
+	0x75, 0x6e, 0x74, 0x5f, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52,
 	0x0b, 0x61, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x46, 0x69, 0x6c, 0x65, 0x73, 0x12, 0x14, 0x0a, 0x05,
 	0x76, 0x61, 0x6c, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x08, 0x52, 0x05, 0x76, 0x61, 0x6c,
 	0x69, 0x64, 0x22, 0x30, 0x0a, 0x16, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65,
