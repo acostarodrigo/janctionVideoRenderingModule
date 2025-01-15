@@ -2,12 +2,14 @@ package keeper
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"cosmossdk.io/collections"
 	"cosmossdk.io/core/address"
 	storetypes "cosmossdk.io/core/store"
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/janction/videoRendering"
+	"github.com/janction/videoRendering/db"
 )
 
 type Keeper struct {
@@ -25,12 +27,19 @@ type Keeper struct {
 	VideoRenderingTasks    collections.Map[string, videoRendering.VideoRenderingTask]
 	Workers                collections.Map[string, videoRendering.Worker]
 	Configuration          VideoConfiguration
+	DB                     db.DB
 }
 
 // NewKeeper creates a new Keeper instance
 func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService storetypes.KVStoreService, authority string, path string) Keeper {
 	if _, err := addressCodec.StringToBytes(authority); err != nil {
 		panic(fmt.Errorf("invalid authority address: %w", err))
+	}
+
+	// we initialize the database
+	db, err := db.Init(filepath.Join(path, "videoRendering.db"))
+	if err != nil {
+		panic(err)
 	}
 
 	config, err := GetVideoRenderingConfiguration(path)
@@ -49,6 +58,7 @@ func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService s
 		VideoRenderingTasks:    collections.NewMap(sb, videoRendering.VideoRenderingTaskKey, "videoRenderingTasks", collections.StringKey, codec.CollValue[videoRendering.VideoRenderingTask](cdc)),
 		Workers:                collections.NewMap(sb, videoRendering.WorkerKey, "workers", collections.StringKey, codec.CollValue[videoRendering.Worker](cdc)),
 		Configuration:          *config,
+		DB:                     *db,
 	}
 
 	schema, err := sb.Build()
