@@ -201,12 +201,13 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 		}
 	}
 
+	MIN_VALIDATORS := 1
 	maxId, _ := k.VideoRenderingTaskInfo.Get(ctx)
 	for i := 0; i < int(maxId.NextId); i++ {
 		task, _ := k.VideoRenderingTasks.Get(ctx, strconv.Itoa(i))
 		if !task.Completed {
 			for k, thread := range task.Threads {
-				if len(thread.Validations) >= 1 && !thread.Completed {
+				if len(thread.Validations) >= MIN_VALIDATORS && !thread.Completed {
 					log.Println("we are ready to validate", thread.ThreadId)
 					am.EvaluateCompletedThread(ctx, &task, k)
 				}
