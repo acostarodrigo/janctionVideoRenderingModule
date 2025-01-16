@@ -185,10 +185,16 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 
 	// we validate if this node is enabled to perform work
 	if k.Configuration.Enabled && k.Configuration.WorkerAddress != "" {
-		// TODO register worker
-
 		// we validate if the worker is idle
 		worker, _ := k.Workers.Get(ctx, k.Configuration.WorkerAddress)
+
+		if worker.Address == "" {
+			isRegistered, _ := k.DB.IsWorkerRegistered(k.Configuration.WorkerAddress)
+			if !isRegistered {
+				go worker.RegisterWorker(k.Configuration.WorkerAddress, &k.DB)
+			}
+		}
+
 		if worker.Enabled && worker.CurrentTaskId == "" {
 			// we find any task in progress that has enought reward
 			log.Printf(" worker %v is idle ", worker.Address)

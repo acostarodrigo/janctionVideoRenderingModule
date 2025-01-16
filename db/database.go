@@ -20,6 +20,11 @@ type Thread struct {
 	VerificationStarted bool
 }
 
+type Worker struct {
+	Address    string
+	Registered bool
+}
+
 // DB encapsulates the database connection.
 type DB struct {
 	conn *sql.DB
@@ -38,16 +43,21 @@ func Init(databasePath string) (*DB, error) {
 		return nil, fmt.Errorf("failed to open database: %w", err)
 	}
 
-	createTable := `
+	createTables := `
     CREATE TABLE IF NOT EXISTS threads (
         id TEXT PRIMARY KEY,
 		work_started BOOLEAN,
 		work_completed BOOLEAN,
 		solution_proposed BOOLEAN,
 		verification_started BOOLEAN
-    );`
+	);
+	CREATE TABLE IF NOT EXISTS workers (
+		address TEXT PRIMARY KEY,
+		registered BOOLEAN
+	);
+    `
 
-	if _, err := db.Exec(createTable); err != nil {
+	if _, err := db.Exec(createTables); err != nil {
 		return nil, fmt.Errorf("failed to create table: %w", err)
 	}
 
@@ -106,4 +116,31 @@ func (db *DB) DeleteThread(id string) error {
 		return fmt.Errorf("failed to delete thread: %w", err)
 	}
 	return nil
+}
+
+// Createthread inserts a new thread into the database.
+func (db *DB) Addworker(address string) error {
+	insertQuery := `INSERT INTO weorkers (address, registered) VALUES (?, true)`
+	_, err := db.conn.Exec(insertQuery, address)
+	if err != nil {
+		return fmt.Errorf("failed to insert worker: %w", err)
+	}
+
+	return nil
+}
+
+// Readthread retrieves a thread by ID.
+func (db *DB) IsWorkerRegistered(address string) (bool, error) {
+	query := `SELECT address, registered  FROM workers WHERE address = ?`
+	row := db.conn.QueryRow(query, address)
+
+	var worker Worker
+	if err := row.Scan(&worker.Address, &worker.Registered); err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		return false, fmt.Errorf("failed to read thread: %w", err)
+	}
+
+	return true, nil
 }
