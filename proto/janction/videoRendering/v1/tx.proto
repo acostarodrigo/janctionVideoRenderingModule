@@ -25,9 +25,12 @@ service Msg {
 
   // Propose a solution for the test of the nodes to validate
   rpc ProposeSolution(MsgProposeSolution) returns (MsgProposeSolutionResponse);
-
   // Propose a solution for the test of the nodes to validate
   rpc SubmitValidation(MsgSubmitValidation) returns (MsgSubmitValidationResponse);
+
+  // Submits the solution to IPFS
+  rpc SubmitSolution(MsgSubmitSolution) returns (MsgSubmitSolutionResponse);
+  
 }
 
 // MsgCreateGame defines the Msg/CreateGame request type.
@@ -94,5 +97,16 @@ message MsgSubmitValidation {
 }
 
 message MsgSubmitValidationResponse {
+  
+}
+
+message MsgSubmitSolution {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1;
+  string taskId = 2;
+  string threadId = 3;
+  repeated string files = 4;
+}
+message MsgSubmitSolutionResponse {
   
 }

@@ -75,6 +75,18 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					},
 				},
 				{
+					RpcMethod: "SubmitSolution",
+					Use:       "submit-solution [taskId] [threadId] [files] --from [workerAddress]",
+					Short:     "Submits the cids of the files uploaded into IPFS.",
+					Long:      "", // TODO Add long
+					Example:   "", // TODO add exampe
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "taskId"},
+						{ProtoField: "threadId"},
+						{ProtoField: "files", Varargs: true},
+					},
+				},
+				{
 					RpcMethod: "SubmitValidation",
 					Use:       "submit-validation [taskId] [threadId] [filesAmount] [valid] --from [workerAddress]",
 					Short:     "Submit a validation to a proposed solution",

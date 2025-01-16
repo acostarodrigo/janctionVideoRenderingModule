@@ -216,6 +216,14 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 				if len(thread.Validations) >= MIN_VALIDATORS && !thread.Completed {
 					log.Println("we are ready to validate", thread.ThreadId)
 					am.EvaluateCompletedThread(ctx, &task, k)
+
+					// if we are the node that proposed the solution, then we upload it
+					if thread.Solution.ProposedBy == am.keeper.Configuration.WorkerAddress {
+						localThread, _ := am.keeper.DB.ReadThread(thread.ThreadId)
+						if !localThread.SubmitionStarted {
+							go thread.SubmitSolution(ctx, am.keeper.Configuration.WorkerAddress, am.keeper.Configuration.RootPath, &am.keeper.DB)
+						}
+					}
 				}
 			}
 		}

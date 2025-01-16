@@ -17,7 +17,7 @@ import (
 func (t *VideoRenderingThread) StartWork(worker string, cid string, path string, db *db.DB) error {
 	ctx := context.Background()
 	log.Printf("Updating thread %s", t.ThreadId)
-	if err := db.UpdateThread(t.ThreadId, true, false, false, false); err != nil {
+	if err := db.UpdateThread(t.ThreadId, true, false, false, false, false); err != nil {
 		log.Printf("Unable to update thread status, err: %s", err.Error())
 	}
 
@@ -35,7 +35,7 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string,
 		}
 
 		err = vm.RenderVideoThread(ctx, cid, uint64(t.StartFrame), uint64(t.EndFrame), t.ThreadId, path)
-		db.UpdateThread(t.ThreadId, true, true, false, false)
+		db.UpdateThread(t.ThreadId, true, true, false, false, false)
 		if err != nil {
 			return err
 		}
@@ -50,7 +50,7 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string,
 }
 
 func (t VideoRenderingThread) ProposeSolution(ctx context.Context, workerAddress string, rootPath string, db *db.DB) error {
-	db.UpdateThread(t.ThreadId, true, true, true, false)
+	db.UpdateThread(t.ThreadId, true, true, true, false, false)
 	count := vm.CountFilesInDirectory(rootPath)
 
 	if count != (int(t.EndFrame)-int(t.StartFrame))+1 {
@@ -153,7 +153,7 @@ func ParseSequenceFromOutput(output string) (string, error) {
 
 func (t VideoRenderingThread) Verify(ctx context.Context, workerAddress string, rootPath string, db *db.DB) error {
 	// we will verify any file we already have rendered.
-	db.UpdateThread(t.ThreadId, true, true, true, true)
+	db.UpdateThread(t.ThreadId, true, true, true, true, false)
 
 	files := vm.CountFilesInDirectory(rootPath)
 	if files == 0 {
@@ -169,7 +169,7 @@ func (t VideoRenderingThread) Verify(ctx context.Context, workerAddress string, 
 		return err
 	}
 
-	solution, _ := transformSliceToMap(t.Solution.Files)
+	solution, _ := transformSliceToMap(t.Solution.Hashes)
 	var valid bool = true
 	for filename, hash := range solution {
 		if myWork[filename] != hash {
@@ -186,6 +186,39 @@ func (t VideoRenderingThread) Verify(ctx context.Context, workerAddress string, 
 func submitValidation(validator string, taskId, threadId string, amount_files int64, valid bool) error {
 	executableName := "minid"
 	cmd := exec.Command(executableName, "tx", "videoRendering", "submit-validation", taskId, threadId, strconv.FormatInt(amount_files, 10), strconv.FormatBool(valid), "--from", validator, "--yes")
+	_, err := cmd.Output()
+	log.Printf("executing %s", cmd.String())
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (t VideoRenderingThread) SubmitSolution(ctx context.Context, workerAddress, rootPath string, db *db.DB) error {
+	db.UpdateThread(t.ThreadId, true, true, true, true, true)
+
+	cids, err := ipfs.UploadSolution(ctx, rootPath, t.ThreadId)
+	if err != nil {
+		return err
+	}
+	err = submitSolution(workerAddress, t.TaskId, t.ThreadId, cids)
+	return err
+}
+
+func submitSolution(address, taskId, threadId string, cids []string) error {
+	executableName := "minid"
+	args := []string{
+		"tx", "videoRendering", "submit-solution",
+		taskId, threadId,
+	}
+
+	// Append solution arguments
+	args = append(args, cids...)
+
+	// Append flags
+	args = append(args, "--yes", "--from", address)
+
+	cmd := exec.Command(executableName, args...)
 	_, err := cmd.Output()
 	log.Printf("executing %s", cmd.String())
 	if err != nil {

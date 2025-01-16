@@ -18,6 +18,7 @@ type Thread struct {
 	WorkCompleted       bool
 	SolutionProposed    bool
 	VerificationStarted bool
+	SubmitionStarted    bool
 }
 
 type Worker struct {
@@ -49,7 +50,8 @@ func Init(databasePath string) (*DB, error) {
 		work_started BOOLEAN,
 		work_completed BOOLEAN,
 		solution_proposed BOOLEAN,
-		verification_started BOOLEAN
+		verification_started BOOLEAN,
+		submition_started BOOLEAN
 	);
 	CREATE TABLE IF NOT EXISTS workers (
 		address TEXT PRIMARY KEY,
@@ -71,7 +73,7 @@ func (db *DB) Close() error {
 
 // Createthread inserts a new thread into the database.
 func (db *DB) AddThread(id string) error {
-	insertQuery := `INSERT INTO threads (id, work_started, work_completed, solution_proposed, verification_started) VALUES (?, false, false, false, false)`
+	insertQuery := `INSERT INTO threads (id, work_started, work_completed, solution_proposed, verification_started, submition_started) VALUES (?, false, false, false, false, false)`
 	_, err := db.conn.Exec(insertQuery, id)
 	if err != nil {
 		return fmt.Errorf("failed to insert thread: %w", err)
@@ -82,15 +84,15 @@ func (db *DB) AddThread(id string) error {
 
 // Readthread retrieves a thread by ID.
 func (db *DB) ReadThread(id string) (*Thread, error) {
-	query := `SELECT id, work_started, work_completed, solution_proposed, verification_started  FROM threads WHERE id = ?`
+	query := `SELECT id, work_started, work_completed, solution_proposed, verification_started, submition_started  FROM threads WHERE id = ?`
 	row := db.conn.QueryRow(query, id)
 
 	var thread Thread
-	if err := row.Scan(&thread.ID, &thread.WorkStarted, &thread.WorkCompleted, &thread.SolutionProposed, &thread.VerificationStarted); err != nil {
+	if err := row.Scan(&thread.ID, &thread.WorkStarted, &thread.WorkCompleted, &thread.SolutionProposed, &thread.VerificationStarted, &thread.SubmitionStarted); err != nil {
 		if err == sql.ErrNoRows {
 			// thead doesn't exists, so we insert it
 			db.AddThread(id)
-			return &Thread{ID: id, WorkStarted: false, WorkCompleted: false, SolutionProposed: false, VerificationStarted: false}, nil
+			return &Thread{ID: id, WorkStarted: false, WorkCompleted: false, SolutionProposed: false, VerificationStarted: false, SubmitionStarted: false}, nil
 		}
 		return nil, fmt.Errorf("failed to read thread: %w", err)
 	}
@@ -99,9 +101,9 @@ func (db *DB) ReadThread(id string) (*Thread, error) {
 }
 
 // Updatethread updates a task's information.
-func (db *DB) UpdateThread(id string, workStarted, workCompleted, solProposed, verificationStarted bool) error {
-	updateQuery := `UPDATE threads SET work_started = ?, work_completed = ?, solution_proposed = ?, verification_started = ? WHERE id = ?`
-	_, err := db.conn.Exec(updateQuery, workStarted, workCompleted, solProposed, verificationStarted, id)
+func (db *DB) UpdateThread(id string, workStarted, workCompleted, solProposed, verificationStarted bool, submitionStarted bool) error {
+	updateQuery := `UPDATE threads SET work_started = ?, work_completed = ?, solution_proposed = ?, verification_started = ? , submition_started = ? WHERE id = ?`
+	_, err := db.conn.Exec(updateQuery, workStarted, workCompleted, solProposed, verificationStarted, submitionStarted, id)
 	if err != nil {
 		return fmt.Errorf("failed to update thread: %w", err)
 	}
@@ -120,7 +122,7 @@ func (db *DB) DeleteThread(id string) error {
 
 // Createthread inserts a new thread into the database.
 func (db *DB) Addworker(address string) error {
-	insertQuery := `INSERT INTO weorkers (address, registered) VALUES (?, true)`
+	insertQuery := `INSERT INTO workers (address, registered) VALUES (?, true)`
 	_, err := db.conn.Exec(insertQuery, address)
 	if err != nil {
 		return fmt.Errorf("failed to insert worker: %w", err)

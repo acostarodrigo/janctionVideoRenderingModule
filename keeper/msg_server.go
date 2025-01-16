@@ -167,7 +167,7 @@ func (ms msgServer) ProposeSolution(ctx context.Context, msg *videoRendering.Msg
 
 			// TODO parse file names equals thread's frames
 
-			task.Threads[i].Solution = &videoRendering.VideoRenderingThread_Solution{ProposedBy: msg.Creator, Files: msg.Solution}
+			task.Threads[i].Solution = &videoRendering.VideoRenderingThread_Solution{ProposedBy: msg.Creator, Hashes: msg.Solution}
 			err = ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
 			if err != nil {
 				log.Printf("unable to propose solution %s", err.Error())
@@ -226,4 +226,32 @@ func (ms msgServer) SubmitValidation(ctx context.Context, msg *videoRendering.Ms
 	ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
 
 	return &videoRendering.MsgSubmitValidationResponse{}, nil
+}
+
+func (ms msgServer) SubmitSolution(ctx context.Context, msg *videoRendering.MsgSubmitSolution) (*videoRendering.MsgSubmitSolutionResponse, error) {
+	task, err := ms.k.VideoRenderingTasks.Get(ctx, msg.TaskId)
+	if err != nil {
+		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "provided task doesn't exists")
+	}
+	for i, thread := range task.Threads {
+		if thread.ThreadId == msg.ThreadId {
+
+			if thread.Solution.ProposedBy != msg.Creator {
+				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "only the provider of the solution can upload it")
+			}
+
+			if !thread.Completed {
+				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "thread is not yet completed")
+			}
+
+			if len(msg.Files) != int(thread.EndFrame)-int(thread.StartFrame)+1 {
+				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "solution is not correct. File amount missmatch")
+			}
+
+			task.Threads[i].Solution.Files = msg.Files
+			ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
+			break
+		}
+	}
+	return &videoRendering.MsgSubmitSolutionResponse{}, nil
 }
