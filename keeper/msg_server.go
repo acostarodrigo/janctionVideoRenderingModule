@@ -47,7 +47,7 @@ func (ms msgServer) CreateVideoRenderingTask(ctx context.Context, msg *videoRend
 	nextId++
 	ms.k.VideoRenderingTaskInfo.Set(ctx, videoRendering.VideoRenderingTaskInfo{NextId: nextId})
 
-	videoTask := videoRendering.VideoRenderingTask{TaskId: taskId, Requester: msg.Creator, Cid: msg.Cid, StartFrame: msg.StartFrame, EndFrame: msg.EndFrame, InProgress: true, ThreadAmount: msg.Threads, Reward: msg.Reward}
+	videoTask := videoRendering.VideoRenderingTask{TaskId: taskId, Requester: msg.Creator, Cid: msg.Cid, StartFrame: msg.StartFrame, EndFrame: msg.EndFrame, Completed: false, ThreadAmount: msg.Threads, Reward: msg.Reward}
 	threads := videoTask.GenerateThreads(taskId)
 	videoTask.Threads = threads
 
@@ -71,7 +71,7 @@ func (ms msgServer) AddWorker(ctx context.Context, msg *videoRendering.MsgAddWor
 	// worker is not previously registered, so we move on
 	// TODO I'm facking a stacked value of 100 for future use
 	reputation := videoRendering.Worker_Reputation{Points: 0, Stacked: 100}
-	worker := videoRendering.Worker{Address: msg.Creator, Reputation: &reputation, Status: videoRendering.Worker_WORKER_STATUS_IDLE, Enabled: true}
+	worker := videoRendering.Worker{Address: msg.Creator, Reputation: &reputation, Enabled: true}
 
 	ms.k.Workers.Set(ctx, msg.Creator, worker)
 	return &videoRendering.MsgAddWorkerResponse{}, nil
@@ -90,19 +90,22 @@ func (ms msgServer) SubscribeWorkerToTask(ctx context.Context, msg *videoRenderi
 	if err != nil {
 		return nil, err
 	}
-	if !task.InProgress {
+	if task.Completed {
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerTaskNotAvailable.Error(), "task (%s) is already completed. Can't subscribe worker", msg.TaskId)
 	}
 
 	for i, v := range task.Threads {
-		if len(v.Workers) < 10 {
+		if len(v.Workers) < 10 && !v.Completed {
 			v.Workers = append(v.Workers, msg.Address)
 			ms.k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
 			worker.CurrentTaskId = task.TaskId
 			worker.CurrentThreadIndex = uint32(i)
-			worker.Status = videoRendering.Worker_WORKER_STATUS_IDLE
 			ms.k.Workers.Set(ctx, msg.Address, worker)
 
+			err := ms.k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
+			if err != nil {
+				log.Printf("error trying to update thread %s to in progress", v.ThreadId)
+			}
 			return &videoRendering.MsgSubscribeWorkerToTaskResponse{ThreadId: v.ThreadId}, nil
 		}
 	}
@@ -127,7 +130,7 @@ func (ms msgServer) ProposeSolution(ctx context.Context, msg *videoRendering.Msg
 	}
 
 	// task must exists and be in progress
-	if !task.InProgress {
+	if task.Completed {
 		log.Printf("Task %s is not valid to accept solutions", msg.TaskId)
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "Task %s is not valid to accept solutions", msg.TaskId)
 	}
@@ -201,7 +204,7 @@ func (ms msgServer) SubmitValidation(ctx context.Context, msg *videoRendering.Ms
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "worker is not working on task")
 	}
 
-	if !task.InProgress {
+	if task.Completed {
 		log.Printf("task is already completed. No more validations accepted")
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "task is already completed. No more validations accepted")
 	}

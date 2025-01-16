@@ -52,7 +52,7 @@ func (qs queryServer) GetPendingVideoRenderingTasks(ctx context.Context, req *vi
 			continue
 		}
 
-		if task.InProgress {
+		if !task.Completed {
 			result = append(result, &task)
 		}
 	}

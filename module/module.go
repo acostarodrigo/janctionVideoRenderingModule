@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
-	"slices"
 	"strconv"
 
 	"cosmossdk.io/core/appmodule"
@@ -134,18 +133,8 @@ func (am AppModule) getPendingVideoRenderingTask(ctx context.Context, worker str
 		}
 
 		// we only search for in progress and with the reward this node will accept
-		if task.InProgress && task.Reward >= uint64(am.keeper.Configuration.MinReward) {
-			// we found a task that might be suitable to start working on.
-			// we need to check if we are already subscribed as a worker in any of the threads
-			for _, v := range task.Threads {
-				log.Printf("worker %v  found on thread %v. Skipping", worker, v.ThreadId)
-				if slices.Contains(v.Workers, worker) {
-					return false, videoRendering.VideoRenderingTask{}
-				} else {
-					log.Printf("worker %v not found on thread %v. registering", worker, v.ThreadId)
-					return true, task
-				}
-			}
+		if !task.Completed && task.Reward >= uint64(am.keeper.Configuration.MinReward) {
+			return true, task
 		}
 	}
 	return false, videoRendering.VideoRenderingTask{}
@@ -178,7 +167,7 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 				go thread.ProposeSolution(ctx, worker.Address, workPath, &k.DB)
 			}
 
-			if thread.Solution != nil  && !dbThread.VerificationStarted {
+			if thread.Solution != nil && !dbThread.VerificationStarted {
 				// start verification
 				go thread.Verify(ctx, worker.Address, workPath, &k.DB)
 			}
@@ -211,6 +200,54 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 			}
 		}
 	}
+
+	maxId, _ := k.VideoRenderingTaskInfo.Get(ctx)
+	for i := 0; i < int(maxId.NextId); i++ {
+		task, _ := k.VideoRenderingTasks.Get(ctx, strconv.Itoa(i))
+		if !task.Completed {
+			for k, thread := range task.Threads {
+				if len(thread.Validations) >= 1 && !thread.Completed {
+					log.Println("we are ready to validate", thread.ThreadId)
+					am.EvaluateCompletedThread(ctx, &task, k)
+				}
+			}
+		}
+	}
+
+	for i := 0; i < int(maxId.NextId); i++ {
+		task, _ := k.VideoRenderingTasks.Get(ctx, strconv.Itoa(i))
+		if !task.Completed {
+			completed := true
+			for _, thread := range task.Threads {
+				if !thread.Completed {
+					// we found at least one thread not completed, so task isn't complete
+					completed = false
+					break
+				}
+			}
+			if completed {
+				// all threads are over, we mark the task as completed
+				task.Completed = true
+				am.keeper.VideoRenderingTasks.Set(ctx, task.TaskId, task)
+			}
+		}
+	}
+
+	return nil
+}
+
+func (am AppModule) EvaluateCompletedThread(ctx context.Context, task *videoRendering.VideoRenderingTask, index int) error {
+	//TODO  implement validations
+	thread := task.Threads[index]
+	for _, worker := range thread.Workers {
+		// we rest all workers
+		worker, _ := am.keeper.Workers.Get(ctx, worker)
+		worker.CurrentTaskId = ""
+		worker.CurrentThreadIndex = 0
+		am.keeper.Workers.Set(ctx, worker.Address, worker)
+	}
+	task.Threads[index].Completed = true
+	am.keeper.VideoRenderingTasks.Set(ctx, task.TaskId, *task)
 
 	return nil
 }
