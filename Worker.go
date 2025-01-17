@@ -14,6 +14,7 @@ func (w Worker) RegisterWorker(address string, db *db.DB) error {
 	_, err := cmd.Output()
 	log.Printf("executing %s", cmd.String())
 	if err != nil {
+		db.DeleteWorker(address)
 		return err
 	}
 	return nil

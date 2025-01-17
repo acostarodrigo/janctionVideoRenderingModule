@@ -146,3 +146,12 @@ func (db *DB) IsWorkerRegistered(address string) (bool, error) {
 
 	return true, nil
 }
+
+func (db *DB) DeleteWorker(address string) error {
+	deleteQuery := `DELETE FROM workers WHERE address = ?`
+	_, err := db.conn.Exec(deleteQuery, address)
+	if err != nil {
+		return fmt.Errorf("failed to delete worker: %w", err)
+	}
+	return nil
+}
