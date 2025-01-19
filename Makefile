@@ -31,6 +31,11 @@ proto-gen:
 	@$(protoImage) sh ./scripts/protocgen.sh
 	@go mod tidy
 
+proto-gen-client:
+	@echo "Generating protobuf files for client..."
+	@$(protoImage) sh ./scripts/protocgen_client.sh
+	@go mod tidy
+
 proto-format:
 	@$(protoImage) find ./ -name "*.proto" -exec clang-format -i {} \;
 

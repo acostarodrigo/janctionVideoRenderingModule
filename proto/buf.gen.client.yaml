@@ -1,0 +1,9 @@
+version: v1
+plugins:
+  - name: ts-proto
+    path: ./node_modules/.bin/protoc-gen-ts_proto
+    out: ../client/src/types/generated
+    opt:
+      - esModuleInterop=true
+      - forceLong=long
+      - useOptionals=messages
