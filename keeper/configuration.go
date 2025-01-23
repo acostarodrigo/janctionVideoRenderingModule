@@ -27,7 +27,6 @@ func GetVideoRenderingConfiguration(rootPath string) (*VideoConfiguration, error
 	// we make sure the root path exists. It might yet not be initialized
 	_, err := os.Stat(rootPath)
 	if errors.Is(err, fs.ErrNotExist) {
-		log.Println("File doesn't exists", rootPath)
 		return &conf, nil
 	}
 
