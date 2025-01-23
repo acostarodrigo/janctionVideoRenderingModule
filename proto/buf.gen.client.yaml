@@ -7,3 +7,4 @@ plugins:
       - esModuleInterop=true
       - forceLong=long
       - useOptionals=messages
+      - useProtobufjs=true

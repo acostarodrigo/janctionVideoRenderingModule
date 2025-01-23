@@ -1,5 +1,8 @@
 {
   "devDependencies": {
     "ts-proto": "^2.6.1"
+  },
+  "dependencies": {
+    "protobufjs": "^7.0.0"
   }
 }
