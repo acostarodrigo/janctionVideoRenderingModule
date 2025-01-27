@@ -64,7 +64,7 @@ func (t VideoRenderingThread) ProposeSolution(ctx context.Context, workerAddress
 		return err
 	}
 
-	executableName := "minid"
+	executableName := "janctiond"
 	// Base arguments
 	args := []string{
 		"tx", "videoRendering", "propose-solution",
@@ -118,7 +118,7 @@ func transformSliceToMap(input []string) (map[string]string, error) {
 }
 
 func GetAccountSequence(account string) (string, error) {
-	executableName := "minid"
+	executableName := "janctiond"
 	cmd := exec.Command(executableName, "query", "auth", "account", account, "--output", "json")
 	output, err := cmd.Output()
 	if err != nil {
@@ -184,7 +184,7 @@ func (t VideoRenderingThread) Verify(ctx context.Context, workerAddress string, 
 }
 
 func submitValidation(validator string, taskId, threadId string, amount_files int64, valid bool) error {
-	executableName := "minid"
+	executableName := "janctiond"
 	cmd := exec.Command(executableName, "tx", "videoRendering", "submit-validation", taskId, threadId, strconv.FormatInt(amount_files, 10), strconv.FormatBool(valid), "--from", validator, "--yes")
 	_, err := cmd.Output()
 	log.Printf("executing %s", cmd.String())
@@ -206,7 +206,7 @@ func (t VideoRenderingThread) SubmitSolution(ctx context.Context, workerAddress,
 }
 
 func submitSolution(address, taskId, threadId string, cids []string) error {
-	executableName := "minid"
+	executableName := "janctiond"
 	args := []string{
 		"tx", "videoRendering", "submit-solution",
 		taskId, threadId,

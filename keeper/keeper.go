@@ -41,11 +41,7 @@ func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService s
 		panic(err)
 	}
 
-	config, err := GetVideoRenderingConfiguration(path)
-
-	if err != nil {
-		panic(err)
-	}
+	config, _ := GetVideoRenderingConfiguration(path)
 
 	sb := collections.NewSchemaBuilder(storeService)
 	k := Keeper{

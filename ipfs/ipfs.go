@@ -68,6 +68,7 @@ func UploadSolution(ctx context.Context, rootPath, threadId string) ([]string, e
 			}
 
 			// Add the file to IPFS
+
 			cid, err := sh.Add(file)
 			file.Close() // Close the file after it's successfully uploaded
 			if err != nil {

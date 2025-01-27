@@ -61,7 +61,7 @@ func splitFrames(startFrame, endFrame, threads int) []frameRange {
 
 func (t *VideoRenderingTask) SubscribeWorkerToTask(ctx context.Context, workerAddress string) error {
 	// TODO call cmd with message subscribeWorkerToTask
-	executableName := "minid"
+	executableName := "janctiond"
 
 	cmd := exec.Command(executableName, "tx", "videoRendering", "subscribe-worker-to-task", workerAddress, t.TaskId, "--yes", "--from", workerAddress)
 	_, err := cmd.Output()

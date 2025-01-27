@@ -56,7 +56,6 @@ func (c *VideoConfiguration) SaveConf() error {
 	// we make sure the root path exists. It might not be initialized
 	_, err := os.Stat(c.ConfigPath)
 	if errors.Is(err, fs.ErrNotExist) {
-		log.Println("File doesn't exists", c.ConfigPath)
 		return nil
 	}
 
@@ -70,17 +69,14 @@ func (c *VideoConfiguration) SaveConf() error {
 	// Save the YAML data to a file
 	file, err := os.Create(c.ConfigPath)
 	if err != nil {
-		log.Fatalf("Error creating file: %v\n", err.Error())
 		return err
 	}
 	defer file.Close()
 
 	_, err = file.Write(data)
 	if err != nil {
-		log.Fatalf("Error writing to file: %v\n", err)
 		return err
 	}
 
-	log.Println("YAML data saved to " + c.ConfigPath)
 	return nil
 }
