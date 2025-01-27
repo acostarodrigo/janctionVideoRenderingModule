@@ -1,3 +1,3 @@
-# Janction Layer One Blockchain
+# Janction Layer One Blockchain - Video Rendering module
 
 
