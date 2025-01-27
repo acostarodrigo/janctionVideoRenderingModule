@@ -207,7 +207,7 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 		}
 	}
 
-	MIN_VALIDATORS := 3
+	MIN_VALIDATORS := 2
 	maxId, _ := k.VideoRenderingTaskInfo.Get(ctx)
 	for i := 0; i < int(maxId.NextId); i++ {
 		task, _ := k.VideoRenderingTasks.Get(ctx, strconv.Itoa(i))
