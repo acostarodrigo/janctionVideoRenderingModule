@@ -201,15 +201,15 @@ func submitValidation(validator string, taskId, threadId string, amount_files in
 func (t VideoRenderingThread) SubmitSolution(ctx context.Context, workerAddress, rootPath string, db *db.DB) error {
 	db.UpdateThread(t.ThreadId, true, true, true, true, true)
 
-	cids, err := ipfs.UploadSolution(ctx, rootPath, t.ThreadId)
+	cid, err := ipfs.UploadSolution(ctx, rootPath, t.ThreadId)
 	if err != nil {
 		return err
 	}
-	err = submitSolution(workerAddress, t.TaskId, t.ThreadId, cids)
+	err = submitSolution(workerAddress, t.TaskId, t.ThreadId, cid)
 	return err
 }
 
-func submitSolution(address, taskId, threadId string, cids []string) error {
+func submitSolution(address, taskId, threadId string, cid string) error {
 	executableName := "janctiond"
 	args := []string{
 		"tx", "videoRendering", "submit-solution",
@@ -217,7 +217,7 @@ func submitSolution(address, taskId, threadId string, cids []string) error {
 	}
 
 	// Append solution arguments
-	args = append(args, cids...)
+	args = append(args, cid)
 
 	// Append flags
 	args = append(args, "--yes", "--from", address)

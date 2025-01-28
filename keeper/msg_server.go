@@ -244,11 +244,10 @@ func (ms msgServer) SubmitSolution(ctx context.Context, msg *videoRendering.MsgS
 				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "thread is not yet completed")
 			}
 
-			if len(msg.Files) != int(thread.EndFrame)-int(thread.StartFrame)+1 {
-				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "solution is not correct. File amount missmatch")
-			}
+			// TODO perform IPFS -ls CID and verify it returns the same amount of files
+			// AND cids in the solution
 
-			task.Threads[i].Solution.Files = msg.Files
+			task.Threads[i].Solution.Files = msg.Cid
 			ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
 			break
 		}

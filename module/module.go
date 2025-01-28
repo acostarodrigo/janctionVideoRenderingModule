@@ -119,7 +119,7 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 	return cdc.MustMarshalJSON(gs)
 }
 
-func (am AppModule) getPendingVideoRenderingTask(ctx context.Context, worker string) (bool, videoRendering.VideoRenderingTask) {
+func (am AppModule) getPendingVideoRenderingTask(ctx context.Context) (bool, videoRendering.VideoRenderingTask) {
 	ti, err := am.keeper.VideoRenderingTaskInfo.Get(ctx)
 
 	if err != nil {
@@ -198,7 +198,7 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 		if worker.Enabled && worker.CurrentTaskId == "" {
 			// we find any task in progress that has enought reward
 			log.Printf(" worker %v is idle ", worker.Address)
-			found, task := am.getPendingVideoRenderingTask(ctx, worker.Address)
+			found, task := am.getPendingVideoRenderingTask(ctx)
 			if found {
 				log.Printf(" registering worker %v in task %v ", worker.Address, task.TaskId)
 				go task.SubscribeWorkerToTask(ctx, worker.Address)
@@ -207,7 +207,7 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 		}
 	}
 
-	MIN_VALIDATORS := 2
+	MIN_VALIDATORS := 1
 	maxId, _ := k.VideoRenderingTaskInfo.Get(ctx)
 	for i := 0; i < int(maxId.NextId); i++ {
 		task, _ := k.VideoRenderingTasks.Get(ctx, strconv.Itoa(i))

@@ -105,7 +105,7 @@ message MsgSubmitSolution {
   string creator = 1;
   string taskId = 2;
   string threadId = 3;
-  repeated string files = 4;
+  string cid = 4;
 }
 message MsgSubmitSolutionResponse {
   

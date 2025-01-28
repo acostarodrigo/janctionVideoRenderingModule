@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -76,7 +75,7 @@ func CalculateCIDs(dirPath string) (map[string]string, error) {
 	return cidMap, nil
 }
 
-func UploadSolution(ctx context.Context, rootPath, threadId string) ([]string, error) {
+func UploadSolution(ctx context.Context, rootPath, threadId string) (string, error) {
 	// Connect to the IPFS daemon
 	sh := shell.NewShell("localhost:5001") // Replace with your IPFS API address
 
@@ -86,48 +85,16 @@ func UploadSolution(ctx context.Context, rootPath, threadId string) ([]string, e
 	// Ensure the thread output path exists
 	info, err := os.Stat(threadOutputPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to access thread output path: %w", err)
+		return "", fmt.Errorf("failed to access thread output path: %w", err)
 	}
 	if !info.IsDir() {
-		return nil, fmt.Errorf("thread output path is not a directory: %s", threadOutputPath)
+		return "", fmt.Errorf("thread output path is not a directory: %s", threadOutputPath)
 	}
 
-	// List of files to upload
-	var addedFileCIDs []string
-
-	// Walk the thread output path and upload PNG files
-	err = filepath.Walk(threadOutputPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-		// Only upload PNG files
-		if !info.IsDir() && strings.HasSuffix(info.Name(), ".png") {
-			// Open the file as a reader
-			file, err := os.Open(path)
-			if err != nil {
-				return fmt.Errorf("failed to open file %s: %w", path, err)
-			}
-
-			// Add the file to IPFS
-
-			cid, err := sh.Add(file)
-			file.Close() // Close the file after it's successfully uploaded
-			if err != nil {
-				return fmt.Errorf("failed to upload file %s: %w", path, err)
-			}
-
-			log.Printf("Uploaded file %s with CID %s", path, cid)
-
-			// Add the CID to the list of added files
-			addedFileCIDs = append(addedFileCIDs, cid)
-
-		}
-		return nil
-	})
-
+	cid, err := sh.AddDir(threadOutputPath)
 	if err != nil {
-		return nil, fmt.Errorf("failed to upload files for threadId %s: %w", threadId, err)
+		return "", fmt.Errorf("failed to upload files for threadId %s: %w", threadId, err)
 	}
 
-	return addedFileCIDs, nil
+	return cid, nil
 }

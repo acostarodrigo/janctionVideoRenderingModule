@@ -4390,52 +4390,6 @@ func (x *_VideoRenderingThread_Solution_2_list) IsValid() bool {
 	return x.list != nil
 }
 
-var _ protoreflect.List = (*_VideoRenderingThread_Solution_3_list)(nil)
-
-type _VideoRenderingThread_Solution_3_list struct {
-	list *[]string
-}
-
-func (x *_VideoRenderingThread_Solution_3_list) Len() int {
-	if x.list == nil {
-		return 0
-	}
-	return len(*x.list)
-}
-
-func (x *_VideoRenderingThread_Solution_3_list) Get(i int) protoreflect.Value {
-	return protoreflect.ValueOfString((*x.list)[i])
-}
-
-func (x *_VideoRenderingThread_Solution_3_list) Set(i int, value protoreflect.Value) {
-	valueUnwrapped := value.String()
-	concreteValue := valueUnwrapped
-	(*x.list)[i] = concreteValue
-}
-
-func (x *_VideoRenderingThread_Solution_3_list) Append(value protoreflect.Value) {
-	valueUnwrapped := value.String()
-	concreteValue := valueUnwrapped
-	*x.list = append(*x.list, concreteValue)
-}
-
-func (x *_VideoRenderingThread_Solution_3_list) AppendMutable() protoreflect.Value {
-	panic(fmt.Errorf("AppendMutable can not be called on message VideoRenderingThread_Solution at list field Files as it is not of Message kind"))
-}
-
-func (x *_VideoRenderingThread_Solution_3_list) Truncate(n int) {
-	*x.list = (*x.list)[:n]
-}
-
-func (x *_VideoRenderingThread_Solution_3_list) NewElement() protoreflect.Value {
-	v := ""
-	return protoreflect.ValueOfString(v)
-}
-
-func (x *_VideoRenderingThread_Solution_3_list) IsValid() bool {
-	return x.list != nil
-}
-
 var (
 	md_VideoRenderingThread_Solution             protoreflect.MessageDescriptor
 	fd_VideoRenderingThread_Solution_proposed_by protoreflect.FieldDescriptor
@@ -4528,8 +4482,8 @@ func (x *fastReflection_VideoRenderingThread_Solution) Range(f func(protoreflect
 			return
 		}
 	}
-	if len(x.Files) != 0 {
-		value := protoreflect.ValueOfList(&_VideoRenderingThread_Solution_3_list{list: &x.Files})
+	if x.Files != "" {
+		value := protoreflect.ValueOfString(x.Files)
 		if !f(fd_VideoRenderingThread_Solution_files, value) {
 			return
 		}
@@ -4554,7 +4508,7 @@ func (x *fastReflection_VideoRenderingThread_Solution) Has(fd protoreflect.Field
 	case "janction.videoRendering.v1.VideoRenderingThread.Solution.hashes":
 		return len(x.Hashes) != 0
 	case "janction.videoRendering.v1.VideoRenderingThread.Solution.files":
-		return len(x.Files) != 0
+		return x.Files != ""
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.VideoRenderingThread.Solution"))
@@ -4576,7 +4530,7 @@ func (x *fastReflection_VideoRenderingThread_Solution) Clear(fd protoreflect.Fie
 	case "janction.videoRendering.v1.VideoRenderingThread.Solution.hashes":
 		x.Hashes = nil
 	case "janction.videoRendering.v1.VideoRenderingThread.Solution.files":
-		x.Files = nil
+		x.Files = ""
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.VideoRenderingThread.Solution"))
@@ -4603,11 +4557,8 @@ func (x *fastReflection_VideoRenderingThread_Solution) Get(descriptor protorefle
 		listValue := &_VideoRenderingThread_Solution_2_list{list: &x.Hashes}
 		return protoreflect.ValueOfList(listValue)
 	case "janction.videoRendering.v1.VideoRenderingThread.Solution.files":
-		if len(x.Files) == 0 {
-			return protoreflect.ValueOfList(&_VideoRenderingThread_Solution_3_list{})
-		}
-		listValue := &_VideoRenderingThread_Solution_3_list{list: &x.Files}
-		return protoreflect.ValueOfList(listValue)
+		value := x.Files
+		return protoreflect.ValueOfString(value)
 	default:
 		if descriptor.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.VideoRenderingThread.Solution"))
@@ -4635,9 +4586,7 @@ func (x *fastReflection_VideoRenderingThread_Solution) Set(fd protoreflect.Field
 		clv := lv.(*_VideoRenderingThread_Solution_2_list)
 		x.Hashes = *clv.list
 	case "janction.videoRendering.v1.VideoRenderingThread.Solution.files":
-		lv := value.List()
-		clv := lv.(*_VideoRenderingThread_Solution_3_list)
-		x.Files = *clv.list
+		x.Files = value.Interface().(string)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.VideoRenderingThread.Solution"))
@@ -4664,14 +4613,10 @@ func (x *fastReflection_VideoRenderingThread_Solution) Mutable(fd protoreflect.F
 		}
 		value := &_VideoRenderingThread_Solution_2_list{list: &x.Hashes}
 		return protoreflect.ValueOfList(value)
-	case "janction.videoRendering.v1.VideoRenderingThread.Solution.files":
-		if x.Files == nil {
-			x.Files = []string{}
-		}
-		value := &_VideoRenderingThread_Solution_3_list{list: &x.Files}
-		return protoreflect.ValueOfList(value)
 	case "janction.videoRendering.v1.VideoRenderingThread.Solution.proposed_by":
 		panic(fmt.Errorf("field proposed_by of message janction.videoRendering.v1.VideoRenderingThread.Solution is not mutable"))
+	case "janction.videoRendering.v1.VideoRenderingThread.Solution.files":
+		panic(fmt.Errorf("field files of message janction.videoRendering.v1.VideoRenderingThread.Solution is not mutable"))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.VideoRenderingThread.Solution"))
@@ -4691,8 +4636,7 @@ func (x *fastReflection_VideoRenderingThread_Solution) NewField(fd protoreflect.
 		list := []string{}
 		return protoreflect.ValueOfList(&_VideoRenderingThread_Solution_2_list{list: &list})
 	case "janction.videoRendering.v1.VideoRenderingThread.Solution.files":
-		list := []string{}
-		return protoreflect.ValueOfList(&_VideoRenderingThread_Solution_3_list{list: &list})
+		return protoreflect.ValueOfString("")
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.VideoRenderingThread.Solution"))
@@ -4772,11 +4716,9 @@ func (x *fastReflection_VideoRenderingThread_Solution) ProtoMethods() *protoifac
 				n += 1 + l + runtime.Sov(uint64(l))
 			}
 		}
-		if len(x.Files) > 0 {
-			for _, s := range x.Files {
-				l = len(s)
-				n += 1 + l + runtime.Sov(uint64(l))
-			}
+		l = len(x.Files)
+		if l > 0 {
+			n += 1 + l + runtime.Sov(uint64(l))
 		}
 		if x.unknownFields != nil {
 			n += len(x.unknownFields)
@@ -4808,13 +4750,11 @@ func (x *fastReflection_VideoRenderingThread_Solution) ProtoMethods() *protoifac
 			copy(dAtA[i:], x.unknownFields)
 		}
 		if len(x.Files) > 0 {
-			for iNdEx := len(x.Files) - 1; iNdEx >= 0; iNdEx-- {
-				i -= len(x.Files[iNdEx])
-				copy(dAtA[i:], x.Files[iNdEx])
-				i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Files[iNdEx])))
-				i--
-				dAtA[i] = 0x1a
-			}
+			i -= len(x.Files)
+			copy(dAtA[i:], x.Files)
+			i = runtime.EncodeVarint(dAtA, i, uint64(len(x.Files)))
+			i--
+			dAtA[i] = 0x1a
 		}
 		if len(x.Hashes) > 0 {
 			for iNdEx := len(x.Hashes) - 1; iNdEx >= 0; iNdEx-- {
@@ -4975,7 +4915,7 @@ func (x *fastReflection_VideoRenderingThread_Solution) ProtoMethods() *protoifac
 				if postIndex > l {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 				}
-				x.Files = append(x.Files, string(dAtA[iNdEx:postIndex]))
+				x.Files = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
 			default:
 				iNdEx = preIndex
@@ -6957,7 +6897,7 @@ type VideoRenderingThread_Solution struct {
 
 	ProposedBy string   `protobuf:"bytes,1,opt,name=proposed_by,json=proposedBy,proto3" json:"proposed_by,omitempty"`
 	Hashes     []string `protobuf:"bytes,2,rep,name=hashes,proto3" json:"hashes,omitempty"`
-	Files      []string `protobuf:"bytes,3,rep,name=files,proto3" json:"files,omitempty"`
+	Files      string   `protobuf:"bytes,3,opt,name=files,proto3" json:"files,omitempty"`
 }
 
 func (x *VideoRenderingThread_Solution) Reset() {
@@ -6994,11 +6934,11 @@ func (x *VideoRenderingThread_Solution) GetHashes() []string {
 	return nil
 }
 
-func (x *VideoRenderingThread_Solution) GetFiles() []string {
+func (x *VideoRenderingThread_Solution) GetFiles() string {
 	if x != nil {
 		return x.Files
 	}
-	return nil
+	return ""
 }
 
 type VideoRenderingThread_Validation struct {
@@ -7166,7 +7106,7 @@ var file_janction_videoRendering_v1_types_proto_rawDesc = []byte{
 	0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x0a, 0x70, 0x72, 0x6f,
 	0x70, 0x6f, 0x73, 0x65, 0x64, 0x42, 0x79, 0x12, 0x16, 0x0a, 0x06, 0x68, 0x61, 0x73, 0x68, 0x65,
 	0x73, 0x18, 0x02, 0x20, 0x03, 0x28, 0x09, 0x52, 0x06, 0x68, 0x61, 0x73, 0x68, 0x65, 0x73, 0x12,
-	0x14, 0x0a, 0x05, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x18, 0x03, 0x20, 0x03, 0x28, 0x09, 0x52, 0x05,
+	0x14, 0x0a, 0x05, 0x66, 0x69, 0x6c, 0x65, 0x73, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05,
 	0x66, 0x69, 0x6c, 0x65, 0x73, 0x1a, 0x7d, 0x0a, 0x0a, 0x56, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74,
 	0x69, 0x6f, 0x6e, 0x12, 0x36, 0x0a, 0x09, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72,
 	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x42, 0x18, 0xd2, 0xb4, 0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d,
