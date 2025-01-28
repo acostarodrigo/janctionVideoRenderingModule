@@ -2,14 +2,10 @@ package vm
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"fmt"
-	"io"
 	"os"
 	"os/exec"
 	"path"
-	"path/filepath"
 	"strings"
 )
 
@@ -105,51 +101,54 @@ func CountFilesInDirectory(directoryPath string) int {
 	return fileCount
 }
 
-// HashFilesInDirectory calculates the SHA-256 hashes of all PNG files in a directory
-func HashFilesInDirectory(rootPath string) (map[string]string, error) {
-	directoryPath := path.Join(rootPath, "output")
-	// Map to store file names and their corresponding hashes
-	hashes := make(map[string]string)
+// // HashFilesInDirectory calculates the SHA-256 hashes of all PNG files in a directory
+// func HashFilesInDirectory(rootPath string) (map[string]string, error) {
+// 	directoryPath := path.Join(rootPath, "output")
+// 	hashes, err := ipfs.CalculateCIDs(directoryPath)
 
-	// Walk through the directory
-	err := filepath.Walk(directoryPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
+// 	return hashes, err
+// 	// // Map to store file names and their corresponding hashes
+// 	// hashes := make(map[string]string)
 
-		// Skip directories
-		if info.IsDir() {
-			return nil
-		}
+// 	// // Walk through the directory
+// 	// err := filepath.Walk(directoryPath, func(path string, info os.FileInfo, err error) error {
+// 	// 	if err != nil {
+// 	// 		return err
+// 	// 	}
 
-		// Check if the file has a .png extension
-		if filepath.Ext(info.Name()) == ".png" {
-			// Open the file
-			file, err := os.Open(path)
-			if err != nil {
-				return err
-			}
-			defer file.Close()
+// 	// 	// Skip directories
+// 	// 	if info.IsDir() {
+// 	// 		return nil
+// 	// 	}
 
-			// Compute the hash
-			hasher := sha256.New()
-			if _, err := io.Copy(hasher, file); err != nil {
-				return err
-			}
+// 	// 	// Check if the file has a .png extension
+// 	// 	if filepath.Ext(info.Name()) == ".png" {
+// 	// 		// Open the file
+// 	// 		file, err := os.Open(path)
+// 	// 		if err != nil {
+// 	// 			return err
+// 	// 		}
+// 	// 		defer file.Close()
 
-			// Convert the hash to a hex string
-			hash := hex.EncodeToString(hasher.Sum(nil))
+// 	// 		// Compute the hash
+// 	// 		hasher := sha256.New()
+// 	// 		if _, err := io.Copy(hasher, file); err != nil {
+// 	// 			return err
+// 	// 		}
 
-			// Store the hash in the map
-			hashes[info.Name()] = hash
-		}
+// 	// 		// Convert the hash to a hex string
+// 	// 		hash := hex.EncodeToString(hasher.Sum(nil))
 
-		return nil
-	})
+// 	// 		// Store the hash in the map
+// 	// 		hashes[info.Name()] = hash
+// 	// 	}
 
-	if err != nil {
-		return nil, err
-	}
+// 	// 	return nil
+// 	// })
 
-	return hashes, nil
-}
+// 	// if err != nil {
+// 	// 	return nil, err
+// 	// }
+
+// 	// return hashes, nil
+// }

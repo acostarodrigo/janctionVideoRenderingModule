@@ -1,10 +1,12 @@
 package ipfs
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"log"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -33,6 +35,45 @@ func IPFSGet(cid string, path string) error {
 
 	fmt.Println("Download completed successfully.")
 	return nil
+}
+
+// CalculateCIDs recursively computes the CIDs of a directory and its contents using `ipfs add --only-hash --recursive`
+func CalculateCIDs(dirPath string) (map[string]string, error) {
+	cidMap := make(map[string]string)
+
+	// Walk through the directory
+	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return fmt.Errorf("error accessing path %s: %w", path, err)
+		}
+
+		// Skip directories
+		if info.IsDir() {
+			return nil
+		}
+
+		// Execute the IPFS add command with -Q and --only-hash to get the CID
+		cmd := exec.Command("ipfs", "add", "-Q", "--only-hash", path)
+		var out bytes.Buffer
+		cmd.Stdout = &out
+		cmd.Stderr = &out
+
+		if err := cmd.Run(); err != nil {
+			return fmt.Errorf("failed to calculate CID for %s: %s, %w", path, out.String(), err)
+		}
+
+		// Extract only the file name and add the result to the map
+		fileName := filepath.Base(path)
+		cid := strings.TrimSpace(out.String())
+		cidMap[fileName] = cid
+		return nil
+	})
+
+	if err != nil {
+		return nil, fmt.Errorf("error walking directory %s: %w", dirPath, err)
+	}
+
+	return cidMap, nil
 }
 
 func UploadSolution(ctx context.Context, rootPath, threadId string) ([]string, error) {

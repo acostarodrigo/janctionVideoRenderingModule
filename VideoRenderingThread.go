@@ -6,6 +6,7 @@ import (
 	fmt "fmt"
 	"log"
 	"os/exec"
+	"path"
 	"strconv"
 	"strings"
 
@@ -57,7 +58,9 @@ func (t VideoRenderingThread) ProposeSolution(ctx context.Context, workerAddress
 		return nil
 	}
 
-	hashes, err := vm.HashFilesInDirectory(rootPath)
+	output := path.Join(rootPath, "output")
+	hashes, err := ipfs.CalculateCIDs(output)
+
 	solution := MapToKeyValueFormat(hashes)
 	if err != nil {
 		log.Printf("Unable to get hashes in path %s. %s", rootPath, err.Error())
@@ -162,7 +165,8 @@ func (t VideoRenderingThread) Verify(ctx context.Context, workerAddress string, 
 	}
 
 	// we do have some work, lets compare it with the solution
-	myWork, err := vm.HashFilesInDirectory(rootPath)
+	output := path.Join(rootPath, "output")
+	myWork, err := ipfs.CalculateCIDs(output)
 
 	if err != nil {
 		log.Printf("Error getting hashes. Err: %s", err.Error())
