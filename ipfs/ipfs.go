@@ -107,7 +107,12 @@ func CheckIPFSStatus() error {
 		Timeout: 2 * time.Second, // Set timeout to avoid long waits
 	}
 
-	resp, err := client.Get("http://localhost:5001/api/v0/id") // IPFS ID endpoint
+	req, err := http.NewRequest("POST", "http://localhost:5001/api/v0/id", nil) // Use POST
+	if err != nil {
+		return fmt.Errorf("failed to create request: %v", err)
+	}
+
+	resp, err := client.Do(req)
 	if err != nil {
 		return fmt.Errorf("IPFS node unreachable: %v", err)
 	}
