@@ -93,7 +93,6 @@ func (AppModule) ValidateGenesis(cdc codec.JSONCodec, _ client.TxEncodingConfig,
 	if err := cdc.UnmarshalJSON(bz, &data); err != nil {
 		return fmt.Errorf("failed to unmarshal %s genesis state: %w", videoRendering.ModuleName, err)
 	}
-
 	return data.Validate()
 }
 
@@ -120,6 +119,7 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 }
 
 func (am AppModule) getPendingVideoRenderingTask(ctx context.Context) (bool, videoRendering.VideoRenderingTask) {
+	MAX_WORKERS_PER_THREAD := 2
 	ti, err := am.keeper.VideoRenderingTaskInfo.Get(ctx)
 
 	if err != nil {
@@ -134,7 +134,11 @@ func (am AppModule) getPendingVideoRenderingTask(ctx context.Context) (bool, vid
 
 		// we only search for in progress and with the reward this node will accept
 		if !task.Completed && task.Reward >= uint64(am.keeper.Configuration.MinReward) {
-			return true, task
+			for _, value := range task.Threads {
+				if !value.Completed && len(value.Workers) < MAX_WORKERS_PER_THREAD {
+					return true, task
+				}
+			}
 		}
 	}
 	return false, videoRendering.VideoRenderingTask{}
