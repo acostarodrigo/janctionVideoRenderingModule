@@ -1,6 +1,7 @@
 package ipfs
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"fmt"
@@ -153,4 +154,42 @@ func EnsureIPFSRunning() {
 			fmt.Println("✅ IPFS started successfully")
 		}
 	}
+}
+
+// ListDirectory runs `ipfs ls {cid}` and returns a map[filename]CID with a 4s timeout.
+func ListDirectory(cid string) (map[string]string, error) {
+	ctx, cancel := context.WithTimeout(context.Background(), 4*time.Second)
+	defer cancel()
+
+	cmd := exec.CommandContext(ctx, "ipfs", "ls", cid) // Use context for timeout
+
+	var out bytes.Buffer
+	cmd.Stdout = &out
+
+	err := cmd.Run()
+	if ctx.Err() == context.DeadlineExceeded {
+		return nil, fmt.Errorf("timeout: ipfs ls command took too long")
+	}
+	if err != nil {
+		return nil, fmt.Errorf("failed to execute ipfs ls: %v", err)
+	}
+
+	result := make(map[string]string)
+	scanner := bufio.NewScanner(&out)
+
+	for scanner.Scan() {
+		fields := strings.Fields(scanner.Text())
+		if len(fields) < 3 {
+			continue // Ensure it has CID, size, and filename
+		}
+		cid := fields[0]
+		filename := fields[2]
+		result[filename] = cid
+	}
+
+	if err := scanner.Err(); err != nil {
+		return nil, fmt.Errorf("error reading command output: %v", err)
+	}
+
+	return result, nil
 }
