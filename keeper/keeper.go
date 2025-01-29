@@ -9,6 +9,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/janction/videoRendering"
 	"github.com/janction/videoRendering/db"
+	"github.com/janction/videoRendering/ipfs"
 )
 
 type Keeper struct {
@@ -42,6 +43,9 @@ func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService s
 	}
 
 	config, _ := GetVideoRenderingConfiguration(path)
+
+	// we make sure IPFS is running
+	ipfs.EnsureIPFSRunning()
 
 	sb := collections.NewSchemaBuilder(storeService)
 	k := Keeper{

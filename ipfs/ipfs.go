@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
+	"time"
 
 	shell "github.com/ipfs/go-ipfs-api"
 )
@@ -97,4 +99,53 @@ func UploadSolution(ctx context.Context, rootPath, threadId string) (string, err
 	}
 
 	return cid, nil
+}
+
+// CheckIPFSStatus pings the IPFS daemon to check if it's running
+func CheckIPFSStatus() error {
+	client := http.Client{
+		Timeout: 2 * time.Second, // Set timeout to avoid long waits
+	}
+
+	resp, err := client.Get("http://localhost:5001/api/v0/id") // IPFS ID endpoint
+	if err != nil {
+		return fmt.Errorf("IPFS node unreachable: %v", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return fmt.Errorf("IPFS node returned non-200 status: %d", resp.StatusCode)
+	}
+
+	fmt.Println("✅ IPFS node is running")
+	return nil
+}
+
+// StartIPFS attempts to start the IPFS daemon
+func StartIPFS() error {
+	cmd := exec.Command("ipfs", "daemon")
+	cmd.Stdout = nil // You can redirect this if needed
+	cmd.Stderr = nil // You can log errors if needed
+
+	err := cmd.Start() // Start IPFS as a background process
+	if err != nil {
+		return fmt.Errorf("failed to start IPFS daemon: %v", err)
+	}
+
+	fmt.Println("IPFS daemon started successfully")
+	return nil
+}
+
+// EnsureIPFSRunning checks and starts IPFS if needed
+func EnsureIPFSRunning() {
+	err := CheckIPFSStatus()
+	if err != nil {
+		fmt.Println("⚠️ IPFS not running. Attempting to start...")
+		startErr := StartIPFS()
+		if startErr != nil {
+			fmt.Printf("Failed to start IPFS: %v\n", startErr)
+		} else {
+			fmt.Println("✅ IPFS started successfully")
+		}
+	}
 }
