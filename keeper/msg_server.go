@@ -11,6 +11,7 @@ import (
 	"github.com/ipfs/go-cid"
 
 	"github.com/janction/videoRendering"
+	"github.com/janction/videoRendering/ipfs"
 )
 
 type msgServer struct {
@@ -95,8 +96,10 @@ func (ms msgServer) SubscribeWorkerToTask(ctx context.Context, msg *videoRenderi
 	}
 
 	for i, v := range task.Threads {
-		if len(v.Workers) < 10 && !v.Completed {
+		// TODO MaxWorkersPerThread value should be global
+		if len(v.Workers) < 3 && !v.Completed {
 			v.Workers = append(v.Workers, msg.Address)
+
 			ms.k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
 			worker.CurrentTaskId = task.TaskId
 			worker.CurrentThreadIndex = uint32(i)
@@ -244,9 +247,14 @@ func (ms msgServer) SubmitSolution(ctx context.Context, msg *videoRendering.MsgS
 				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "thread is not yet completed")
 			}
 
-			// TODO perform IPFS -ls CID and verify it returns the same amount of files
-			// AND cids in the solution
+			// we make sure ipfs is running
+			ipfs.EnsureIPFSRunning()
 
+			err := thread.VerifySubmittedSolution(msg.Cid)
+			if err != nil {
+				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "submited solution is incorrect")
+			}
+			
 			task.Threads[i].Solution.Files = msg.Cid
 			ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
 			break

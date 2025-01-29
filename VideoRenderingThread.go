@@ -3,6 +3,7 @@ package videoRendering
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	fmt "fmt"
 	"log"
 	"os/exec"
@@ -227,6 +228,25 @@ func submitSolution(address, taskId, threadId string, cid string) error {
 	log.Printf("executing %s", cmd.String())
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+func (t VideoRenderingThread) VerifySubmittedSolution(cid string) error {
+	result, err := ipfs.ListDirectory(cid)
+	if err != nil {
+		return err
+	}
+
+	solution, err := transformSliceToMap(t.Solution.Hashes)
+	if err != nil {
+		return err
+	}
+
+	for key, value := range solution {
+		if result[key] != value {
+			return errors.New("provided solution is incorrect")
+		}
 	}
 	return nil
 }
