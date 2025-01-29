@@ -26,7 +26,7 @@ func IsContainerRunning(ctx context.Context, threadId string) bool {
 	return containerName == name
 }
 
-func RenderVideoThread(ctx context.Context, cid string, s uint64, e uint64, id string, path string) error {
+func RenderVideoThread(ctx context.Context, cid string, start uint64, end uint64, id string, path string) error {
 	n := "myBlender" + id
 
 	// Check if the container exists using `docker ps -a`
@@ -46,7 +46,7 @@ func RenderVideoThread(ctx context.Context, cid string, s uint64, e uint64, id s
 	bindPath := fmt.Sprintf("%s:/workspace", path)
 	command := fmt.Sprintf(
 		"blender -b /workspace/%s -o /workspace/output/frame_###### -F PNG -E CYCLES -s %d -e %d -a",
-		cid, s, e,
+		cid, start, end,
 	)
 
 	// Create and start the container
