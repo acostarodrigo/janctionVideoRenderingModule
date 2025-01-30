@@ -119,7 +119,8 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 }
 
 func (am AppModule) getPendingVideoRenderingTask(ctx context.Context) (bool, videoRendering.VideoRenderingTask) {
-	MAX_WORKERS_PER_THREAD := 2
+	// TODO move this to global parameters
+	MAX_WORKERS_PER_THREAD := 1
 	ti, err := am.keeper.VideoRenderingTaskInfo.Get(ctx)
 
 	if err != nil {
