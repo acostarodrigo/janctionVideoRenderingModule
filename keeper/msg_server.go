@@ -95,9 +95,10 @@ func (ms msgServer) SubscribeWorkerToTask(ctx context.Context, msg *videoRenderi
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerTaskNotAvailable.Error(), "task (%s) is already completed. Can't subscribe worker", msg.TaskId)
 	}
 
+	MAX_WORKERS_PER_THREAD := 1
 	for i, v := range task.Threads {
 		// TODO MaxWorkersPerThread value should be global
-		if len(v.Workers) < 3 && !v.Completed {
+		if len(v.Workers) < MAX_WORKERS_PER_THREAD && !v.Completed {
 			v.Workers = append(v.Workers, msg.Address)
 
 			ms.k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
@@ -250,11 +251,13 @@ func (ms msgServer) SubmitSolution(ctx context.Context, msg *videoRendering.MsgS
 			// we make sure ipfs is running
 			ipfs.EnsureIPFSRunning()
 
-			err := thread.VerifySubmittedSolution(msg.Cid)
-			if err != nil {
-				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "submited solution is incorrect")
-			}
-			
+			// TODO This needs to be improved. If IPFS nodes are not synced, this will cause
+			// issues with discrepancies
+			// err := thread.VerifySubmittedSolution(msg.Cid)
+			// if err != nil {
+			// 	return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "submited solution is incorrect")
+			// }
+
 			task.Threads[i].Solution.Files = msg.Cid
 			ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
 			break
