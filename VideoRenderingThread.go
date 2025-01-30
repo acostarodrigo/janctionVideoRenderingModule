@@ -6,8 +6,10 @@ import (
 	"errors"
 	fmt "fmt"
 	"log"
+	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"strconv"
 	"strings"
 
@@ -18,7 +20,7 @@ import (
 
 func (t *VideoRenderingThread) StartWork(worker string, cid string, path string, db *db.DB) error {
 	ctx := context.Background()
-	log.Printf("Updating thread %s", t.ThreadId)
+
 	if err := db.UpdateThread(t.ThreadId, true, false, false, false, false); err != nil {
 		log.Printf("Unable to update thread status, err: %s", err.Error())
 	}
@@ -36,11 +38,25 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string,
 			return err
 		}
 
-		err = vm.RenderVideoThread(ctx, cid, uint64(t.StartFrame), uint64(t.EndFrame), t.ThreadId, path)
-		db.UpdateThread(t.ThreadId, true, true, false, false, false)
+		vm.RenderVideoThread(ctx, cid, uint64(t.StartFrame), uint64(t.EndFrame), t.ThreadId, path)
+
+		rendersPath := filepath.Join(path, "output")
+		_, err = os.Stat(rendersPath)
+
 		if err != nil {
-			return err
+			// output path was not created so no rendering happened. we will start over
+			db.UpdateThread(t.ThreadId, false, false, false, false, false)
+			log.Println("Unable to complete rendering of task, retrying")
+			return nil
 		}
+		files, _ := os.ReadDir(rendersPath)
+		if len(files) != int(t.EndFrame)-int(t.StartFrame)+1 {
+			db.UpdateThread(t.ThreadId, false, false, false, false, false)
+			log.Println("Unable to complete rendering of task, retrying")
+			return nil
+		}
+		db.UpdateThread(t.ThreadId, true, true, false, false, false)
+
 	} else {
 		// Container is running, so we update worker status
 		// if worker status is idle, we change it
