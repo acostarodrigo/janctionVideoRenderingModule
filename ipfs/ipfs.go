@@ -5,12 +5,15 @@ import (
 	"bytes"
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
+
+	yaml "gopkg.in/yaml.v3"
 
 	shell "github.com/ipfs/go-ipfs-api"
 )
@@ -154,6 +157,14 @@ func EnsureIPFSRunning() {
 			fmt.Println("✅ IPFS started successfully")
 		}
 	}
+
+	config, err := ReadConfig("../videoRendering/ipfs/config.yaml")
+	if err == nil {
+		go ConnectToIPFSNodes(config.IPFSSeeds)
+	} else {
+		fmt.Printf("Unable to connect to swarm. %s", err.Error())
+	}
+
 }
 
 // ListDirectory runs `ipfs ls {cid}` and returns a map[filename]CID with a 4s timeout.
@@ -192,4 +203,38 @@ func ListDirectory(cid string) (map[string]string, error) {
 	}
 
 	return result, nil
+}
+
+// Function to connect to IPFS nodes
+func ConnectToIPFSNodes(seeds []string) {
+	for _, seed := range seeds {
+		cmd := exec.Command("ipfs", "swarm", "connect", seed)
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			log.Printf("Failed to connect to %s: %v\nOutput: %s", seed, err, output)
+		} else {
+			fmt.Printf("Connected to IPFS node: %s\n", seed)
+		}
+	}
+}
+
+// Config struct to match YAML structure
+type Config struct {
+	IPFSSeeds []string `yaml:"ipfs_seeds"`
+}
+
+// Function to read YAML config file
+func ReadConfig(filename string) (*Config, error) {
+	data, err := os.ReadFile(filename)
+	if err != nil {
+		return nil, err
+	}
+
+	var config Config
+	err = yaml.Unmarshal(data, &config)
+	if err != nil {
+		return nil, err
+	}
+
+	return &config, nil
 }

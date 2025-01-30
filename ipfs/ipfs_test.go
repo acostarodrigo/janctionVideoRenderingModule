@@ -1,4 +1,4 @@
-package ipfs
+package ipfs_test
 
 import (
 	"fmt"
@@ -7,7 +7,8 @@ import (
 	"github.com/janction/videoRendering/ipfs"
 )
 
-func TestCalculateCIDs(t *testing.T) {
-	result, _ := ipfs.CalculateCIDs("/Users/rodrigoacosta/.janctiond/renders/10/output")
-	fmt.Println(result)
+func TestConnectionToSeeds(t *testing.T) {
+	config, _ := ipfs.ReadConfig("./config.yaml")
+	fmt.Println(len(config.IPFSSeeds))
+	ipfs.ConnectToIPFSNodes(config.IPFSSeeds)
 }
