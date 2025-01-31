@@ -11,7 +11,6 @@ import (
 	"github.com/ipfs/go-cid"
 
 	"github.com/janction/videoRendering"
-	"github.com/janction/videoRendering/ipfs"
 )
 
 type msgServer struct {
@@ -249,7 +248,7 @@ func (ms msgServer) SubmitSolution(ctx context.Context, msg *videoRendering.MsgS
 			}
 
 			// we make sure ipfs is running
-			ipfs.EnsureIPFSRunning()
+			// ipfs.EnsureIPFSRunning()
 
 			// we verify the solution
 			// err := thread.VerifySubmittedSolution(msg.Cid)
