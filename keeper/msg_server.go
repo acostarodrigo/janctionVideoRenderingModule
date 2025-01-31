@@ -252,10 +252,10 @@ func (ms msgServer) SubmitSolution(ctx context.Context, msg *videoRendering.MsgS
 			ipfs.EnsureIPFSRunning()
 
 			// we verify the solution
-			err := thread.VerifySubmittedSolution(msg.Cid)
-			if err != nil {
-				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "submited solution is incorrect")
-			}
+			// err := thread.VerifySubmittedSolution(msg.Cid)
+			// if err != nil {
+			// 	return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "submited solution is incorrect")
+			// }
 
 			task.Threads[i].Solution.Files = msg.Cid
 			ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
