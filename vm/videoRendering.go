@@ -72,14 +72,16 @@ func RenderVideoThread(ctx context.Context, cid string, start uint64, end uint64
 	fmt.Println("Container logs:")
 	fmt.Println(string(logsOutput))
 
-	// Remove the container after completion
-	rmCmd := exec.CommandContext(ctx, "docker", "rm", n)
-	err = rmCmd.Run()
-	if err != nil {
-		return fmt.Errorf("failed to remove container: %w", err)
-	}
+	RemoveContainer(ctx, n)
 
 	return nil
+}
+
+func RemoveContainer(ctx context.Context, name string) error {
+	// Remove the container after completion
+	rmCmd := exec.CommandContext(ctx, "docker", "rm", name)
+	err := rmCmd.Run()
+	return err
 }
 
 // CountFilesInDirectory counts the number of files in a given directory
