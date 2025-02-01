@@ -27,8 +27,10 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string,
 
 	isRunning := vm.IsContainerRunning(ctx, t.ThreadId)
 	if !isRunning {
-
 		// task is not running,
+
+		// we remove the container just in case it already exists.
+		vm.RemoveContainer(ctx, "myBlender"+t.ThreadId)
 
 		log.Printf("No solution for thread %s. Starting work", t.ThreadId)
 		// we don't have a solution, start working
