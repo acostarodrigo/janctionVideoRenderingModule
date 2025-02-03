@@ -34,6 +34,7 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string,
 
 		log.Printf("No solution for thread %s. Starting work", t.ThreadId)
 		// we don't have a solution, start working
+		ipfs.EnsureIPFSRunning()
 		err := ipfs.IPFSGet(cid, path)
 		if err != nil {
 			log.Printf("Error getting cid %s", cid)
