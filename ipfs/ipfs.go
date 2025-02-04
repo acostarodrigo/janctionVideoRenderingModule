@@ -132,7 +132,7 @@ func CheckIPFSStatus() error {
 
 // StartIPFS attempts to start the IPFS daemon
 func StartIPFS() error {
-	cmd := exec.Command("ipfs", "daemon", "&")
+	cmd := exec.Command("ipfs", "daemon")
 	cmd.Stdout = nil // You can redirect this if needed
 	cmd.Stderr = nil // You can log errors if needed
 

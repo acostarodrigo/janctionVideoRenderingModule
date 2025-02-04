@@ -3,6 +3,7 @@ package vm
 import (
 	"context"
 	"fmt"
+	"log"
 	"os"
 	"os/exec"
 	"path"
@@ -26,7 +27,14 @@ func IsContainerRunning(ctx context.Context, threadId string) bool {
 	return containerName == name
 }
 
-func RenderVideoThread(ctx context.Context, cid string, start uint64, end uint64, id string, path string) error {
+func RenderVideo(ctx context.Context, cid string, start uint64, end uint64, id string, path string, reverse bool) error {
+	if reverse {
+		return renderVideoReverse(ctx, cid, start, end, id, path)
+	}
+	return renderVideoThread(ctx, cid, start, end, id, path)
+}
+
+func renderVideoThread(ctx context.Context, cid string, start uint64, end uint64, id string, path string) error {
 	n := "myBlender" + id
 
 	// Check if the container exists using `docker ps -a`
@@ -51,6 +59,8 @@ func RenderVideoThread(ctx context.Context, cid string, start uint64, end uint64
 
 	// Create and start the container
 	runCmd := exec.CommandContext(ctx, "docker", "run", "--name", n, "-v", bindPath, "-d", "blender_render", "sh", "-c", command)
+	log.Printf("*************")
+	log.Printf("Starting docker: %s", runCmd.String())
 	err = runCmd.Run()
 	if err != nil {
 		return fmt.Errorf("failed to create and start container: %w", err)
@@ -73,6 +83,46 @@ func RenderVideoThread(ctx context.Context, cid string, start uint64, end uint64
 	fmt.Println(string(logsOutput))
 
 	RemoveContainer(ctx, n)
+
+	return nil
+}
+
+func renderVideoReverse(ctx context.Context, cid string, start uint64, end uint64, id string, path string) error {
+	n := "myBlender" + id
+
+	for i := end; i >= start; i-- {
+		bindPath := fmt.Sprintf("%s:/workspace", path)
+		command := fmt.Sprintf(
+			"blender -b /workspace/%s -o /workspace/output/frame_###### -F PNG -E CYCLES -s %d -e %d -a",
+			cid, i, i,
+		)
+
+		runCmd := exec.CommandContext(ctx, "docker", "run", "--name", n, "-v", bindPath, "-d", "blender_render", "sh", "-c", command)
+		log.Printf("*************")
+		log.Printf("Starting docker: %s", runCmd.String())
+		err := runCmd.Run()
+		if err != nil {
+			return fmt.Errorf("failed to create and start container: %w", err)
+		}
+
+		// Wait for the container to finish
+		waitCmd := exec.CommandContext(ctx, "docker", "wait", n)
+		err = waitCmd.Run()
+		if err != nil {
+			return fmt.Errorf("failed to wait for container: %w", err)
+		}
+
+		// Retrieve and print logs
+		logsCmd := exec.CommandContext(ctx, "docker", "logs", n)
+		logsOutput, err := logsCmd.Output()
+		if err != nil {
+			return fmt.Errorf("failed to retrieve container logs: %w", err)
+		}
+		fmt.Println("Container logs:")
+		fmt.Println(string(logsOutput))
+
+		RemoveContainer(ctx, n)
+	}
 
 	return nil
 }
@@ -102,55 +152,3 @@ func CountFilesInDirectory(directoryPath string) int {
 	}
 	return fileCount
 }
-
-// // HashFilesInDirectory calculates the SHA-256 hashes of all PNG files in a directory
-// func HashFilesInDirectory(rootPath string) (map[string]string, error) {
-// 	directoryPath := path.Join(rootPath, "output")
-// 	hashes, err := ipfs.CalculateCIDs(directoryPath)
-
-// 	return hashes, err
-// 	// // Map to store file names and their corresponding hashes
-// 	// hashes := make(map[string]string)
-
-// 	// // Walk through the directory
-// 	// err := filepath.Walk(directoryPath, func(path string, info os.FileInfo, err error) error {
-// 	// 	if err != nil {
-// 	// 		return err
-// 	// 	}
-
-// 	// 	// Skip directories
-// 	// 	if info.IsDir() {
-// 	// 		return nil
-// 	// 	}
-
-// 	// 	// Check if the file has a .png extension
-// 	// 	if filepath.Ext(info.Name()) == ".png" {
-// 	// 		// Open the file
-// 	// 		file, err := os.Open(path)
-// 	// 		if err != nil {
-// 	// 			return err
-// 	// 		}
-// 	// 		defer file.Close()
-
-// 	// 		// Compute the hash
-// 	// 		hasher := sha256.New()
-// 	// 		if _, err := io.Copy(hasher, file); err != nil {
-// 	// 			return err
-// 	// 		}
-
-// 	// 		// Convert the hash to a hex string
-// 	// 		hash := hex.EncodeToString(hasher.Sum(nil))
-
-// 	// 		// Store the hash in the map
-// 	// 		hashes[info.Name()] = hash
-// 	// 	}
-
-// 	// 	return nil
-// 	// })
-
-// 	// if err != nil {
-// 	// 	return nil, err
-// 	// }
-
-// 	// return hashes, nil
-// }

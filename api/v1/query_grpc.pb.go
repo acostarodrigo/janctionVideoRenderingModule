@@ -27,7 +27,7 @@ const (
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type QueryClient interface {
-	// GetGame returns the game at the requested index.
+	// GetVideoRenderingTask returns the task based on the taskId
 	GetVideoRenderingTask(ctx context.Context, in *QueryGetVideoRenderingTaskRequest, opts ...grpc.CallOption) (*QueryGetVideoRenderingTaskResponse, error)
 	GetPendingVideoRenderingTasks(ctx context.Context, in *QueryGetPendingVideoRenderingTaskRequest, opts ...grpc.CallOption) (*QueryGetPendingVideoRenderingTaskResponse, error)
 }
@@ -62,7 +62,7 @@ func (c *queryClient) GetPendingVideoRenderingTasks(ctx context.Context, in *Que
 // All implementations must embed UnimplementedQueryServer
 // for forward compatibility
 type QueryServer interface {
-	// GetGame returns the game at the requested index.
+	// GetVideoRenderingTask returns the task based on the taskId
 	GetVideoRenderingTask(context.Context, *QueryGetVideoRenderingTaskRequest) (*QueryGetVideoRenderingTaskResponse, error)
 	GetPendingVideoRenderingTasks(context.Context, *QueryGetPendingVideoRenderingTaskRequest) (*QueryGetPendingVideoRenderingTaskResponse, error)
 	mustEmbedUnimplementedQueryServer()
