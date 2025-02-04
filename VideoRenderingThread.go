@@ -41,8 +41,7 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string,
 			return err
 		}
 
-		isReverse := isIndexOdd(t.Workers, worker)
-		vm.RenderVideo(ctx, cid, uint64(t.StartFrame), uint64(t.EndFrame), t.ThreadId, path, !isReverse)
+		vm.RenderVideo(ctx, cid, uint64(t.StartFrame), uint64(t.EndFrame), t.ThreadId, path, t.IsReverse(worker))
 
 		rendersPath := filepath.Join(path, "output")
 		_, err = os.Stat(rendersPath)
@@ -271,9 +270,9 @@ func (t VideoRenderingThread) VerifySubmittedSolution(cid string) error {
 	return nil
 }
 
-func isIndexOdd(slice []string, value string) bool {
-	for i, v := range slice {
-		if v == value {
+func (t VideoRenderingThread) IsReverse(worker string) bool {
+	for i, v := range t.Workers {
+		if v == worker {
 			return i%2 != 0
 		}
 	}

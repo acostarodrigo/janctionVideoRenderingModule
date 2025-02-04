@@ -224,7 +224,7 @@ func (ms msgServer) SubmitValidation(ctx context.Context, msg *videoRendering.Ms
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "worker is not working on thread")
 	}
 
-	validation := videoRendering.VideoRenderingThread_Validation{Validator: msg.Creator, AmountFiles: msg.FilesAmount, Valid: msg.Valid}
+	validation := videoRendering.VideoRenderingThread_Validation{Validator: msg.Creator, AmountFiles: msg.FilesAmount, Valid: msg.Valid, IsReverse: thread.IsReverse(worker.Address)}
 	task.Threads[worker.CurrentThreadIndex].Validations = append(thread.Validations, &validation)
 	ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
 
