@@ -39,7 +39,7 @@ func (qs queryServer) GetVideoRenderingTask(ctx context.Context, req *videoRende
 func (qs queryServer) GetVideoRenderingLogs(ctx context.Context, req *videoRendering.QueryGetVideoRenderingLogsRequest) (*videoRendering.QueryGetVideoRenderingLogsResponse, error) {
 	// access database
 	var logs []*videoRendering.VideoRenderingLogs_VideoRenderingLog
-	result := qs.k.DB.ReadLogs(req.Index)
+	result := qs.k.DB.ReadLogs(req.ThreadId)
 	if len(result) == 0 {
 		return nil, nil
 	}
@@ -48,7 +48,7 @@ func (qs queryServer) GetVideoRenderingLogs(ctx context.Context, req *videoRende
 		logs = append(logs, &logEntry)
 	}
 
-	return &videoRendering.QueryGetVideoRenderingLogsResponse{VideoRenderingLogs: &videoRendering.VideoRenderingLogs{ThreadId: req.Index, Logs: logs}}, nil
+	return &videoRendering.QueryGetVideoRenderingLogsResponse{VideoRenderingLogs: &videoRendering.VideoRenderingLogs{ThreadId: req.ThreadId, Logs: logs}}, nil
 }
 
 func (qs queryServer) GetPendingVideoRenderingTasks(ctx context.Context, req *videoRendering.QueryGetPendingVideoRenderingTaskRequest) (*videoRendering.QueryGetPendingVideoRenderingTaskResponse, error) {

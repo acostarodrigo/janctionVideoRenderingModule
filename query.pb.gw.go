@@ -98,15 +98,15 @@ func request_Query_GetVideoRenderingLogs_0(ctx context.Context, marshaler runtim
 		_   = err
 	)
 
-	val, ok = pathParams["index"]
+	val, ok = pathParams["threadId"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "index")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "threadId")
 	}
 
-	protoReq.Index, err = runtime.String(val)
+	protoReq.ThreadId, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "index", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "threadId", err)
 	}
 
 	msg, err := client.GetVideoRenderingLogs(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -125,15 +125,15 @@ func local_request_Query_GetVideoRenderingLogs_0(ctx context.Context, marshaler 
 		_   = err
 	)
 
-	val, ok = pathParams["index"]
+	val, ok = pathParams["threadId"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "index")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "threadId")
 	}
 
-	protoReq.Index, err = runtime.String(val)
+	protoReq.ThreadId, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "index", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "threadId", err)
 	}
 
 	msg, err := server.GetVideoRenderingLogs(ctx, &protoReq)
@@ -377,7 +377,7 @@ func RegisterQueryHandlerClient(ctx context.Context, mux *runtime.ServeMux, clie
 var (
 	pattern_Query_GetVideoRenderingTask_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"janction", "videoRendering", "v1", "index"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_GetVideoRenderingLogs_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"janction", "videoRendering", "v1", "index"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_GetVideoRenderingLogs_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"janction", "videoRendering", "v1", "threadId"}, "", runtime.AssumeColonVerbOpt(false)))
 
 	pattern_Query_GetWorker_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"janction", "videoRendering", "v1", "worker"}, "", runtime.AssumeColonVerbOpt(false)))
 )
