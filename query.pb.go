@@ -123,6 +123,99 @@ func (m *QueryGetVideoRenderingTaskResponse) GetVideoRenderingTask() *VideoRende
 	return nil
 }
 
+// QueryGetGameRequest is the request type for the Query/GetGame RPC
+// method.
+type QueryGetVideoRenderingLogsRequest struct {
+	Index string `protobuf:"bytes,1,opt,name=index,proto3" json:"index,omitempty"`
+}
+
+func (m *QueryGetVideoRenderingLogsRequest) Reset()         { *m = QueryGetVideoRenderingLogsRequest{} }
+func (m *QueryGetVideoRenderingLogsRequest) String() string { return proto.CompactTextString(m) }
+func (*QueryGetVideoRenderingLogsRequest) ProtoMessage()    {}
+func (*QueryGetVideoRenderingLogsRequest) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6439ce36a3757d86, []int{2}
+}
+func (m *QueryGetVideoRenderingLogsRequest) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetVideoRenderingLogsRequest) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetVideoRenderingLogsRequest.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetVideoRenderingLogsRequest) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetVideoRenderingLogsRequest.Merge(m, src)
+}
+func (m *QueryGetVideoRenderingLogsRequest) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetVideoRenderingLogsRequest) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetVideoRenderingLogsRequest.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetVideoRenderingLogsRequest proto.InternalMessageInfo
+
+func (m *QueryGetVideoRenderingLogsRequest) GetIndex() string {
+	if m != nil {
+		return m.Index
+	}
+	return ""
+}
+
+// QueryGetGameResponse is the response type for the Query/GetGame RPC
+// method.
+type QueryGetVideoRenderingLogsResponse struct {
+	// Game defines the game at the requested index.
+	VideoRenderingLogs *VideoRenderingLogs `protobuf:"bytes,1,opt,name=video_rendering_logs,json=videoRenderingLogs,proto3" json:"video_rendering_logs,omitempty"`
+}
+
+func (m *QueryGetVideoRenderingLogsResponse) Reset()         { *m = QueryGetVideoRenderingLogsResponse{} }
+func (m *QueryGetVideoRenderingLogsResponse) String() string { return proto.CompactTextString(m) }
+func (*QueryGetVideoRenderingLogsResponse) ProtoMessage()    {}
+func (*QueryGetVideoRenderingLogsResponse) Descriptor() ([]byte, []int) {
+	return fileDescriptor_6439ce36a3757d86, []int{3}
+}
+func (m *QueryGetVideoRenderingLogsResponse) XXX_Unmarshal(b []byte) error {
+	return m.Unmarshal(b)
+}
+func (m *QueryGetVideoRenderingLogsResponse) XXX_Marshal(b []byte, deterministic bool) ([]byte, error) {
+	if deterministic {
+		return xxx_messageInfo_QueryGetVideoRenderingLogsResponse.Marshal(b, m, deterministic)
+	} else {
+		b = b[:cap(b)]
+		n, err := m.MarshalToSizedBuffer(b)
+		if err != nil {
+			return nil, err
+		}
+		return b[:n], nil
+	}
+}
+func (m *QueryGetVideoRenderingLogsResponse) XXX_Merge(src proto.Message) {
+	xxx_messageInfo_QueryGetVideoRenderingLogsResponse.Merge(m, src)
+}
+func (m *QueryGetVideoRenderingLogsResponse) XXX_Size() int {
+	return m.Size()
+}
+func (m *QueryGetVideoRenderingLogsResponse) XXX_DiscardUnknown() {
+	xxx_messageInfo_QueryGetVideoRenderingLogsResponse.DiscardUnknown(m)
+}
+
+var xxx_messageInfo_QueryGetVideoRenderingLogsResponse proto.InternalMessageInfo
+
+func (m *QueryGetVideoRenderingLogsResponse) GetVideoRenderingLogs() *VideoRenderingLogs {
+	if m != nil {
+		return m.VideoRenderingLogs
+	}
+	return nil
+}
+
 type QueryGetPendingVideoRenderingTaskRequest struct {
 }
 
@@ -132,7 +225,7 @@ func (m *QueryGetPendingVideoRenderingTaskRequest) Reset() {
 func (m *QueryGetPendingVideoRenderingTaskRequest) String() string { return proto.CompactTextString(m) }
 func (*QueryGetPendingVideoRenderingTaskRequest) ProtoMessage()    {}
 func (*QueryGetPendingVideoRenderingTaskRequest) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6439ce36a3757d86, []int{2}
+	return fileDescriptor_6439ce36a3757d86, []int{4}
 }
 func (m *QueryGetPendingVideoRenderingTaskRequest) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -173,7 +266,7 @@ func (m *QueryGetPendingVideoRenderingTaskResponse) String() string {
 }
 func (*QueryGetPendingVideoRenderingTaskResponse) ProtoMessage() {}
 func (*QueryGetPendingVideoRenderingTaskResponse) Descriptor() ([]byte, []int) {
-	return fileDescriptor_6439ce36a3757d86, []int{3}
+	return fileDescriptor_6439ce36a3757d86, []int{5}
 }
 func (m *QueryGetPendingVideoRenderingTaskResponse) XXX_Unmarshal(b []byte) error {
 	return m.Unmarshal(b)
@@ -212,6 +305,8 @@ func (m *QueryGetPendingVideoRenderingTaskResponse) GetVideoRenderingTasks() []*
 func init() {
 	proto.RegisterType((*QueryGetVideoRenderingTaskRequest)(nil), "janction.videoRendering.v1.QueryGetVideoRenderingTaskRequest")
 	proto.RegisterType((*QueryGetVideoRenderingTaskResponse)(nil), "janction.videoRendering.v1.QueryGetVideoRenderingTaskResponse")
+	proto.RegisterType((*QueryGetVideoRenderingLogsRequest)(nil), "janction.videoRendering.v1.QueryGetVideoRenderingLogsRequest")
+	proto.RegisterType((*QueryGetVideoRenderingLogsResponse)(nil), "janction.videoRendering.v1.QueryGetVideoRenderingLogsResponse")
 	proto.RegisterType((*QueryGetPendingVideoRenderingTaskRequest)(nil), "janction.videoRendering.v1.QueryGetPendingVideoRenderingTaskRequest")
 	proto.RegisterType((*QueryGetPendingVideoRenderingTaskResponse)(nil), "janction.videoRendering.v1.QueryGetPendingVideoRenderingTaskResponse")
 }
@@ -221,7 +316,7 @@ func init() {
 }
 
 var fileDescriptor_6439ce36a3757d86 = []byte{
-	// 385 bytes of a gzipped FileDescriptorProto
+	// 428 bytes of a gzipped FileDescriptorProto
 	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0xe2, 0x52, 0xcb, 0x4a, 0xcc, 0x4b,
 	0x2e, 0xc9, 0xcc, 0xcf, 0xd3, 0x2f, 0xcb, 0x4c, 0x49, 0xcd, 0x0f, 0x4a, 0xcd, 0x4b, 0x49, 0x2d,
 	0xca, 0xcc, 0x4b, 0xd7, 0x2f, 0x33, 0xd4, 0x2f, 0x2c, 0x4d, 0x2d, 0xaa, 0xd4, 0x2b, 0x28, 0xca,
@@ -234,19 +329,21 @@ var fileDescriptor_6439ce36a3757d86 = []byte{
 	0x2e, 0xd6, 0xcc, 0xbc, 0x94, 0xd4, 0x0a, 0x09, 0x46, 0x05, 0x46, 0x0d, 0xce, 0x20, 0x08, 0x47,
 	0xa9, 0x8d, 0x91, 0x4b, 0x09, 0x9f, 0xde, 0xe2, 0x82, 0xfc, 0xbc, 0xe2, 0x54, 0xa1, 0x04, 0x2e,
 	0x11, 0xb0, 0x9f, 0xe2, 0x8b, 0x60, 0xd2, 0xf1, 0x25, 0x89, 0xc5, 0xd9, 0x60, 0xb3, 0xb8, 0x8d,
-	0xf4, 0xf4, 0x70, 0x87, 0x8a, 0x1e, 0x16, 0x53, 0x85, 0xca, 0x30, 0xc4, 0x94, 0xb4, 0xb8, 0x34,
-	0x60, 0xee, 0x08, 0x48, 0xcd, 0x4b, 0xc9, 0xcc, 0x4b, 0xc7, 0xe9, 0x15, 0xa5, 0x7e, 0x46, 0x2e,
-	0x4d, 0x22, 0x14, 0x43, 0xdd, 0x9e, 0xc4, 0x25, 0x8a, 0xcd, 0xed, 0xc5, 0x12, 0x8c, 0x0a, 0xcc,
-	0x64, 0x38, 0x5e, 0x18, 0xd3, 0xf1, 0xc5, 0x46, 0xcd, 0xcc, 0x5c, 0xac, 0x60, 0x17, 0x09, 0x9d,
-	0x60, 0xe4, 0x12, 0xc5, 0x1a, 0x96, 0x42, 0xb6, 0xf8, 0x2c, 0x22, 0x18, 0x7f, 0x52, 0x76, 0xe4,
-	0x6a, 0x87, 0x04, 0x83, 0x92, 0x41, 0xc7, 0xf3, 0x0d, 0x5a, 0x8c, 0x4d, 0x97, 0x9f, 0x4c, 0x66,
-	0x52, 0x15, 0x52, 0xd6, 0xc7, 0x93, 0x56, 0xab, 0xc1, 0x49, 0xa3, 0x56, 0x68, 0x1d, 0x23, 0x97,
-	0x2c, 0xbe, 0x10, 0x2e, 0x16, 0x72, 0x21, 0xc6, 0x4d, 0x84, 0xa2, 0x53, 0xca, 0x95, 0x42, 0x53,
-	0xa0, 0x1e, 0x64, 0x70, 0xb2, 0x39, 0xf1, 0x48, 0x8e, 0xf1, 0xc2, 0x23, 0x39, 0xc6, 0x07, 0x8f,
-	0xe4, 0x18, 0x27, 0x3c, 0x96, 0x63, 0xb8, 0xf0, 0x58, 0x8e, 0xe1, 0xc6, 0x63, 0x39, 0x86, 0x28,
-	0xa5, 0xf4, 0xcc, 0x92, 0x8c, 0xd2, 0x24, 0xbd, 0xe4, 0xfc, 0x5c, 0x5c, 0x3e, 0x4f, 0x62, 0x03,
-	0x67, 0x26, 0x63, 0x40, 0x00, 0x00, 0x00, 0xff, 0xff, 0xb2, 0x2a, 0xf1, 0xaa, 0x0b, 0x04, 0x00,
-	0x00,
+	0xf4, 0xf4, 0x70, 0x87, 0x8a, 0x1e, 0x16, 0x53, 0x85, 0xca, 0x30, 0xc4, 0x70, 0xfb, 0xc1, 0x27,
+	0x3f, 0xbd, 0x98, 0x5c, 0x3f, 0x40, 0xf4, 0xe2, 0xf6, 0x43, 0x4e, 0x7e, 0x7a, 0x31, 0xe9, 0x7e,
+	0x00, 0x9b, 0x8a, 0xe6, 0x07, 0x90, 0x98, 0x92, 0x16, 0x97, 0x06, 0xcc, 0x1d, 0x01, 0xa9, 0x79,
+	0x29, 0x99, 0x79, 0xe9, 0x38, 0xa3, 0x43, 0xa9, 0x9f, 0x91, 0x4b, 0x93, 0x08, 0xc5, 0x50, 0xb7,
+	0x27, 0x71, 0x89, 0x62, 0x0b, 0x7f, 0x90, 0xe3, 0x99, 0xc9, 0x88, 0x00, 0x61, 0xcc, 0x08, 0x28,
+	0x36, 0x3a, 0xc7, 0xc2, 0xc5, 0x0a, 0x76, 0x91, 0xd0, 0x09, 0x46, 0x2e, 0x51, 0xac, 0xe9, 0x41,
+	0xc8, 0x16, 0x9f, 0x45, 0x04, 0xd3, 0xa0, 0x94, 0x1d, 0xb9, 0xda, 0x21, 0xc1, 0xa0, 0x64, 0xd0,
+	0xf1, 0x7c, 0x83, 0x16, 0x63, 0xd3, 0xe5, 0x27, 0x93, 0x99, 0x54, 0x85, 0x94, 0xf5, 0xf1, 0xe4,
+	0xb7, 0x6a, 0x70, 0xd2, 0xa8, 0xc5, 0xee, 0x15, 0x50, 0x64, 0x91, 0xe3, 0x15, 0xa4, 0xa4, 0x48,
+	0x8e, 0x57, 0x90, 0x53, 0x23, 0x19, 0x5e, 0x59, 0xc7, 0xc8, 0x25, 0x8b, 0x2f, 0xb1, 0x14, 0x0b,
+	0xb9, 0x10, 0xe3, 0x26, 0x42, 0x29, 0x53, 0xca, 0x95, 0x42, 0x53, 0xa0, 0x1e, 0x64, 0x70, 0xb2,
+	0x39, 0xf1, 0x48, 0x8e, 0xf1, 0xc2, 0x23, 0x39, 0xc6, 0x07, 0x8f, 0xe4, 0x18, 0x27, 0x3c, 0x96,
+	0x63, 0xb8, 0xf0, 0x58, 0x8e, 0xe1, 0xc6, 0x63, 0x39, 0x86, 0x28, 0xa5, 0xf4, 0xcc, 0x92, 0x8c,
+	0xd2, 0x24, 0xbd, 0xe4, 0xfc, 0x5c, 0x5c, 0x3e, 0x4f, 0x62, 0x03, 0x97, 0x6d, 0xc6, 0x80, 0x00,
+	0x00, 0x00, 0xff, 0xff, 0x8a, 0xc9, 0x40, 0x9b, 0x9a, 0x05, 0x00, 0x00,
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -263,6 +360,7 @@ const _ = grpc.SupportPackageIsVersion4
 type QueryClient interface {
 	// GetVideoRenderingTask returns the task based on the taskId
 	GetVideoRenderingTask(ctx context.Context, in *QueryGetVideoRenderingTaskRequest, opts ...grpc.CallOption) (*QueryGetVideoRenderingTaskResponse, error)
+	GetVideoRenderingLogs(ctx context.Context, in *QueryGetVideoRenderingLogsRequest, opts ...grpc.CallOption) (*QueryGetVideoRenderingLogsResponse, error)
 	GetPendingVideoRenderingTasks(ctx context.Context, in *QueryGetPendingVideoRenderingTaskRequest, opts ...grpc.CallOption) (*QueryGetPendingVideoRenderingTaskResponse, error)
 }
 
@@ -283,6 +381,15 @@ func (c *queryClient) GetVideoRenderingTask(ctx context.Context, in *QueryGetVid
 	return out, nil
 }
 
+func (c *queryClient) GetVideoRenderingLogs(ctx context.Context, in *QueryGetVideoRenderingLogsRequest, opts ...grpc.CallOption) (*QueryGetVideoRenderingLogsResponse, error) {
+	out := new(QueryGetVideoRenderingLogsResponse)
+	err := c.cc.Invoke(ctx, "/janction.videoRendering.v1.Query/GetVideoRenderingLogs", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *queryClient) GetPendingVideoRenderingTasks(ctx context.Context, in *QueryGetPendingVideoRenderingTaskRequest, opts ...grpc.CallOption) (*QueryGetPendingVideoRenderingTaskResponse, error) {
 	out := new(QueryGetPendingVideoRenderingTaskResponse)
 	err := c.cc.Invoke(ctx, "/janction.videoRendering.v1.Query/GetPendingVideoRenderingTasks", in, out, opts...)
@@ -296,6 +403,7 @@ func (c *queryClient) GetPendingVideoRenderingTasks(ctx context.Context, in *Que
 type QueryServer interface {
 	// GetVideoRenderingTask returns the task based on the taskId
 	GetVideoRenderingTask(context.Context, *QueryGetVideoRenderingTaskRequest) (*QueryGetVideoRenderingTaskResponse, error)
+	GetVideoRenderingLogs(context.Context, *QueryGetVideoRenderingLogsRequest) (*QueryGetVideoRenderingLogsResponse, error)
 	GetPendingVideoRenderingTasks(context.Context, *QueryGetPendingVideoRenderingTaskRequest) (*QueryGetPendingVideoRenderingTaskResponse, error)
 }
 
@@ -305,6 +413,9 @@ type UnimplementedQueryServer struct {
 
 func (*UnimplementedQueryServer) GetVideoRenderingTask(ctx context.Context, req *QueryGetVideoRenderingTaskRequest) (*QueryGetVideoRenderingTaskResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVideoRenderingTask not implemented")
+}
+func (*UnimplementedQueryServer) GetVideoRenderingLogs(ctx context.Context, req *QueryGetVideoRenderingLogsRequest) (*QueryGetVideoRenderingLogsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVideoRenderingLogs not implemented")
 }
 func (*UnimplementedQueryServer) GetPendingVideoRenderingTasks(ctx context.Context, req *QueryGetPendingVideoRenderingTaskRequest) (*QueryGetPendingVideoRenderingTaskResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPendingVideoRenderingTasks not implemented")
@@ -328,6 +439,24 @@ func _Query_GetVideoRenderingTask_Handler(srv interface{}, ctx context.Context, 
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(QueryServer).GetVideoRenderingTask(ctx, req.(*QueryGetVideoRenderingTaskRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _Query_GetVideoRenderingLogs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetVideoRenderingLogsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetVideoRenderingLogs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/janction.videoRendering.v1.Query/GetVideoRenderingLogs",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetVideoRenderingLogs(ctx, req.(*QueryGetVideoRenderingLogsRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -357,6 +486,10 @@ var _Query_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetVideoRenderingTask",
 			Handler:    _Query_GetVideoRenderingTask_Handler,
+		},
+		{
+			MethodName: "GetVideoRenderingLogs",
+			Handler:    _Query_GetVideoRenderingLogs_Handler,
 		},
 		{
 			MethodName: "GetPendingVideoRenderingTasks",
@@ -420,6 +553,71 @@ func (m *QueryGetVideoRenderingTaskResponse) MarshalToSizedBuffer(dAtA []byte) (
 	if m.VideoRenderingTask != nil {
 		{
 			size, err := m.VideoRenderingTask.MarshalToSizedBuffer(dAtA[:i])
+			if err != nil {
+				return 0, err
+			}
+			i -= size
+			i = encodeVarintQuery(dAtA, i, uint64(size))
+		}
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetVideoRenderingLogsRequest) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetVideoRenderingLogsRequest) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetVideoRenderingLogsRequest) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if len(m.Index) > 0 {
+		i -= len(m.Index)
+		copy(dAtA[i:], m.Index)
+		i = encodeVarintQuery(dAtA, i, uint64(len(m.Index)))
+		i--
+		dAtA[i] = 0xa
+	}
+	return len(dAtA) - i, nil
+}
+
+func (m *QueryGetVideoRenderingLogsResponse) Marshal() (dAtA []byte, err error) {
+	size := m.Size()
+	dAtA = make([]byte, size)
+	n, err := m.MarshalToSizedBuffer(dAtA[:size])
+	if err != nil {
+		return nil, err
+	}
+	return dAtA[:n], nil
+}
+
+func (m *QueryGetVideoRenderingLogsResponse) MarshalTo(dAtA []byte) (int, error) {
+	size := m.Size()
+	return m.MarshalToSizedBuffer(dAtA[:size])
+}
+
+func (m *QueryGetVideoRenderingLogsResponse) MarshalToSizedBuffer(dAtA []byte) (int, error) {
+	i := len(dAtA)
+	_ = i
+	var l int
+	_ = l
+	if m.VideoRenderingLogs != nil {
+		{
+			size, err := m.VideoRenderingLogs.MarshalToSizedBuffer(dAtA[:i])
 			if err != nil {
 				return 0, err
 			}
@@ -524,6 +722,32 @@ func (m *QueryGetVideoRenderingTaskResponse) Size() (n int) {
 	_ = l
 	if m.VideoRenderingTask != nil {
 		l = m.VideoRenderingTask.Size()
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryGetVideoRenderingLogsRequest) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	l = len(m.Index)
+	if l > 0 {
+		n += 1 + l + sovQuery(uint64(l))
+	}
+	return n
+}
+
+func (m *QueryGetVideoRenderingLogsResponse) Size() (n int) {
+	if m == nil {
+		return 0
+	}
+	var l int
+	_ = l
+	if m.VideoRenderingLogs != nil {
+		l = m.VideoRenderingLogs.Size()
 		n += 1 + l + sovQuery(uint64(l))
 	}
 	return n
@@ -703,6 +927,174 @@ func (m *QueryGetVideoRenderingTaskResponse) Unmarshal(dAtA []byte) error {
 				m.VideoRenderingTask = &VideoRenderingTask{}
 			}
 			if err := m.VideoRenderingTask.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
+				return err
+			}
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetVideoRenderingLogsRequest) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetVideoRenderingLogsRequest: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetVideoRenderingLogsRequest: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field Index", wireType)
+			}
+			var stringLen uint64
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				stringLen |= uint64(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			intStringLen := int(stringLen)
+			if intStringLen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + intStringLen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			m.Index = string(dAtA[iNdEx:postIndex])
+			iNdEx = postIndex
+		default:
+			iNdEx = preIndex
+			skippy, err := skipQuery(dAtA[iNdEx:])
+			if err != nil {
+				return err
+			}
+			if (skippy < 0) || (iNdEx+skippy) < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if (iNdEx + skippy) > l {
+				return io.ErrUnexpectedEOF
+			}
+			iNdEx += skippy
+		}
+	}
+
+	if iNdEx > l {
+		return io.ErrUnexpectedEOF
+	}
+	return nil
+}
+func (m *QueryGetVideoRenderingLogsResponse) Unmarshal(dAtA []byte) error {
+	l := len(dAtA)
+	iNdEx := 0
+	for iNdEx < l {
+		preIndex := iNdEx
+		var wire uint64
+		for shift := uint(0); ; shift += 7 {
+			if shift >= 64 {
+				return ErrIntOverflowQuery
+			}
+			if iNdEx >= l {
+				return io.ErrUnexpectedEOF
+			}
+			b := dAtA[iNdEx]
+			iNdEx++
+			wire |= uint64(b&0x7F) << shift
+			if b < 0x80 {
+				break
+			}
+		}
+		fieldNum := int32(wire >> 3)
+		wireType := int(wire & 0x7)
+		if wireType == 4 {
+			return fmt.Errorf("proto: QueryGetVideoRenderingLogsResponse: wiretype end group for non-group")
+		}
+		if fieldNum <= 0 {
+			return fmt.Errorf("proto: QueryGetVideoRenderingLogsResponse: illegal tag %d (wire type %d)", fieldNum, wire)
+		}
+		switch fieldNum {
+		case 1:
+			if wireType != 2 {
+				return fmt.Errorf("proto: wrong wireType = %d for field VideoRenderingLogs", wireType)
+			}
+			var msglen int
+			for shift := uint(0); ; shift += 7 {
+				if shift >= 64 {
+					return ErrIntOverflowQuery
+				}
+				if iNdEx >= l {
+					return io.ErrUnexpectedEOF
+				}
+				b := dAtA[iNdEx]
+				iNdEx++
+				msglen |= int(b&0x7F) << shift
+				if b < 0x80 {
+					break
+				}
+			}
+			if msglen < 0 {
+				return ErrInvalidLengthQuery
+			}
+			postIndex := iNdEx + msglen
+			if postIndex < 0 {
+				return ErrInvalidLengthQuery
+			}
+			if postIndex > l {
+				return io.ErrUnexpectedEOF
+			}
+			if m.VideoRenderingLogs == nil {
+				m.VideoRenderingLogs = &VideoRenderingLogs{}
+			}
+			if err := m.VideoRenderingLogs.Unmarshal(dAtA[iNdEx:postIndex]); err != nil {
 				return err
 			}
 			iNdEx = postIndex

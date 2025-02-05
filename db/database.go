@@ -26,6 +26,13 @@ type Worker struct {
 	Registered bool
 }
 
+type LogEntry struct {
+	ThreadId  string
+	Log       string
+	Timestamp int64
+	Severity  int64
+}
+
 // DB encapsulates the database connection.
 type DB struct {
 	conn *sql.DB
@@ -56,6 +63,12 @@ func Init(databasePath string) (*DB, error) {
 	CREATE TABLE IF NOT EXISTS workers (
 		address TEXT PRIMARY KEY,
 		registered BOOLEAN
+	);
+	CREATE TABLE IF NOT EXISTS logs (
+		threadId TEXT,
+		log TEXT,
+		timestamp NUMBER,
+		severity NUMBER
 	);
     `
 
@@ -154,4 +167,32 @@ func (db *DB) DeleteWorker(address string) error {
 		return fmt.Errorf("failed to delete worker: %w", err)
 	}
 	return nil
+}
+
+// inserts a new log entry
+func (db *DB) AddLogEntry(threadId, log string, timestamp, severity int64) error {
+	insertQuery := `INSERT INTO logs (threadId, log, timestamp, severity) VALUES (?,?,?,?)`
+	fmt.Printf("inserting log %s", log)
+	_, err := db.conn.Exec(insertQuery, threadId, log, timestamp, severity)
+	if err != nil {
+		return fmt.Errorf("failed to insert log entry: %w", err)
+	}
+
+	return nil
+}
+
+func (db *DB) ReadLogs(threadId string) []LogEntry {
+	query := `SELECT log, timestamp, severity FROM logs WHERE threadId = ? ORDER BY timestamp`
+	rows, _ := db.conn.Query(query, threadId)
+
+	var logs []LogEntry
+	for rows.Next() { // Iterate and fetch the records from result cursor
+		log := LogEntry{}
+		err := rows.Scan(&log.Log, &log.Timestamp, &log.Severity)
+		if err != nil {
+			fmt.Println(err.Error())
+		}
+		logs = append(logs, log)
+	}
+	return logs
 }

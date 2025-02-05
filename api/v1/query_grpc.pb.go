@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion7
 
 const (
 	Query_GetVideoRenderingTask_FullMethodName         = "/janction.videoRendering.v1.Query/GetVideoRenderingTask"
+	Query_GetVideoRenderingLogs_FullMethodName         = "/janction.videoRendering.v1.Query/GetVideoRenderingLogs"
 	Query_GetPendingVideoRenderingTasks_FullMethodName = "/janction.videoRendering.v1.Query/GetPendingVideoRenderingTasks"
 )
 
@@ -29,6 +30,7 @@ const (
 type QueryClient interface {
 	// GetVideoRenderingTask returns the task based on the taskId
 	GetVideoRenderingTask(ctx context.Context, in *QueryGetVideoRenderingTaskRequest, opts ...grpc.CallOption) (*QueryGetVideoRenderingTaskResponse, error)
+	GetVideoRenderingLogs(ctx context.Context, in *QueryGetVideoRenderingLogsRequest, opts ...grpc.CallOption) (*QueryGetVideoRenderingLogsResponse, error)
 	GetPendingVideoRenderingTasks(ctx context.Context, in *QueryGetPendingVideoRenderingTaskRequest, opts ...grpc.CallOption) (*QueryGetPendingVideoRenderingTaskResponse, error)
 }
 
@@ -43,6 +45,15 @@ func NewQueryClient(cc grpc.ClientConnInterface) QueryClient {
 func (c *queryClient) GetVideoRenderingTask(ctx context.Context, in *QueryGetVideoRenderingTaskRequest, opts ...grpc.CallOption) (*QueryGetVideoRenderingTaskResponse, error) {
 	out := new(QueryGetVideoRenderingTaskResponse)
 	err := c.cc.Invoke(ctx, Query_GetVideoRenderingTask_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *queryClient) GetVideoRenderingLogs(ctx context.Context, in *QueryGetVideoRenderingLogsRequest, opts ...grpc.CallOption) (*QueryGetVideoRenderingLogsResponse, error) {
+	out := new(QueryGetVideoRenderingLogsResponse)
+	err := c.cc.Invoke(ctx, Query_GetVideoRenderingLogs_FullMethodName, in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -64,6 +75,7 @@ func (c *queryClient) GetPendingVideoRenderingTasks(ctx context.Context, in *Que
 type QueryServer interface {
 	// GetVideoRenderingTask returns the task based on the taskId
 	GetVideoRenderingTask(context.Context, *QueryGetVideoRenderingTaskRequest) (*QueryGetVideoRenderingTaskResponse, error)
+	GetVideoRenderingLogs(context.Context, *QueryGetVideoRenderingLogsRequest) (*QueryGetVideoRenderingLogsResponse, error)
 	GetPendingVideoRenderingTasks(context.Context, *QueryGetPendingVideoRenderingTaskRequest) (*QueryGetPendingVideoRenderingTaskResponse, error)
 	mustEmbedUnimplementedQueryServer()
 }
@@ -74,6 +86,9 @@ type UnimplementedQueryServer struct {
 
 func (UnimplementedQueryServer) GetVideoRenderingTask(context.Context, *QueryGetVideoRenderingTaskRequest) (*QueryGetVideoRenderingTaskResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetVideoRenderingTask not implemented")
+}
+func (UnimplementedQueryServer) GetVideoRenderingLogs(context.Context, *QueryGetVideoRenderingLogsRequest) (*QueryGetVideoRenderingLogsResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetVideoRenderingLogs not implemented")
 }
 func (UnimplementedQueryServer) GetPendingVideoRenderingTasks(context.Context, *QueryGetPendingVideoRenderingTaskRequest) (*QueryGetPendingVideoRenderingTaskResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPendingVideoRenderingTasks not implemented")
@@ -109,6 +124,24 @@ func _Query_GetVideoRenderingTask_Handler(srv interface{}, ctx context.Context, 
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Query_GetVideoRenderingLogs_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(QueryGetVideoRenderingLogsRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(QueryServer).GetVideoRenderingLogs(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Query_GetVideoRenderingLogs_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(QueryServer).GetVideoRenderingLogs(ctx, req.(*QueryGetVideoRenderingLogsRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Query_GetPendingVideoRenderingTasks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(QueryGetPendingVideoRenderingTaskRequest)
 	if err := dec(in); err != nil {
@@ -137,6 +170,10 @@ var Query_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetVideoRenderingTask",
 			Handler:    _Query_GetVideoRenderingTask_Handler,
+		},
+		{
+			MethodName: "GetVideoRenderingLogs",
+			Handler:    _Query_GetVideoRenderingLogs_Handler,
 		},
 		{
 			MethodName: "GetPendingVideoRenderingTasks",

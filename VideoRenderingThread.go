@@ -41,7 +41,7 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string,
 			return err
 		}
 
-		vm.RenderVideo(ctx, cid, uint64(t.StartFrame), uint64(t.EndFrame), t.ThreadId, path, t.IsReverse(worker))
+		vm.RenderVideo(ctx, cid, uint64(t.StartFrame), uint64(t.EndFrame), t.ThreadId, path, t.IsReverse(worker), db)
 
 		rendersPath := filepath.Join(path, "output")
 		_, err = os.Stat(rendersPath)

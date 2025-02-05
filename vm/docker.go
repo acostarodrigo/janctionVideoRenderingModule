@@ -8,6 +8,9 @@ import (
 	"os/exec"
 	"path"
 	"strings"
+	"time"
+
+	"github.com/janction/videoRendering/db"
 )
 
 func IsContainerRunning(ctx context.Context, threadId string) bool {
@@ -27,14 +30,21 @@ func IsContainerRunning(ctx context.Context, threadId string) bool {
 	return containerName == name
 }
 
-func RenderVideo(ctx context.Context, cid string, start uint64, end uint64, id string, path string, reverse bool) error {
+func RenderVideo(ctx context.Context, cid string, start uint64, end uint64, id string, path string, reverse bool, db *db.DB) {
 	if reverse {
-		return renderVideoReverse(ctx, cid, start, end, id, path)
+		for i := end; i >= start; i-- {
+			err := renderVideoFrame(ctx, cid, i, id, path)
+			logEntry(db, id, i, err)
+		}
+	} else {
+		for i := start; i <= end; i++ {
+			err := renderVideoFrame(ctx, cid, i, id, path)
+			logEntry(db, id, i, err)
+		}
 	}
-	return renderVideoThread(ctx, cid, start, end, id, path)
 }
 
-func renderVideoThread(ctx context.Context, cid string, start uint64, end uint64, id string, path string) error {
+func renderVideoFrame(ctx context.Context, cid string, frameNumber uint64, id string, path string) error {
 	n := "myBlender" + id
 
 	// Check if the container exists using `docker ps -a`
@@ -54,12 +64,11 @@ func renderVideoThread(ctx context.Context, cid string, start uint64, end uint64
 	bindPath := fmt.Sprintf("%s:/workspace", path)
 	command := fmt.Sprintf(
 		"blender -b /workspace/%s -o /workspace/output/frame_###### -F PNG -E CYCLES -s %d -e %d -a",
-		cid, start, end,
+		cid, frameNumber, frameNumber,
 	)
 
 	// Create and start the container
 	runCmd := exec.CommandContext(ctx, "docker", "run", "--name", n, "-v", bindPath, "-d", "blender_render", "sh", "-c", command)
-	log.Printf("*************")
 	log.Printf("Starting docker: %s", runCmd.String())
 	err = runCmd.Run()
 	if err != nil {
@@ -83,46 +92,6 @@ func renderVideoThread(ctx context.Context, cid string, start uint64, end uint64
 	fmt.Println(string(logsOutput))
 
 	RemoveContainer(ctx, n)
-
-	return nil
-}
-
-func renderVideoReverse(ctx context.Context, cid string, start uint64, end uint64, id string, path string) error {
-	n := "myBlender" + id
-
-	for i := end; i >= start; i-- {
-		bindPath := fmt.Sprintf("%s:/workspace", path)
-		command := fmt.Sprintf(
-			"blender -b /workspace/%s -o /workspace/output/frame_###### -F PNG -E CYCLES -s %d -e %d -a",
-			cid, i, i,
-		)
-
-		runCmd := exec.CommandContext(ctx, "docker", "run", "--name", n, "-v", bindPath, "-d", "blender_render", "sh", "-c", command)
-		log.Printf("*************")
-		log.Printf("Starting docker: %s", runCmd.String())
-		err := runCmd.Run()
-		if err != nil {
-			return fmt.Errorf("failed to create and start container: %w", err)
-		}
-
-		// Wait for the container to finish
-		waitCmd := exec.CommandContext(ctx, "docker", "wait", n)
-		err = waitCmd.Run()
-		if err != nil {
-			return fmt.Errorf("failed to wait for container: %w", err)
-		}
-
-		// Retrieve and print logs
-		logsCmd := exec.CommandContext(ctx, "docker", "logs", n)
-		logsOutput, err := logsCmd.Output()
-		if err != nil {
-			return fmt.Errorf("failed to retrieve container logs: %w", err)
-		}
-		fmt.Println("Container logs:")
-		fmt.Println(string(logsOutput))
-
-		RemoveContainer(ctx, n)
-	}
 
 	return nil
 }
@@ -151,4 +120,9 @@ func CountFilesInDirectory(directoryPath string) int {
 		}
 	}
 	return fileCount
+}
+
+func logEntry(db *db.DB, threadId string, frameNumber uint64, err error) {
+	db.AddLogEntry(threadId, fmt.Sprintf("Rendered frame %v successfully", frameNumber), time.Now().Unix(), 0)
+
 }

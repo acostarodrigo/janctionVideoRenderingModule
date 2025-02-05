@@ -36,6 +36,21 @@ func (qs queryServer) GetVideoRenderingTask(ctx context.Context, req *videoRende
 	return nil, status.Error(codes.Internal, err.Error())
 }
 
+func (qs queryServer) GetVideoRenderingLogs(ctx context.Context, req *videoRendering.QueryGetVideoRenderingLogsRequest) (*videoRendering.QueryGetVideoRenderingLogsResponse, error) {
+	// access database
+	var logs []*videoRendering.VideoRenderingLogs_VideoRenderingLog
+	result := qs.k.DB.ReadLogs(req.Index)
+	if len(result) == 0 {
+		return nil, nil
+	}
+	for _, val := range result {
+		logEntry := videoRendering.VideoRenderingLogs_VideoRenderingLog{Log: val.Log, Timestamp: val.Timestamp, Severity: videoRendering.VideoRenderingLogs_VideoRenderingLog_SEVERITY(val.Severity)}
+		logs = append(logs, &logEntry)
+	}
+
+	return &videoRendering.QueryGetVideoRenderingLogsResponse{VideoRenderingLogs: &videoRendering.VideoRenderingLogs{ThreadId: req.Index, Logs: logs}}, nil
+}
+
 func (qs queryServer) GetPendingVideoRenderingTasks(ctx context.Context, req *videoRendering.QueryGetPendingVideoRenderingTaskRequest) (*videoRendering.QueryGetPendingVideoRenderingTaskResponse, error) {
 	ti, err := qs.k.VideoRenderingTaskInfo.Get(ctx)
 
