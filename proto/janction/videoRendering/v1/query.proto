@@ -26,7 +26,7 @@ service Query {
   rpc GetWorker(QueryGetWorkerRequest) returns (QueryGetWorkerResponse) {
     option (cosmos.query.v1.module_query_safe) = true;
     option (google.api.http).get =
-      "/janction/videoRendering/v1/{worker_address}";
+      "/janction/videoRendering/v1/{worker}";
   }
   rpc GetPendingVideoRenderingTasks(QueryGetPendingVideoRenderingTaskRequest) returns (QueryGetPendingVideoRenderingTaskResponse){
   }
@@ -68,7 +68,7 @@ message QueryGetPendingVideoRenderingTaskResponse {
 }
 
 message QueryGetWorkerRequest {
-  string worker_address = 1;
+  string worker = 1;
 }
 
 message QueryGetWorkerResponse {

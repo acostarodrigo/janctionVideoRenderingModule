@@ -152,15 +152,15 @@ func request_Query_GetWorker_0(ctx context.Context, marshaler runtime.Marshaler,
 		_   = err
 	)
 
-	val, ok = pathParams["worker_address"]
+	val, ok = pathParams["worker"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "worker_address")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "worker")
 	}
 
-	protoReq.WorkerAddress, err = runtime.String(val)
+	protoReq.Worker, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "worker_address", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "worker", err)
 	}
 
 	msg, err := client.GetWorker(ctx, &protoReq, grpc.Header(&metadata.HeaderMD), grpc.Trailer(&metadata.TrailerMD))
@@ -179,15 +179,15 @@ func local_request_Query_GetWorker_0(ctx context.Context, marshaler runtime.Mars
 		_   = err
 	)
 
-	val, ok = pathParams["worker_address"]
+	val, ok = pathParams["worker"]
 	if !ok {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "worker_address")
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "worker")
 	}
 
-	protoReq.WorkerAddress, err = runtime.String(val)
+	protoReq.Worker, err = runtime.String(val)
 
 	if err != nil {
-		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "worker_address", err)
+		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "worker", err)
 	}
 
 	msg, err := server.GetWorker(ctx, &protoReq)
@@ -379,7 +379,7 @@ var (
 
 	pattern_Query_GetVideoRenderingLogs_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"janction", "videoRendering", "v1", "index"}, "", runtime.AssumeColonVerbOpt(false)))
 
-	pattern_Query_GetWorker_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"janction", "videoRendering", "v1", "worker_address"}, "", runtime.AssumeColonVerbOpt(false)))
+	pattern_Query_GetWorker_0 = runtime.MustPattern(runtime.NewPattern(1, []int{2, 0, 2, 1, 2, 2, 1, 0, 4, 1, 5, 3}, []string{"janction", "videoRendering", "v1", "worker"}, "", runtime.AssumeColonVerbOpt(false)))
 )
 
 var (

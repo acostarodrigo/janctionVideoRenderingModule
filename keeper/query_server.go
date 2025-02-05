@@ -75,7 +75,7 @@ func (qs queryServer) GetPendingVideoRenderingTasks(ctx context.Context, req *vi
 }
 
 func (qs queryServer) GetWorker(ctx context.Context, req *videoRendering.QueryGetWorkerRequest) (*videoRendering.QueryGetWorkerResponse, error) {
-	worker, err := qs.k.Workers.Get(ctx, req.WorkerAddress)
+	worker, err := qs.k.Workers.Get(ctx, req.Worker)
 	if err != nil {
 		return nil, err
 	}
