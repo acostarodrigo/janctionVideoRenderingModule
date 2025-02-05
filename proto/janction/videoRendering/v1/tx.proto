@@ -54,6 +54,7 @@ message MsgCreateVideoRenderingTaskResponse {
 message MsgAddWorker {
   option (cosmos.msg.v1.signer) = "creator";
   string creator = 1;
+  string public_ip = 2;
 }
 
 message MsgAddWorkerResponse {

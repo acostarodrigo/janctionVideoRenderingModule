@@ -44,12 +44,14 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					},
 				},
 				{
-					RpcMethod:      "AddWorker",
-					Use:            "add-worker --from [workerAddress]",
-					Short:          "Registers a new worker that will perform video rendering tasks",
-					Long:           "", // TODO Add long
-					Example:        "", // TODO add exampe
-					PositionalArgs: []*autocliv1.PositionalArgDescriptor{},
+					RpcMethod: "AddWorker",
+					Use:       "add-worker [public_ip] --from [workerAddress]",
+					Short:     "Registers a new worker that will perform video rendering tasks",
+					Long:      "", // TODO Add long
+					Example:   "", // TODO add exampe
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "public_ip"},
+					},
 				},
 				{
 					RpcMethod: "SubscribeWorkerToTask",

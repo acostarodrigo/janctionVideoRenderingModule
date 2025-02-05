@@ -63,6 +63,8 @@ func (ms msgServer) AddWorker(ctx context.Context, msg *videoRendering.MsgAddWor
 		return nil, err
 	}
 
+	// TODO validate ip is valid
+
 	if found {
 		log.Printf("Worker %v already exists.", msg.Creator)
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerAlreadyRegistered.Error(), "worker (%s) is already registered", msg.Creator)
@@ -71,7 +73,7 @@ func (ms msgServer) AddWorker(ctx context.Context, msg *videoRendering.MsgAddWor
 	// worker is not previously registered, so we move on
 	// TODO I'm facking a stacked value of 100 for future use
 	reputation := videoRendering.Worker_Reputation{Points: 0, Stacked: 100}
-	worker := videoRendering.Worker{Address: msg.Creator, Reputation: &reputation, Enabled: true}
+	worker := videoRendering.Worker{Address: msg.Creator, Reputation: &reputation, Enabled: true, PublicIp: msg.PublicIp}
 
 	ms.k.Workers.Set(ctx, msg.Creator, worker)
 	return &videoRendering.MsgAddWorkerResponse{}, nil

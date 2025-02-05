@@ -23,6 +23,11 @@ service Query {
       "/janction/videoRendering/v1/{index}";
   }
 
+  rpc GetWorker(QueryGetWorkerRequest) returns (QueryGetWorkerResponse) {
+    option (cosmos.query.v1.module_query_safe) = true;
+    option (google.api.http).get =
+      "/janction/videoRendering/v1/{worker_address}";
+  }
   rpc GetPendingVideoRenderingTasks(QueryGetPendingVideoRenderingTaskRequest) returns (QueryGetPendingVideoRenderingTaskResponse){
   }
 
@@ -60,4 +65,12 @@ message QueryGetPendingVideoRenderingTaskRequest {
 
 message QueryGetPendingVideoRenderingTaskResponse {
   repeated VideoRenderingTask video_rendering_tasks = 1;
+}
+
+message QueryGetWorkerRequest {
+  string worker_address = 1;
+}
+
+message QueryGetWorkerResponse {
+  Worker worker = 1;
 }
