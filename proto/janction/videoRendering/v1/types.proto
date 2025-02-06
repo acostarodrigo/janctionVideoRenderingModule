@@ -5,7 +5,6 @@ option go_package = "github.com/janction/videoRendering";
 
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
-import "google/protobuf/timestamp.proto";
 
 
 
