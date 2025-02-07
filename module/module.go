@@ -19,7 +19,6 @@ import (
 
 	"github.com/janction/videoRendering"
 	"github.com/janction/videoRendering/keeper"
-	"github.com/janction/videoRendering/vm"
 )
 
 var (
@@ -177,16 +176,6 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 				// start verification
 				go thread.Verify(ctx, worker.Address, workPath, &k.DB)
 			}
-
-			// if it already executed, we validate the docker is still running just in case
-			if thread.Solution == nil && dbThread.WorkStarted {
-				isRunning := vm.IsContainerRunning(ctx, thread.ThreadId)
-				if !isRunning {
-					// something happended with the container. we will try to run it again
-					k.DB.UpdateThread(dbThread.ID, false, false, false, false, false)
-				}
-			}
-
 		}
 	}
 
