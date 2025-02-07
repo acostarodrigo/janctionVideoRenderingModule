@@ -24,4 +24,4 @@ for dir in $proto_dirs; do
 done
 
 echo "Generating Client proto code"
-buf generate --template buf.gen.client.yaml
+buf generate --template buf.gen.client.yaml --path ./janction/videoRendering/v1/
