@@ -12,6 +12,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/janction/videoRendering/db"
 	"github.com/janction/videoRendering/ipfs"
@@ -34,21 +35,31 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string,
 
 		log.Printf("No solution for thread %s. Starting work", t.ThreadId)
 		// we don't have a solution, start working
+		started := time.Now().Unix()
 		ipfs.EnsureIPFSRunning()
+		db.AddLogEntry(t.ThreadId, fmt.Sprintf("Started downloading IPFS file %s...", cid), started, 0)
 		err := ipfs.IPFSGet(cid, path)
 		if err != nil {
+			db.AddLogEntry(t.ThreadId, fmt.Sprintf("Error getting IPFS file %s. %s", cid, err.Error()), started, 2)
 			log.Printf("Error getting cid %s", cid)
 			return err
 		}
 
+		finish := time.Now().Unix()
+		difference := time.Unix(finish, 0).Sub(time.Unix(started, 0))
+		db.AddLogEntry(t.ThreadId, fmt.Sprintf("Successfully downloaded IPFS file %s in %v seconds.", cid, int(difference.Seconds())), finish, 0)
+
+		// we start rendering
 		vm.RenderVideo(ctx, cid, uint64(t.StartFrame), uint64(t.EndFrame), t.ThreadId, path, t.IsReverse(worker), db)
 
 		rendersPath := filepath.Join(path, "output")
 		_, err = os.Stat(rendersPath)
-
+		finish = time.Now().Unix()
+		difference = time.Unix(finish, 0).Sub(time.Unix(started, 0))
 		if err != nil {
 			// output path was not created so no rendering happened. we will start over
 			log.Printf("Unable to complete rendering of task, retrying. No files at %s", rendersPath)
+
 			db.UpdateThread(t.ThreadId, false, false, false, false, false)
 			return nil
 		}
@@ -59,7 +70,7 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string,
 			return nil
 		}
 		db.UpdateThread(t.ThreadId, true, true, false, false, false)
-
+		db.AddLogEntry(t.ThreadId, fmt.Sprintf("Thread %s completed succesfully in %v seconds.", t.ThreadId, int(difference.Seconds())), finish, 1)
 	} else {
 		// Container is running, so we update worker status
 		// if worker status is idle, we change it
@@ -107,6 +118,8 @@ func (t VideoRenderingThread) ProposeSolution(ctx context.Context, workerAddress
 		log.Printf("Error Executing %s", err.Error())
 		return err
 	}
+
+	db.AddLogEntry(t.ThreadId, "Solution proposed. Wainting confirmation...", time.Now().Unix(), 0)
 
 	return nil
 }
@@ -195,6 +208,7 @@ func (t VideoRenderingThread) Verify(ctx context.Context, workerAddress string, 
 
 	solution, _ := transformSliceToMap(t.Solution.Hashes)
 	var valid bool = true
+	db.AddLogEntry(t.ThreadId, "Starting verification of solution...", time.Now().Unix(), 0)
 	for filename, hash := range solution {
 		if myWork[filename] != hash {
 			valid = false
@@ -203,7 +217,7 @@ func (t VideoRenderingThread) Verify(ctx context.Context, workerAddress string, 
 	}
 
 	submitValidation(workerAddress, t.TaskId, t.ThreadId, int64(files), valid)
-
+	db.AddLogEntry(t.ThreadId, "Solution verified", time.Now().Unix(), 0)
 	return nil
 }
 
@@ -221,12 +235,19 @@ func submitValidation(validator string, taskId, threadId string, amount_files in
 func (t VideoRenderingThread) SubmitSolution(ctx context.Context, workerAddress, rootPath string, db *db.DB) error {
 	db.UpdateThread(t.ThreadId, true, true, true, true, true)
 
+	db.AddLogEntry(t.ThreadId, "Submiting solution to IPFS...", time.Now().Unix(), 0)
 	cid, err := ipfs.UploadSolution(ctx, rootPath, t.ThreadId)
 	if err != nil {
 		return err
 	}
 	err = submitSolution(workerAddress, t.TaskId, t.ThreadId, cid)
-	return err
+	if err != nil {
+		db.AddLogEntry(t.ThreadId, fmt.Sprintf("Error submitting solution. %s", err.Error()), time.Now().Unix(), 2)
+		return err
+	}
+
+	db.AddLogEntry(t.ThreadId, "Solution uploaded to IPFS correctly.", time.Now().Unix(), 0)
+	return nil
 }
 
 func submitSolution(address, taskId, threadId string, cid string) error {

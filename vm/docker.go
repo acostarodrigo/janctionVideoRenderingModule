@@ -2,11 +2,13 @@ package vm
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
 	"os/exec"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -33,24 +35,26 @@ func IsContainerRunning(ctx context.Context, threadId string) bool {
 func RenderVideo(ctx context.Context, cid string, start uint64, end uint64, id string, path string, reverse bool, db *db.DB) {
 	if reverse {
 		for i := end; i >= start; i-- {
-			err := renderVideoFrame(ctx, cid, i, id, path)
-			logEntry(db, id, i, err)
+			renderVideoFrame(ctx, cid, i, id, path, db)
 		}
 	} else {
 		for i := start; i <= end; i++ {
-			err := renderVideoFrame(ctx, cid, i, id, path)
-			logEntry(db, id, i, err)
+			renderVideoFrame(ctx, cid, i, id, path, db)
 		}
 	}
 }
 
-func renderVideoFrame(ctx context.Context, cid string, frameNumber uint64, id string, path string) error {
+func renderVideoFrame(ctx context.Context, cid string, frameNumber uint64, id string, path string, db *db.DB) error {
 	n := "myBlender" + id
+
+	started := time.Now().Unix()
+	db.AddLogEntry(id, fmt.Sprintf("Started rendering frame %v...", frameNumber), started, 0)
 
 	// Check if the container exists using `docker ps -a`
 	checkCmd := exec.CommandContext(ctx, "docker", "ps", "-a", "--filter", fmt.Sprintf("name=%s", n), "--format", "{{.Names}}")
 	output, err := checkCmd.Output()
 	if err != nil {
+		db.AddLogEntry(id, "Error trying to verify if container already exists.", started, 2)
 		return fmt.Errorf("failed to check container existence: %w", err)
 	}
 
@@ -72,6 +76,7 @@ func renderVideoFrame(ctx context.Context, cid string, frameNumber uint64, id st
 	log.Printf("Starting docker: %s", runCmd.String())
 	err = runCmd.Run()
 	if err != nil {
+		db.AddLogEntry(id, fmt.Sprintf("Error in crearing the container. %s", err.Error()), started, 1)
 		return fmt.Errorf("failed to create and start container: %w", err)
 	}
 
@@ -93,6 +98,16 @@ func renderVideoFrame(ctx context.Context, cid string, frameNumber uint64, id st
 
 	RemoveContainer(ctx, n)
 
+	// Verify the frame exists and log
+	frameFile := FormatFrameFilename(int(frameNumber))
+	framePath := filepath.Join(path, "output", frameFile)
+	finish := time.Now().Unix()
+	difference := time.Unix(finish, 0).Sub(time.Unix(started, 0))
+	if _, err := os.Stat(framePath); errors.Is(err, os.ErrNotExist) {
+		db.AddLogEntry(id, fmt.Sprintf("Error while rendering frame %v. %s file is not there", frameNumber, framePath), started, 2)
+	} else {
+		db.AddLogEntry(id, fmt.Sprintf("Successfully rendered frame %v in %v seconds.", frameNumber, int(difference.Seconds())), finish, 1)
+	}
 	return nil
 }
 
@@ -122,7 +137,7 @@ func CountFilesInDirectory(directoryPath string) int {
 	return fileCount
 }
 
-func logEntry(db *db.DB, threadId string, frameNumber uint64, err error) {
-	db.AddLogEntry(threadId, fmt.Sprintf("Rendered frame %v successfully", frameNumber), time.Now().Unix(), 0)
-
+// FormatFrameFilename returns the correct filename for a given frame number.
+func FormatFrameFilename(frameNumber int) string {
+	return fmt.Sprintf("frame_%06d.png", frameNumber)
 }
