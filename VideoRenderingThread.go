@@ -48,14 +48,14 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string,
 
 		if err != nil {
 			// output path was not created so no rendering happened. we will start over
+			log.Printf("Unable to complete rendering of task, retrying. No files at %s", rendersPath)
 			db.UpdateThread(t.ThreadId, false, false, false, false, false)
-			log.Println("Unable to complete rendering of task, retrying")
 			return nil
 		}
 		files, _ := os.ReadDir(rendersPath)
 		if len(files) != int(t.EndFrame)-int(t.StartFrame)+1 {
 			db.UpdateThread(t.ThreadId, false, false, false, false, false)
-			log.Println("Unable to complete rendering of task, retrying")
+			log.Printf("Not the amount we expected. retrying. Amount of files %v", len(files))
 			return nil
 		}
 		db.UpdateThread(t.ThreadId, true, true, false, false, false)
