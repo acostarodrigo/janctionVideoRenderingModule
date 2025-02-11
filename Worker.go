@@ -14,7 +14,7 @@ func (w Worker) RegisterWorker(address string, db *db.DB) error {
 	db.Addworker(address)
 	executableName := "janctiond"
 	ip, _ := getPublicIP()
-	cmd := exec.Command(executableName, "tx", "videoRendering", "add-worker", ip, "--from", address, "--yes")
+	cmd := exec.Command(executableName, "tx", "videoRendering", "add-worker", ip, "100jct", "--from", address, "--yes")
 	_, err := cmd.Output()
 	log.Printf("executing %s", cmd.String())
 	if err != nil {

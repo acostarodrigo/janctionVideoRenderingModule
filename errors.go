@@ -9,6 +9,7 @@ var (
 	ErrWorkerAlreadyRegistered = errors.Register(ModuleName, 10, "worker already registered")
 	ErrWorkerNotAvailable      = errors.Register(ModuleName, 11, "worker cannot subscribe to task")
 	ErrWorkerTaskNotAvailable  = errors.Register(ModuleName, 12, "task is already completed")
+	ErrWorkerIncorrectStake  = errors.Register(ModuleName, 13, "staked coin is incorrect")
 
 	ErrInvalidVideoRenderingTask = errors.Register(ModuleName, 20, "invalid video rendering task")
 

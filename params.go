@@ -1,10 +1,15 @@
 package videoRendering
 
+import (
+	"cosmossdk.io/math"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+)
+
 // DefaultParams returns default module parameters.
 func DefaultParams() Params {
 	return Params{
 		// Set default values here.
-		VideoRenderingKeyName: "videoRenderingKey",
+		MinWorkerStaking: &sdk.Coin{Denom: "jct", Amount: math.NewInt(100)},
 	}
 }
 

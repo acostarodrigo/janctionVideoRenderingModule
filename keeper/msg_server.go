@@ -70,12 +70,24 @@ func (ms msgServer) AddWorker(ctx context.Context, msg *videoRendering.MsgAddWor
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerAlreadyRegistered.Error(), "worker (%s) is already registered", msg.Creator)
 	}
 
+	// we verify the staking amount if valid and at least equeal the min value
+	params, _ := ms.k.Params.Get(ctx)
+	if msg.Stake.Denom != params.MinWorkerStaking.Denom {
+		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerIncorrectStake.Error(), "staked coin denom %s is not accepted", msg.Stake.Denom)
+	}
+
+	if msg.Stake.Amount.LT(params.MinWorkerStaking.Amount) {
+		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerIncorrectStake.Error(), "staked coin is not enought. Min value is %v", params.MinWorkerStaking.Amount)
+	}
+
 	// worker is not previously registered, so we move on
-	// TODO I'm facking a stacked value of 100 for future use
-	reputation := videoRendering.Worker_Reputation{Points: 0, Stacked: 100}
+	reputation := videoRendering.Worker_Reputation{Points: 0, Staked: &msg.Stake}
 	worker := videoRendering.Worker{Address: msg.Creator, Reputation: &reputation, Enabled: true, PublicIp: msg.PublicIp}
 
 	ms.k.Workers.Set(ctx, msg.Creator, worker)
+
+	// TODO stake into the module the amount staked by the worker
+
 	return &videoRendering.MsgAddWorkerResponse{}, nil
 }
 
