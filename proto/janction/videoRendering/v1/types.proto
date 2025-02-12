@@ -38,6 +38,7 @@ message Worker {
     int64 points = 2;
     uint32 validations = 3;
     uint32 solutions = 4;
+    cosmos.base.v1beta1.Coin winnings = 5;
   }
 
   string address = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
