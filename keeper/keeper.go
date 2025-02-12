@@ -15,7 +15,7 @@ import (
 type Keeper struct {
 	cdc          codec.BinaryCodec
 	addressCodec address.Codec
-	bankKeeper   bankkeeper.Keeper
+	BankKeeper   bankkeeper.Keeper
 
 	// authority is the address capable of executing a MsgUpdateParams and other authority-gated message.
 	// typically, this should be the x/gov module account.
@@ -56,7 +56,7 @@ func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService s
 		Workers:                collections.NewMap(sb, videoRendering.WorkerKey, "workers", collections.StringKey, codec.CollValue[videoRendering.Worker](cdc)),
 		Configuration:          *config,
 		DB:                     *db,
-		bankKeeper:             bankKeeper,
+		BankKeeper:             bankKeeper,
 	}
 
 	schema, err := sb.Build()
