@@ -11,6 +11,7 @@ func DefaultParams() Params {
 		// Set default values here.
 		MinWorkerStaking:    &sdk.Coin{Denom: "jct", Amount: math.NewInt(100)},
 		MaxWorkersPerThread: 2,
+		MinValidators:       2,
 	}
 }
 

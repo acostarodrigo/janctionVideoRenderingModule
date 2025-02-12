@@ -13,6 +13,7 @@ import "gogoproto/gogo.proto";
 message Params {
   cosmos.base.v1beta1.Coin min_worker_staking = 1;
   uint64 max_workers_per_thread = 2;
+  uint64 min_validators = 3;
 }
 
 // GenesisState is the state that must be provided at genesis.
