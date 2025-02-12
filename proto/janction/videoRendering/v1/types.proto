@@ -63,7 +63,7 @@ message VideoRenderingTask {
   uint32 end_frame = 5;
   uint32 threadAmount = 6;
   bool completed = 7;
-  uint64 reward = 8;
+  cosmos.base.v1beta1.Coin reward = 8;
   repeated VideoRenderingThread  threads = 9;
 }
 

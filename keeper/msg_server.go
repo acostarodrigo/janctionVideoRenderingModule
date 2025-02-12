@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ipfs/go-cid"
@@ -33,6 +34,8 @@ func (ms msgServer) CreateVideoRenderingTask(ctx context.Context, msg *videoRend
 		return nil, err
 	}
 
+	// TODO reward must be valid
+
 	// we make sure the provided CID is valid
 	_, err = cid.Decode(msg.Cid)
 	if err != nil {
@@ -52,6 +55,10 @@ func (ms msgServer) CreateVideoRenderingTask(ctx context.Context, msg *videoRend
 	threads := videoTask.GenerateThreads(taskId)
 	videoTask.Threads = threads
 
+	// the module will keep the reward to be distributed later
+	ms.k.bankKeeper.DelegateCoinsFromAccountToModule(ctx, types.AccAddress(msg.Creator), videoRendering.ModuleName, types.NewCoins(*msg.Reward))
+
+	// we create the task
 	if err := ms.k.VideoRenderingTasks.Set(ctx, taskId, videoTask); err != nil {
 		return nil, err
 	}
@@ -279,6 +286,10 @@ func (ms msgServer) SubmitSolution(ctx context.Context, msg *videoRendering.MsgS
 			// if err != nil {
 			// 	return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "submited solution is incorrect")
 			// }
+
+			// solution is verified so we pay the winner
+			winnerReward := types.NewCoin(task.Reward.Denom, task.Reward.Amount.Quo(math.NewInt(2)))
+			ms.k.bankKeeper.SendCoinsFromModuleToAccount(ctx, videoRendering.ModuleName, types.AccAddress(msg.Creator), types.NewCoins(winnerReward))
 
 			task.Threads[i].Solution.Files = msg.Cid
 			ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)

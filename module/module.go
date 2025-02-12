@@ -9,6 +9,7 @@ import (
 	"strconv"
 
 	"cosmossdk.io/core/appmodule"
+	"cosmossdk.io/math"
 	gwruntime "github.com/grpc-ecosystem/grpc-gateway/runtime"
 
 	"github.com/cosmos/cosmos-sdk/client"
@@ -134,7 +135,7 @@ func (am AppModule) getPendingVideoRenderingTask(ctx context.Context) (bool, vid
 		}
 
 		// we only search for in progress and with the reward this node will accept
-		if !task.Completed && task.Reward >= uint64(am.keeper.Configuration.MinReward) {
+		if !task.Completed && task.Reward.Amount.GTE(math.NewInt(am.keeper.Configuration.MinReward)) {
 			for _, value := range task.Threads {
 				if !value.Completed && len(value.Workers) < int(params.MaxWorkersPerThread) {
 					return true, task
