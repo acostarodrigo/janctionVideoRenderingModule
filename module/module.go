@@ -120,7 +120,7 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 
 func (am AppModule) getPendingVideoRenderingTask(ctx context.Context) (bool, videoRendering.VideoRenderingTask) {
 	// TODO move this to global parameters
-	MAX_WORKERS_PER_THREAD := 2
+	params, _ := am.keeper.Params.Get(ctx)
 	ti, err := am.keeper.VideoRenderingTaskInfo.Get(ctx)
 
 	if err != nil {
@@ -136,7 +136,7 @@ func (am AppModule) getPendingVideoRenderingTask(ctx context.Context) (bool, vid
 		// we only search for in progress and with the reward this node will accept
 		if !task.Completed && task.Reward >= uint64(am.keeper.Configuration.MinReward) {
 			for _, value := range task.Threads {
-				if !value.Completed && len(value.Workers) < MAX_WORKERS_PER_THREAD {
+				if !value.Completed && len(value.Workers) < int(params.MaxWorkersPerThread) {
 					return true, task
 				}
 			}
@@ -211,13 +211,13 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 		}
 	}
 
-	MIN_VALIDATORS := 2
+	params, _ := am.keeper.Params.Get(ctx)
 	maxId, _ := k.VideoRenderingTaskInfo.Get(ctx)
 	for i := 0; i < int(maxId.NextId); i++ {
 		task, _ := k.VideoRenderingTasks.Get(ctx, strconv.Itoa(i))
 		if !task.Completed {
 			for k, thread := range task.Threads {
-				if len(thread.Validations) >= MIN_VALIDATORS && !thread.Completed {
+				if len(thread.Validations) >= int(params.MinValidators) && !thread.Completed {
 					log.Println("we are ready to validate", thread.ThreadId)
 					am.EvaluateCompletedThread(ctx, &task, k)
 
