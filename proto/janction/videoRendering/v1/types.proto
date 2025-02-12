@@ -12,6 +12,7 @@ import "gogoproto/gogo.proto";
 // Params defines the parameters of the module.
 message Params {
   cosmos.base.v1beta1.Coin min_worker_staking = 1;
+  uint64 max_workers_per_thread = 2;
 }
 
 // GenesisState is the state that must be provided at genesis.
