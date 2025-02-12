@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ipfs/go-cid"
 
@@ -80,14 +81,23 @@ func (ms msgServer) AddWorker(ctx context.Context, msg *videoRendering.MsgAddWor
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerIncorrectStake.Error(), "staked coin is not enought. Min value is %v", params.MinWorkerStaking.Amount)
 	}
 
+	// we verify the account has enought balance to stack
+	balance := ms.k.bankKeeper.GetBalance(ctx, types.AccAddress(msg.Creator), params.MinWorkerStaking.Denom)
+	if balance.Amount.LT(params.MinWorkerStaking.Amount) {
+		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerIncorrectStake.Error(), "not enought balance to stack. Min value is %v", params.MinWorkerStaking.Amount)
+	}
+
 	// worker is not previously registered, so we move on
-	reputation := videoRendering.Worker_Reputation{Points: 0, Staked: &msg.Stake}
+	reputation := videoRendering.Worker_Reputation{Points: 0, Staked: &msg.Stake, Validations: 0, Solutions: 0}
 	worker := videoRendering.Worker{Address: msg.Creator, Reputation: &reputation, Enabled: true, PublicIp: msg.PublicIp}
 
 	ms.k.Workers.Set(ctx, msg.Creator, worker)
 
-	// TODO stake into the module the amount staked by the worker
-
+	// we stack the coins in the module
+	err = ms.k.bankKeeper.DelegateCoinsFromAccountToModule(ctx, types.AccAddress(msg.Creator), videoRendering.ModuleName, types.NewCoins(msg.Stake))
+	if err != nil {
+		return nil, err
+	}
 	return &videoRendering.MsgAddWorkerResponse{}, nil
 }
 
@@ -108,10 +118,10 @@ func (ms msgServer) SubscribeWorkerToTask(ctx context.Context, msg *videoRenderi
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerTaskNotAvailable.Error(), "task (%s) is already completed. Can't subscribe worker", msg.TaskId)
 	}
 
-	MAX_WORKERS_PER_THREAD := 2
+	// we get the params to get the MaxWorkersPerThread value
+	params, _ := ms.k.Params.Get(ctx)
 	for i, v := range task.Threads {
-		// TODO MaxWorkersPerThread value should be global
-		if len(v.Workers) < MAX_WORKERS_PER_THREAD && !v.Completed {
+		if len(v.Workers) < int(params.MaxWorkersPerThread) && !v.Completed {
 			v.Workers = append(v.Workers, msg.Address)
 
 			ms.k.VideoRenderingTasks.Set(ctx, task.TaskId, task)

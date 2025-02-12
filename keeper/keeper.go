@@ -7,6 +7,7 @@ import (
 	"cosmossdk.io/core/address"
 	storetypes "cosmossdk.io/core/store"
 	"github.com/cosmos/cosmos-sdk/codec"
+	bankkeeper "github.com/cosmos/cosmos-sdk/x/bank/keeper"
 	"github.com/janction/videoRendering"
 	"github.com/janction/videoRendering/db"
 )
@@ -14,6 +15,7 @@ import (
 type Keeper struct {
 	cdc          codec.BinaryCodec
 	addressCodec address.Codec
+	bankKeeper   bankkeeper.Keeper
 
 	// authority is the address capable of executing a MsgUpdateParams and other authority-gated message.
 	// typically, this should be the x/gov module account.
@@ -30,7 +32,7 @@ type Keeper struct {
 }
 
 // NewKeeper creates a new Keeper instance
-func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService storetypes.KVStoreService, authority string, path string) Keeper {
+func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService storetypes.KVStoreService, authority string, path string, bankKeeper bankkeeper.Keeper) Keeper {
 	if _, err := addressCodec.StringToBytes(authority); err != nil {
 		panic(fmt.Errorf("invalid authority address: %w", err))
 	}
@@ -54,6 +56,7 @@ func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService s
 		Workers:                collections.NewMap(sb, videoRendering.WorkerKey, "workers", collections.StringKey, codec.CollValue[videoRendering.Worker](cdc)),
 		Configuration:          *config,
 		DB:                     *db,
+		bankKeeper:             bankKeeper,
 	}
 
 	schema, err := sb.Build()
