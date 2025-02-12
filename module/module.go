@@ -195,7 +195,9 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 		if worker.Address == "" {
 			isRegistered, _ := k.DB.IsWorkerRegistered(k.Configuration.WorkerAddress)
 			if !isRegistered {
-				go worker.RegisterWorker(k.Configuration.WorkerAddress, &k.DB)
+				// the worker is not registered, so we do it with the stake
+				params, _ := am.keeper.Params.Get(ctx)
+				go worker.RegisterWorker(k.Configuration.WorkerAddress, *params.MinWorkerStaking, &k.DB)
 			}
 		}
 

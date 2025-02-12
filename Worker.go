@@ -7,14 +7,15 @@ import (
 	"os/exec"
 	"strings"
 
+	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/janction/videoRendering/db"
 )
 
-func (w Worker) RegisterWorker(address string, db *db.DB) error {
+func (w Worker) RegisterWorker(address string, stake types.Coin, db *db.DB) error {
 	db.Addworker(address)
 	executableName := "janctiond"
 	ip, _ := getPublicIP()
-	cmd := exec.Command(executableName, "tx", "videoRendering", "add-worker", ip, "100jct", "--from", address, "--yes")
+	cmd := exec.Command(executableName, "tx", "videoRendering", "add-worker", ip, stake.String(), "--from", address, "--yes")
 	_, err := cmd.Output()
 	log.Printf("executing %s", cmd.String())
 	if err != nil {
