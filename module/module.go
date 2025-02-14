@@ -224,6 +224,8 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 					log.Println("we are ready to validate", thread.ThreadId)
 					am.EvaluateCompletedThread(ctx, &task, k)
 
+					// PAY to validators
+
 					// if we are the node that proposed the solution, then we upload it
 					if thread.Solution.ProposedBy == am.keeper.Configuration.WorkerAddress {
 						localThread, _ := am.keeper.DB.ReadThread(thread.ThreadId)
@@ -259,15 +261,17 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 }
 
 func (am AppModule) EvaluateCompletedThread(ctx context.Context, task *videoRendering.VideoRenderingTask, index int) error {
-	//TODO  implement validations
+	//TODO  implement validations. What happens if a validation is false?
 	thread := task.Threads[index]
+
 	for _, worker := range thread.Workers {
-		// we rest all workers
+		// we reset all workers
 		worker, _ := am.keeper.Workers.Get(ctx, worker)
 		worker.CurrentTaskId = ""
 		worker.CurrentThreadIndex = 0
 		am.keeper.Workers.Set(ctx, worker.Address, worker)
 	}
+
 	task.Threads[index].Completed = true
 	am.keeper.VideoRenderingTasks.Set(ctx, task.TaskId, *task)
 

@@ -61,7 +61,8 @@ message MsgAddWorker {
 }
 
 message MsgAddWorkerResponse {
-
+  bool ok = 1;
+  string message = 2;
 }
 
 message MsgSubscribeWorkerToTask {

@@ -5,6 +5,8 @@ import (
 	"log"
 	"os/exec"
 	"strconv"
+
+	"github.com/cosmos/cosmos-sdk/types"
 )
 
 func (VideoRenderingTask) Validate() error {
@@ -72,4 +74,14 @@ func (t *VideoRenderingTask) SubscribeWorkerToTask(ctx context.Context, workerAd
 	}
 
 	return nil
+}
+
+func (t *VideoRenderingTask) GetWinnerReward() types.Coin {
+	amountThreads := len(t.Threads)
+	return types.NewCoin(t.Reward.Denom, t.Reward.Amount.QuoRaw(2).QuoRaw(int64(amountThreads)))
+}
+
+func (t *VideoRenderingTask) GetValidatorsReward() types.Coin {
+	amountThreads := len(t.Threads)
+	return types.NewCoin(t.Reward.Denom, t.Reward.Amount.QuoRaw(2).QuoRaw(int64(amountThreads)))
 }

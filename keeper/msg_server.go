@@ -7,7 +7,6 @@ import (
 	"strconv"
 	"strings"
 
-	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ipfs/go-cid"
@@ -56,7 +55,7 @@ func (ms msgServer) CreateVideoRenderingTask(ctx context.Context, msg *videoRend
 	videoTask.Threads = threads
 
 	// the module will keep the reward to be distributed later
-	ms.k.bankKeeper.DelegateCoinsFromAccountToModule(ctx, types.AccAddress(msg.Creator), videoRendering.ModuleName, types.NewCoins(*msg.Reward))
+	ms.k.BankKeeper.SendCoinsFromAccountToModule(ctx, types.AccAddress(msg.Creator), videoRendering.ModuleName, types.NewCoins(*msg.Reward))
 
 	// we create the task
 	if err := ms.k.VideoRenderingTasks.Set(ctx, taskId, videoTask); err != nil {
@@ -68,30 +67,38 @@ func (ms msgServer) CreateVideoRenderingTask(ctx context.Context, msg *videoRend
 func (ms msgServer) AddWorker(ctx context.Context, msg *videoRendering.MsgAddWorker) (*videoRendering.MsgAddWorkerResponse, error) {
 	found, err := ms.k.Workers.Has(ctx, msg.Creator)
 	if err != nil {
-		return nil, err
+		log.Println(err.Error())
+		return &videoRendering.MsgAddWorkerResponse{Ok: false, Message: err.Error()}, err
 	}
-
-	// TODO validate ip is valid
 
 	if found {
 		log.Printf("Worker %v already exists.", msg.Creator)
-		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerAlreadyRegistered.Error(), "worker (%s) is already registered", msg.Creator)
+		error := sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerAlreadyRegistered.Error(), "worker (%s) is already registered", msg.Creator)
+		log.Println(error.Error())
+		return &videoRendering.MsgAddWorkerResponse{Ok: false, Message: error.Error()}, error
 	}
 
 	// we verify the staking amount if valid and at least equeal the min value
 	params, _ := ms.k.Params.Get(ctx)
 	if msg.Stake.Denom != params.MinWorkerStaking.Denom {
-		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerIncorrectStake.Error(), "staked coin denom %s is not accepted", msg.Stake.Denom)
+		error := sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerIncorrectStake.Error(), "staked coin denom %s is not accepted", msg.Stake.Denom)
+		log.Println(error.Error())
+		return &videoRendering.MsgAddWorkerResponse{Ok: false, Message: error.Error()}, error
 	}
 
 	if msg.Stake.Amount.LT(params.MinWorkerStaking.Amount) {
-		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerIncorrectStake.Error(), "staked coin is not enought. Min value is %v", params.MinWorkerStaking.Amount)
+		error := sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerIncorrectStake.Error(), "staked coin is not enought. Min value is %v", params.MinWorkerStaking.Amount)
+		log.Println(error.Error())
+		return &videoRendering.MsgAddWorkerResponse{Ok: false, Message: error.Error()}, error
 	}
 
 	// we verify the account has enought balance to stack
-	balance := ms.k.bankKeeper.GetBalance(ctx, types.AccAddress(msg.Creator), params.MinWorkerStaking.Denom)
+	addr, _ := types.AccAddressFromBech32(msg.Creator)
+	balance := ms.k.BankKeeper.GetBalance(ctx, addr, params.MinWorkerStaking.Denom)
 	if balance.Amount.LT(params.MinWorkerStaking.Amount) {
-		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerIncorrectStake.Error(), "not enought balance to stack. Min value is %v", params.MinWorkerStaking.Amount)
+		error := sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerIncorrectStake.Error(), "not enought balance to stack. Min value is %v", params.MinWorkerStaking.Amount)
+		log.Println(error.Error())
+		return &videoRendering.MsgAddWorkerResponse{Ok: false, Message: error.Error()}, error
 	}
 
 	// worker is not previously registered, so we move on
@@ -101,11 +108,13 @@ func (ms msgServer) AddWorker(ctx context.Context, msg *videoRendering.MsgAddWor
 	ms.k.Workers.Set(ctx, msg.Creator, worker)
 
 	// we stack the coins in the module
-	err = ms.k.bankKeeper.DelegateCoinsFromAccountToModule(ctx, types.AccAddress(msg.Creator), videoRendering.ModuleName, types.NewCoins(msg.Stake))
+	err = ms.k.BankKeeper.SendCoinsFromAccountToModule(ctx, addr, videoRendering.ModuleName, types.NewCoins(msg.Stake))
 	if err != nil {
-		return nil, err
+		log.Println(err.Error())
+		return &videoRendering.MsgAddWorkerResponse{Ok: false, Message: err.Error()}, err
 	}
-	return &videoRendering.MsgAddWorkerResponse{}, nil
+
+	return &videoRendering.MsgAddWorkerResponse{Ok: true, Message: "Worker added correctly"}, nil
 }
 
 func (ms msgServer) SubscribeWorkerToTask(ctx context.Context, msg *videoRendering.MsgSubscribeWorkerToTask) (*videoRendering.MsgSubscribeWorkerToTaskResponse, error) {
@@ -255,6 +264,8 @@ func (ms msgServer) SubmitValidation(ctx context.Context, msg *videoRendering.Ms
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "worker is not working on thread")
 	}
 
+	// TODO Validate the validation is ok with ZKP
+
 	validation := videoRendering.VideoRenderingThread_Validation{Validator: msg.Creator, AmountFiles: msg.FilesAmount, Valid: msg.Valid, IsReverse: thread.IsReverse(worker.Address)}
 	task.Threads[worker.CurrentThreadIndex].Validations = append(thread.Validations, &validation)
 	ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
@@ -288,11 +299,16 @@ func (ms msgServer) SubmitSolution(ctx context.Context, msg *videoRendering.MsgS
 			// }
 
 			// solution is verified so we pay the winner
-			winnerReward := types.NewCoin(task.Reward.Denom, task.Reward.Amount.Quo(math.NewInt(2)))
-			ms.k.bankKeeper.SendCoinsFromModuleToAccount(ctx, videoRendering.ModuleName, types.AccAddress(msg.Creator), types.NewCoins(winnerReward))
+			payment := task.GetWinnerReward()
+			ms.k.BankKeeper.SendCoinsFromModuleToAccount(ctx, videoRendering.ModuleName, types.AccAddress(msg.Creator), types.NewCoins(payment))
 
 			task.Threads[i].Solution.Files = msg.Cid
 			ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
+
+			// we increase the reputation of the winner
+			worker, _ := ms.k.Workers.Get(ctx, msg.Creator)
+			worker.DeclareWinner(payment)
+			ms.k.Workers.Set(ctx, msg.Creator, worker)
 			break
 		}
 	}

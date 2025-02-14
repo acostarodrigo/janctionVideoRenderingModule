@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/janction/videoRendering/db"
 	"github.com/janction/videoRendering/ipfs"
 	"github.com/janction/videoRendering/vm"
@@ -298,4 +299,8 @@ func (t VideoRenderingThread) IsReverse(worker string) bool {
 		}
 	}
 	return false
+}
+
+func (t *VideoRenderingThread) GetValidatorReward(worker string, totalReward types.Coin) types.Coin {
+	return totalReward
 }

@@ -40,3 +40,9 @@ func getPublicIP() (string, error) {
 
 	return strings.TrimSpace(string(ip)), nil
 }
+
+func (w *Worker) DeclareWinner(payment types.Coin) {
+	w.Reputation.Points = w.Reputation.Points + 1
+	w.Reputation.Solutions = w.Reputation.Solutions + 1
+	w.Reputation.Winnings = w.Reputation.Winnings.Add(payment)
+}
