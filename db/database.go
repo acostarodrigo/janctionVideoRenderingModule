@@ -33,6 +33,11 @@ type LogEntry struct {
 	Severity  int64
 }
 
+type IPFS struct {
+	Address string
+	Added   bool
+}
+
 // DB encapsulates the database connection.
 type DB struct {
 	conn *sql.DB
@@ -69,6 +74,10 @@ func Init(databasePath string) (*DB, error) {
 		log TEXT,
 		timestamp NUMBER,
 		severity NUMBER
+	);
+	CREATE TABLE IF NOT EXISTS ipfs (
+		address TEXT PRIMARY KEY,
+		added BOOLEAN
 	);
     `
 
@@ -195,4 +204,31 @@ func (db *DB) ReadLogs(threadId string) []LogEntry {
 		logs = append(logs, log)
 	}
 	return logs
+}
+
+// Createthread inserts a new thread into the database.
+func (db *DB) AddIPFSWorker(address string) error {
+	insertQuery := `INSERT INTO ipfs (address, added) VALUES (?, true)`
+	_, err := db.conn.Exec(insertQuery, address)
+	if err != nil {
+		return fmt.Errorf("failed to insert worker: %w", err)
+	}
+
+	return nil
+}
+
+// Readthread retrieves a thread by ID.
+func (db *DB) IsIPFSWorkerAdded(address string) (bool, error) {
+	query := `SELECT address, added  FROM workers WHERE address = ?`
+	row := db.conn.QueryRow(query, address)
+
+	var ipfs IPFS
+	if err := row.Scan(&ipfs.Address, &ipfs.Added); err != nil {
+		if err == sql.ErrNoRows {
+			return false, nil
+		}
+		return false, fmt.Errorf("failed to read thread: %w", err)
+	}
+
+	return true, nil
 }

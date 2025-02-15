@@ -48,7 +48,6 @@ message Worker {
   uint32 current_thread_index = 6;
   string public_ip = 7;
   string ipfs_id = 8;
-  bool connected_to_ipfs = 9;
 }
 
 

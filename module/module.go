@@ -259,7 +259,8 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 	}
 
 	am.keeper.Workers.Walk(ctx, nil, func(address string, worker videoRendering.Worker) (stop bool, err error) {
-		if worker.IpfsId != "" && worker.PublicIp != "" && !worker.ConnectedToIpfs {
+		isAdded, _ := am.keeper.DB.IsIPFSWorkerAdded(address)
+		if worker.IpfsId != "" && worker.PublicIp != "" && !isAdded {
 			go func(w videoRendering.Worker) {
 				log.Printf("Connecting to IPFS node %s at %s", w.IpfsId, w.PublicIp)
 				ipfs.EnsureIPFSRunning()
@@ -267,8 +268,7 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 			}(worker)
 
 			// ✅ Mark worker as processed
-			worker.ConnectedToIpfs = true
-			am.keeper.Workers.Set(ctx, address, worker) // Save update
+			am.keeper.DB.AddIPFSWorker(address)
 		}
 		return false, nil // Continue iterating
 	})
