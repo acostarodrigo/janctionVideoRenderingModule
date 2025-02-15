@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -213,13 +214,13 @@ func (db *DB) AddIPFSWorker(address string) error {
 	if err != nil {
 		return fmt.Errorf("failed to insert worker: %w", err)
 	}
-
+	log.Println("adding added for ", address)
 	return nil
 }
 
 // Readthread retrieves a thread by ID.
 func (db *DB) IsIPFSWorkerAdded(address string) (bool, error) {
-	query := `SELECT address, added  FROM workers WHERE address = ?`
+	query := `SELECT address, added  FROM ipfs WHERE address = ?`
 	row := db.conn.QueryRow(query, address)
 
 	var ipfs IPFS
@@ -229,6 +230,5 @@ func (db *DB) IsIPFSWorkerAdded(address string) (bool, error) {
 		}
 		return false, fmt.Errorf("failed to read thread: %w", err)
 	}
-
-	return true, nil
+	return ipfs.Added, nil
 }
