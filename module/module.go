@@ -19,6 +19,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 
 	"github.com/janction/videoRendering"
+	"github.com/janction/videoRendering/ipfs"
 	"github.com/janction/videoRendering/keeper"
 )
 
@@ -256,6 +257,21 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 			}
 		}
 	}
+
+	am.keeper.Workers.Walk(ctx, nil, func(address string, worker videoRendering.Worker) (stop bool, err error) {
+		if worker.IpfsId != "" && worker.PublicIp != "" && !worker.ConnectedToIpfs {
+			go func(w videoRendering.Worker) {
+				log.Printf("Connecting to IPFS node %s at %s", w.IpfsId, w.PublicIp)
+				ipfs.EnsureIPFSRunning()
+				go ipfs.ConnectToIPFSNode(w.PublicIp, w.IpfsId)
+			}(worker)
+
+			// ✅ Mark worker as processed
+			worker.ConnectedToIpfs = true
+			am.keeper.Workers.Set(ctx, address, worker) // Save update
+		}
+		return false, nil // Continue iterating
+	})
 
 	return nil
 }

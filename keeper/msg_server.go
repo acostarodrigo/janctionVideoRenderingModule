@@ -13,7 +13,6 @@ import (
 	"github.com/ipfs/go-cid"
 
 	"github.com/janction/videoRendering"
-	"github.com/janction/videoRendering/ipfs"
 )
 
 type msgServer struct {
@@ -109,12 +108,10 @@ func (ms msgServer) AddWorker(ctx context.Context, msg *videoRendering.MsgAddWor
 	reputation := videoRendering.Worker_Reputation{Points: 0, Staked: &msg.Stake, Validations: 0, Solutions: 0, Winnings: types.NewCoin(params.MinWorkerStaking.Denom, math.NewInt(0))}
 	worker := videoRendering.Worker{Address: msg.Creator, Reputation: &reputation, Enabled: true, PublicIp: msg.PublicIp, IpfsId: msg.IpfsId}
 
-	ms.k.Workers.Set(ctx, msg.Creator, worker)
-
-	if msg.IpfsId != "" && msg.PublicIp != "" {
-		// we add the ipfs node into the swarm
-		ipfs.EnsureIPFSRunning()
-		go ipfs.ConnectToIPFSNode(msg.PublicIp, msg.IpfsId)
+	err = ms.k.Workers.Set(ctx, msg.Creator, worker)
+	if err != nil {
+		log.Println(err.Error())
+		return &videoRendering.MsgAddWorkerResponse{Ok: false, Message: err.Error()}, err
 	}
 
 	// we stack the coins in the module
