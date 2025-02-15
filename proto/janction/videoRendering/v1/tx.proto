@@ -56,7 +56,8 @@ message MsgAddWorker {
   option (cosmos.msg.v1.signer) = "creator";
   string creator = 1 ;
   string public_ip = 2;
-  cosmos.base.v1beta1.Coin stake = 3 [(gogoproto.nullable) = false];;
+  string ipfs_id = 3;
+  cosmos.base.v1beta1.Coin stake = 4 [(gogoproto.nullable) = false];;
 
 }
 

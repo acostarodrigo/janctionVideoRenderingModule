@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"bytes"
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -12,8 +13,6 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
-
-	yaml "gopkg.in/yaml.v3"
 
 	shell "github.com/ipfs/go-ipfs-api"
 )
@@ -157,14 +156,6 @@ func EnsureIPFSRunning() {
 			fmt.Println("✅ IPFS started successfully")
 		}
 	}
-
-	config, err := ReadConfig("../videoRendering/ipfs/config.yaml")
-	if err == nil {
-		go ConnectToIPFSNodes(config.IPFSSeeds)
-	} else {
-		fmt.Printf("Unable to connect to swarm. %s", err.Error())
-	}
-
 }
 
 // ListDirectory runs `ipfs ls {cid}` and returns a map[filename]CID with a 4s timeout.
@@ -206,35 +197,39 @@ func ListDirectory(cid string) (map[string]string, error) {
 }
 
 // Function to connect to IPFS nodes
-func ConnectToIPFSNodes(seeds []string) {
-	for _, seed := range seeds {
-		cmd := exec.Command("ipfs", "swarm", "connect", seed)
-		output, err := cmd.CombinedOutput()
-		if err != nil {
-			log.Printf("Failed to connect to %s: %v\nOutput: %s", seed, err, output)
-		} else {
-			fmt.Printf("Connected to IPFS node: %s\n", seed)
-		}
+func ConnectToIPFSNode(ip, peerId string) {
+	seed, _ := GenerateSwarmConnectURL(ip, peerId)
+	cmd := exec.Command("ipfs", "swarm", "connect", seed)
+	output, err := cmd.CombinedOutput()
+	if err != nil {
+		log.Printf("Failed to connect to %s: %v\nOutput: %s", seed, err, output)
+	} else {
+		fmt.Printf("Connected to IPFS node: %s\n", seed)
 	}
 }
 
-// Config struct to match YAML structure
-type Config struct {
-	IPFSSeeds []string `yaml:"ipfs_seeds"`
+// IPFSIDResponse represents the structure of the `ipfs id` JSON response.
+type IPFSIDResponse struct {
+	ID string `json:"ID"`
 }
 
-// Function to read YAML config file
-func ReadConfig(filename string) (*Config, error) {
-	data, err := os.ReadFile(filename)
+// GetIPFSPeerID runs `ipfs id` and extracts the Peer ID.
+func GetIPFSPeerID() (string, error) {
+	cmd := exec.Command("ipfs", "id")
+	output, err := cmd.Output()
 	if err != nil {
-		return nil, err
+		return "", fmt.Errorf("failed to run ipfs id: %w", err)
 	}
 
-	var config Config
-	err = yaml.Unmarshal(data, &config)
-	if err != nil {
-		return nil, err
+	var response IPFSIDResponse
+	if err := json.Unmarshal(output, &response); err != nil {
+		return "", fmt.Errorf("failed to parse ipfs id output: %w", err)
 	}
 
-	return &config, nil
+	return response.ID, nil
+}
+
+// GenerateSwarmConnectURL creates the full IPFS swarm connect URL.
+func GenerateSwarmConnectURL(ip, peerID string) (string, error) {
+	return fmt.Sprintf("/ip4/%s/tcp/4001/p2p/%s", ip, peerID), nil
 }

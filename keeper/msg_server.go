@@ -7,11 +7,13 @@ import (
 	"strconv"
 	"strings"
 
+	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ipfs/go-cid"
 
 	"github.com/janction/videoRendering"
+	"github.com/janction/videoRendering/ipfs"
 )
 
 type msgServer struct {
@@ -55,7 +57,9 @@ func (ms msgServer) CreateVideoRenderingTask(ctx context.Context, msg *videoRend
 	videoTask.Threads = threads
 
 	// the module will keep the reward to be distributed later
-	ms.k.BankKeeper.SendCoinsFromAccountToModule(ctx, types.AccAddress(msg.Creator), videoRendering.ModuleName, types.NewCoins(*msg.Reward))
+	// TODO Add validations for msg.Creator
+	addr, _ := types.AccAddressFromBech32(msg.Creator)
+	ms.k.BankKeeper.SendCoinsFromAccountToModule(ctx, addr, videoRendering.ModuleName, types.NewCoins(*msg.Reward))
 
 	// we create the task
 	if err := ms.k.VideoRenderingTasks.Set(ctx, taskId, videoTask); err != nil {
@@ -102,10 +106,16 @@ func (ms msgServer) AddWorker(ctx context.Context, msg *videoRendering.MsgAddWor
 	}
 
 	// worker is not previously registered, so we move on
-	reputation := videoRendering.Worker_Reputation{Points: 0, Staked: &msg.Stake, Validations: 0, Solutions: 0}
-	worker := videoRendering.Worker{Address: msg.Creator, Reputation: &reputation, Enabled: true, PublicIp: msg.PublicIp}
+	reputation := videoRendering.Worker_Reputation{Points: 0, Staked: &msg.Stake, Validations: 0, Solutions: 0, Winnings: types.NewCoin(params.MinWorkerStaking.Denom, math.NewInt(0))}
+	worker := videoRendering.Worker{Address: msg.Creator, Reputation: &reputation, Enabled: true, PublicIp: msg.PublicIp, IpfsId: msg.IpfsId}
 
 	ms.k.Workers.Set(ctx, msg.Creator, worker)
+
+	if msg.IpfsId != "" && msg.PublicIp != "" {
+		// we add the ipfs node into the swarm
+		ipfs.EnsureIPFSRunning()
+		go ipfs.ConnectToIPFSNode(msg.PublicIp, msg.IpfsId)
+	}
 
 	// we stack the coins in the module
 	err = ms.k.BankKeeper.SendCoinsFromAccountToModule(ctx, addr, videoRendering.ModuleName, types.NewCoins(msg.Stake))
@@ -299,9 +309,9 @@ func (ms msgServer) SubmitSolution(ctx context.Context, msg *videoRendering.MsgS
 			// }
 
 			// solution is verified so we pay the winner
+			addr, _ := types.AccAddressFromBech32(msg.Creator)
 			payment := task.GetWinnerReward()
-			ms.k.BankKeeper.SendCoinsFromModuleToAccount(ctx, videoRendering.ModuleName, types.AccAddress(msg.Creator), types.NewCoins(payment))
-
+			ms.k.BankKeeper.SendCoinsFromModuleToAccount(ctx, videoRendering.ModuleName, addr, types.NewCoins(payment))
 			task.Threads[i].Solution.Files = msg.Cid
 			ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
 
