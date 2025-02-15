@@ -115,11 +115,11 @@ func (ms msgServer) AddWorker(ctx context.Context, msg *videoRendering.MsgAddWor
 	}
 
 	// // we stack the coins in the module
-	// err = ms.k.BankKeeper.SendCoinsFromAccountToModule(ctx, addr, videoRendering.ModuleName, types.NewCoins(msg.Stake))
-	// if err != nil {
-	// 	log.Println(err.Error())
-	// 	return &videoRendering.MsgAddWorkerResponse{Ok: false, Message: err.Error()}, err
-	// }
+	err = ms.k.BankKeeper.SendCoinsFromAccountToModule(ctx, addr, videoRendering.ModuleName, types.NewCoins(msg.Stake))
+	if err != nil {
+		log.Println(err.Error())
+		return &videoRendering.MsgAddWorkerResponse{Ok: false, Message: err.Error()}, err
+	}
 
 	return &videoRendering.MsgAddWorkerResponse{Ok: true, Message: "Worker added correctly"}, nil
 }

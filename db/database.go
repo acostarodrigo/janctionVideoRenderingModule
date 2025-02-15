@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"io/fs"
-	"log"
 	"os"
 	"path/filepath"
 
@@ -214,7 +213,6 @@ func (db *DB) AddIPFSWorker(address string) error {
 	if err != nil {
 		return fmt.Errorf("failed to insert worker: %w", err)
 	}
-	log.Println("adding added for ", address)
 	return nil
 }
 
