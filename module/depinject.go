@@ -35,7 +35,7 @@ type ModuleInputs struct {
 	Cdc          codec.Codec
 	StoreService store.KVStoreService
 	AddressCodec address.Codec
-	BankKeeper   bankkeeper.Keeper
+	BankKeeper   bankkeeper.BaseKeeper
 
 	Config *modulev1.Module
 }

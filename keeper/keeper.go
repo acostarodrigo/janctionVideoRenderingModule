@@ -15,7 +15,7 @@ import (
 type Keeper struct {
 	cdc          codec.BinaryCodec
 	addressCodec address.Codec
-	BankKeeper   bankkeeper.Keeper
+	BankKeeper   bankkeeper.BaseKeeper
 
 	// authority is the address capable of executing a MsgUpdateParams and other authority-gated message.
 	// typically, this should be the x/gov module account.
@@ -32,7 +32,7 @@ type Keeper struct {
 }
 
 // NewKeeper creates a new Keeper instance
-func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService storetypes.KVStoreService, authority string, path string, bankKeeper bankkeeper.Keeper) Keeper {
+func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService storetypes.KVStoreService, authority string, path string, bankKeeper bankkeeper.BaseKeeper) Keeper {
 	if _, err := addressCodec.StringToBytes(authority); err != nil {
 		panic(fmt.Errorf("invalid authority address: %w", err))
 	}
