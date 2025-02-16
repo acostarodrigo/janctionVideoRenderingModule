@@ -253,14 +253,14 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 			if completed {
 				// all threads are over, we mark the task as completed
 				task.Completed = true
-				am.keeper.VideoRenderingTasks.Set(ctx, task.TaskId, task)
+				k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
 			}
 		}
 	}
 
 	// we now will connect to the IPFS nodes of new workers
-	am.keeper.Workers.Walk(ctx, nil, func(address string, worker videoRendering.Worker) (stop bool, err error) {
-		isAdded, _ := am.keeper.DB.IsIPFSWorkerAdded(address)
+	k.Workers.Walk(ctx, nil, func(address string, worker videoRendering.Worker) (stop bool, err error) {
+		isAdded, _ := k.DB.IsIPFSWorkerAdded(address)
 		if worker.IpfsId != "" && worker.PublicIp != "" && !isAdded {
 			log.Printf("Connecting to IPFS node %s at %s", worker.IpfsId, worker.PublicIp)
 			ipfs.EnsureIPFSRunning()
