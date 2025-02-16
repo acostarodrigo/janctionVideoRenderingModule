@@ -68,6 +68,7 @@ func (ms msgServer) CreateVideoRenderingTask(ctx context.Context, msg *videoRend
 }
 
 func (ms msgServer) AddWorker(ctx context.Context, msg *videoRendering.MsgAddWorker) (*videoRendering.MsgAddWorkerResponse, error) {
+	log.Println("AddWorker", msg.Creator, msg.IpfsId, msg.PublicIp, msg.Stake.String())
 	found, err := ms.k.Workers.Has(ctx, msg.Creator)
 	if err != nil {
 		log.Println(err.Error())
@@ -98,6 +99,7 @@ func (ms msgServer) AddWorker(ctx context.Context, msg *videoRendering.MsgAddWor
 	// we verify the account has enought balance to stack
 	addr, _ := types.AccAddressFromBech32(msg.Creator)
 	balance := ms.k.BankKeeper.GetBalance(ctx, addr, params.MinWorkerStaking.Denom)
+	log.Println("balance of ", msg.Creator, addr, balance)
 	if balance.Amount.LT(params.MinWorkerStaking.Amount) {
 		error := sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrWorkerIncorrectStake.Error(), "not enought balance to stack. Min value is %v", params.MinWorkerStaking.Amount)
 		log.Println(error.Error())
