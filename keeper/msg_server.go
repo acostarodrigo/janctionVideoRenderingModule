@@ -110,6 +110,7 @@ func (ms msgServer) AddWorker(ctx context.Context, msg *videoRendering.MsgAddWor
 	reputation := videoRendering.Worker_Reputation{Points: 0, Staked: &msg.Stake, Validations: 0, Solutions: 0, Winnings: types.NewCoin(params.MinWorkerStaking.Denom, math.NewInt(0))}
 	worker := videoRendering.Worker{Address: msg.Creator, Reputation: &reputation, Enabled: true, PublicIp: msg.PublicIp, IpfsId: msg.IpfsId}
 
+	log.Println("worker:", worker)
 	err = ms.k.Workers.Set(ctx, msg.Creator, worker)
 	if err != nil {
 		log.Println(err.Error())
@@ -117,11 +118,11 @@ func (ms msgServer) AddWorker(ctx context.Context, msg *videoRendering.MsgAddWor
 	}
 
 	// // we stack the coins in the module
-	err = ms.k.BankKeeper.SendCoinsFromAccountToModule(ctx, addr, videoRendering.ModuleName, types.NewCoins(msg.Stake))
-	if err != nil {
-		log.Println(err.Error())
-		return &videoRendering.MsgAddWorkerResponse{Ok: false, Message: err.Error()}, err
-	}
+	// err = ms.k.BankKeeper.SendCoinsFromAccountToModule(ctx, addr, videoRendering.ModuleName, types.NewCoins(msg.Stake))
+	// if err != nil {
+	// 	log.Println(err.Error())
+	// 	return &videoRendering.MsgAddWorkerResponse{Ok: false, Message: err.Error()}, err
+	// }
 
 	return &videoRendering.MsgAddWorkerResponse{Ok: true, Message: "Worker added correctly"}, nil
 }
