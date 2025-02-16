@@ -218,15 +218,17 @@ func (db *DB) AddIPFSWorker(address string) error {
 
 // Readthread retrieves a thread by ID.
 func (db *DB) IsIPFSWorkerAdded(address string) (bool, error) {
-	query := `SELECT address, added  FROM ipfs WHERE address = ?`
+	query := `SELECT added FROM ipfs WHERE address = ?`
 	row := db.conn.QueryRow(query, address)
 
-	var ipfs IPFS
-	if err := row.Scan(&ipfs.Address, &ipfs.Added); err != nil {
+	var added sql.NullBool
+	if err := row.Scan(&added); err != nil {
 		if err == sql.ErrNoRows {
-			return false, nil
+			return false, nil // No worker found, returning false
 		}
-		return false, fmt.Errorf("failed to read thread: %w", err)
+		return false, fmt.Errorf("failed to read IPFS worker status: %w", err)
 	}
-	return ipfs.Added, nil
+
+	// If the value is NULL, treat it as "not added" (false)
+	return added.Valid && added.Bool, nil
 }
