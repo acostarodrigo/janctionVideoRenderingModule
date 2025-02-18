@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/janction/videoRendering/db"
 	"github.com/janction/videoRendering/ipfs"
@@ -302,5 +303,25 @@ func (t VideoRenderingThread) IsReverse(worker string) bool {
 }
 
 func (t *VideoRenderingThread) GetValidatorReward(worker string, totalReward types.Coin) types.Coin {
-	return totalReward
+	var totalFiles int
+	for _, validation := range t.Validations {
+		totalFiles = totalFiles + int(validation.AmountFiles)
+	}
+	for _, validation := range t.Validations {
+		if validation.Validator == worker {
+			amount := calculateValidatorPayment(int(validation.AmountFiles), totalFiles, totalReward.Amount)
+			return types.NewCoin("jct", amount)
+		}
+	}
+	return types.NewCoin("jct", math.NewInt(0))
+}
+
+// Calculate the validator's reward proportionally using sdkmath.Int
+func calculateValidatorPayment(filesValidated, totalFilesValidated int, totalValidatorReward math.Int) math.Int {
+	if totalFilesValidated == 0 {
+		return math.NewInt(0) // Avoid division by zero
+	}
+
+	// (filesValidated * totalValidatorReward) / totalFilesValidated
+	return totalValidatorReward.Mul(math.NewInt(int64(filesValidated))).Quo(math.NewInt(int64(totalFilesValidated)))
 }
