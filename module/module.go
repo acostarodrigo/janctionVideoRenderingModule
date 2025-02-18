@@ -149,6 +149,22 @@ func (am AppModule) getPendingVideoRenderingTask(ctx context.Context) (bool, vid
 
 func (am AppModule) BeginBlock(ctx context.Context) error {
 	k := am.keeper
+
+	// we adjust the amount of minimum validators per thread based on the amount of
+	// registered workers
+	params, _ := k.Params.Get(ctx)
+	count := 0
+	iterator, _ := k.Workers.Iterate(ctx, nil)
+	for iterator.Valid() {
+		count++
+		iterator.Next()
+	}
+	// we adjust the min validators dinamycally
+	if count > 1 && count < 7 {
+		params.MinValidators = uint64(count)
+		k.Params.Set(ctx, params)
+	}
+
 	if k.Configuration.Enabled && k.Configuration.WorkerAddress != "" {
 		worker, _ := k.Workers.Get(ctx, k.Configuration.WorkerAddress)
 		if worker.Enabled && worker.CurrentTaskId != "" {
@@ -285,6 +301,12 @@ func (am AppModule) EvaluateCompletedThread(ctx context.Context, task *videoRend
 		worker, _ := am.keeper.Workers.Get(ctx, worker)
 		worker.CurrentTaskId = ""
 		worker.CurrentThreadIndex = 0
+		// we increase reputation
+		worker.Reputation.Points = worker.Reputation.Points + 1
+		worker.Reputation.Validations = worker.Reputation.Validations + 1
+		// we pay for the validation
+		winning := thread.GetValidatorReward(worker.Address, task.GetValidatorsReward())
+		worker.Reputation.Winnings = worker.Reputation.Winnings.Add(winning)
 		am.keeper.Workers.Set(ctx, worker.Address, worker)
 	}
 
