@@ -28,6 +28,7 @@ func NewMsgServerImpl(keeper Keeper) videoRendering.MsgServer {
 
 // CreateGame defines the handler for the MsgCreateVideoRenderingTask message.
 func (ms msgServer) CreateVideoRenderingTask(ctx context.Context, msg *videoRendering.MsgCreateVideoRenderingTask) (*videoRendering.MsgCreateVideoRenderingTaskResponse, error) {
+	log.Println("CreateVideoRenderingTask", msg.Creator, msg.Cid, msg.StartFrame, msg.EndFrame, msg.Threads, msg.Reward)
 	// TODO had validations about the parameters
 	taskInfo, err := ms.k.VideoRenderingTaskInfo.Get(ctx)
 	if err != nil {
