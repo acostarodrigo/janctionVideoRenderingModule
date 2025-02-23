@@ -7,4 +7,4 @@ plugins:
       - esModuleInterop=true
       - forceLong=long
       - useOptionals=messages
-      - useProtobufjs=true
+      - useProtobufjs=false   # Disable protobufjs and use @bufbuild/protobuf instead
