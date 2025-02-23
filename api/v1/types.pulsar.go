@@ -101,14 +101,14 @@ func (x *fastReflection_Params) Range(f func(protoreflect.FieldDescriptor, proto
 			return
 		}
 	}
-	if x.MaxWorkersPerThread != uint64(0) {
-		value := protoreflect.ValueOfUint64(x.MaxWorkersPerThread)
+	if x.MaxWorkersPerThread != int64(0) {
+		value := protoreflect.ValueOfInt64(x.MaxWorkersPerThread)
 		if !f(fd_Params_max_workers_per_thread, value) {
 			return
 		}
 	}
-	if x.MinValidators != uint64(0) {
-		value := protoreflect.ValueOfUint64(x.MinValidators)
+	if x.MinValidators != int64(0) {
+		value := protoreflect.ValueOfInt64(x.MinValidators)
 		if !f(fd_Params_min_validators, value) {
 			return
 		}
@@ -131,9 +131,9 @@ func (x *fastReflection_Params) Has(fd protoreflect.FieldDescriptor) bool {
 	case "janction.videoRendering.v1.Params.min_worker_staking":
 		return x.MinWorkerStaking != nil
 	case "janction.videoRendering.v1.Params.max_workers_per_thread":
-		return x.MaxWorkersPerThread != uint64(0)
+		return x.MaxWorkersPerThread != int64(0)
 	case "janction.videoRendering.v1.Params.min_validators":
-		return x.MinValidators != uint64(0)
+		return x.MinValidators != int64(0)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.Params"))
@@ -153,9 +153,9 @@ func (x *fastReflection_Params) Clear(fd protoreflect.FieldDescriptor) {
 	case "janction.videoRendering.v1.Params.min_worker_staking":
 		x.MinWorkerStaking = nil
 	case "janction.videoRendering.v1.Params.max_workers_per_thread":
-		x.MaxWorkersPerThread = uint64(0)
+		x.MaxWorkersPerThread = int64(0)
 	case "janction.videoRendering.v1.Params.min_validators":
-		x.MinValidators = uint64(0)
+		x.MinValidators = int64(0)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.Params"))
@@ -177,10 +177,10 @@ func (x *fastReflection_Params) Get(descriptor protoreflect.FieldDescriptor) pro
 		return protoreflect.ValueOfMessage(value.ProtoReflect())
 	case "janction.videoRendering.v1.Params.max_workers_per_thread":
 		value := x.MaxWorkersPerThread
-		return protoreflect.ValueOfUint64(value)
+		return protoreflect.ValueOfInt64(value)
 	case "janction.videoRendering.v1.Params.min_validators":
 		value := x.MinValidators
-		return protoreflect.ValueOfUint64(value)
+		return protoreflect.ValueOfInt64(value)
 	default:
 		if descriptor.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.Params"))
@@ -204,9 +204,9 @@ func (x *fastReflection_Params) Set(fd protoreflect.FieldDescriptor, value proto
 	case "janction.videoRendering.v1.Params.min_worker_staking":
 		x.MinWorkerStaking = value.Message().Interface().(*v1beta1.Coin)
 	case "janction.videoRendering.v1.Params.max_workers_per_thread":
-		x.MaxWorkersPerThread = value.Uint()
+		x.MaxWorkersPerThread = value.Int()
 	case "janction.videoRendering.v1.Params.min_validators":
-		x.MinValidators = value.Uint()
+		x.MinValidators = value.Int()
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.Params"))
@@ -253,9 +253,9 @@ func (x *fastReflection_Params) NewField(fd protoreflect.FieldDescriptor) protor
 		m := new(v1beta1.Coin)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
 	case "janction.videoRendering.v1.Params.max_workers_per_thread":
-		return protoreflect.ValueOfUint64(uint64(0))
+		return protoreflect.ValueOfInt64(int64(0))
 	case "janction.videoRendering.v1.Params.min_validators":
-		return protoreflect.ValueOfUint64(uint64(0))
+		return protoreflect.ValueOfInt64(int64(0))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.Params"))
@@ -487,7 +487,7 @@ func (x *fastReflection_Params) ProtoMethods() *protoiface.Methods {
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.MaxWorkersPerThread |= uint64(b&0x7F) << shift
+					x.MaxWorkersPerThread |= int64(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -506,7 +506,7 @@ func (x *fastReflection_Params) ProtoMethods() *protoiface.Methods {
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.MinValidators |= uint64(b&0x7F) << shift
+					x.MinValidators |= int64(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -1448,8 +1448,8 @@ func (x *fastReflection_Worker) Range(f func(protoreflect.FieldDescriptor, proto
 			return
 		}
 	}
-	if x.CurrentThreadIndex != uint32(0) {
-		value := protoreflect.ValueOfUint32(x.CurrentThreadIndex)
+	if x.CurrentThreadIndex != int32(0) {
+		value := protoreflect.ValueOfInt32(x.CurrentThreadIndex)
 		if !f(fd_Worker_current_thread_index, value) {
 			return
 		}
@@ -1490,7 +1490,7 @@ func (x *fastReflection_Worker) Has(fd protoreflect.FieldDescriptor) bool {
 	case "janction.videoRendering.v1.Worker.current_task_id":
 		return x.CurrentTaskId != ""
 	case "janction.videoRendering.v1.Worker.current_thread_index":
-		return x.CurrentThreadIndex != uint32(0)
+		return x.CurrentThreadIndex != int32(0)
 	case "janction.videoRendering.v1.Worker.public_ip":
 		return x.PublicIp != ""
 	case "janction.videoRendering.v1.Worker.ipfs_id":
@@ -1520,7 +1520,7 @@ func (x *fastReflection_Worker) Clear(fd protoreflect.FieldDescriptor) {
 	case "janction.videoRendering.v1.Worker.current_task_id":
 		x.CurrentTaskId = ""
 	case "janction.videoRendering.v1.Worker.current_thread_index":
-		x.CurrentThreadIndex = uint32(0)
+		x.CurrentThreadIndex = int32(0)
 	case "janction.videoRendering.v1.Worker.public_ip":
 		x.PublicIp = ""
 	case "janction.videoRendering.v1.Worker.ipfs_id":
@@ -1555,7 +1555,7 @@ func (x *fastReflection_Worker) Get(descriptor protoreflect.FieldDescriptor) pro
 		return protoreflect.ValueOfString(value)
 	case "janction.videoRendering.v1.Worker.current_thread_index":
 		value := x.CurrentThreadIndex
-		return protoreflect.ValueOfUint32(value)
+		return protoreflect.ValueOfInt32(value)
 	case "janction.videoRendering.v1.Worker.public_ip":
 		value := x.PublicIp
 		return protoreflect.ValueOfString(value)
@@ -1591,7 +1591,7 @@ func (x *fastReflection_Worker) Set(fd protoreflect.FieldDescriptor, value proto
 	case "janction.videoRendering.v1.Worker.current_task_id":
 		x.CurrentTaskId = value.Interface().(string)
 	case "janction.videoRendering.v1.Worker.current_thread_index":
-		x.CurrentThreadIndex = uint32(value.Uint())
+		x.CurrentThreadIndex = int32(value.Int())
 	case "janction.videoRendering.v1.Worker.public_ip":
 		x.PublicIp = value.Interface().(string)
 	case "janction.videoRendering.v1.Worker.ipfs_id":
@@ -1656,7 +1656,7 @@ func (x *fastReflection_Worker) NewField(fd protoreflect.FieldDescriptor) protor
 	case "janction.videoRendering.v1.Worker.current_task_id":
 		return protoreflect.ValueOfString("")
 	case "janction.videoRendering.v1.Worker.current_thread_index":
-		return protoreflect.ValueOfUint32(uint32(0))
+		return protoreflect.ValueOfInt32(int32(0))
 	case "janction.videoRendering.v1.Worker.public_ip":
 		return protoreflect.ValueOfString("")
 	case "janction.videoRendering.v1.Worker.ipfs_id":
@@ -2025,7 +2025,7 @@ func (x *fastReflection_Worker) ProtoMethods() *protoiface.Methods {
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.CurrentThreadIndex |= uint32(b&0x7F) << shift
+					x.CurrentThreadIndex |= int32(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -2225,14 +2225,14 @@ func (x *fastReflection_Worker_Reputation) Range(f func(protoreflect.FieldDescri
 			return
 		}
 	}
-	if x.Validations != uint32(0) {
-		value := protoreflect.ValueOfUint32(x.Validations)
+	if x.Validations != int32(0) {
+		value := protoreflect.ValueOfInt32(x.Validations)
 		if !f(fd_Worker_Reputation_validations, value) {
 			return
 		}
 	}
-	if x.Solutions != uint32(0) {
-		value := protoreflect.ValueOfUint32(x.Solutions)
+	if x.Solutions != int32(0) {
+		value := protoreflect.ValueOfInt32(x.Solutions)
 		if !f(fd_Worker_Reputation_solutions, value) {
 			return
 		}
@@ -2263,9 +2263,9 @@ func (x *fastReflection_Worker_Reputation) Has(fd protoreflect.FieldDescriptor) 
 	case "janction.videoRendering.v1.Worker.Reputation.points":
 		return x.Points != int64(0)
 	case "janction.videoRendering.v1.Worker.Reputation.validations":
-		return x.Validations != uint32(0)
+		return x.Validations != int32(0)
 	case "janction.videoRendering.v1.Worker.Reputation.solutions":
-		return x.Solutions != uint32(0)
+		return x.Solutions != int32(0)
 	case "janction.videoRendering.v1.Worker.Reputation.winnings":
 		return x.Winnings != nil
 	default:
@@ -2289,9 +2289,9 @@ func (x *fastReflection_Worker_Reputation) Clear(fd protoreflect.FieldDescriptor
 	case "janction.videoRendering.v1.Worker.Reputation.points":
 		x.Points = int64(0)
 	case "janction.videoRendering.v1.Worker.Reputation.validations":
-		x.Validations = uint32(0)
+		x.Validations = int32(0)
 	case "janction.videoRendering.v1.Worker.Reputation.solutions":
-		x.Solutions = uint32(0)
+		x.Solutions = int32(0)
 	case "janction.videoRendering.v1.Worker.Reputation.winnings":
 		x.Winnings = nil
 	default:
@@ -2318,10 +2318,10 @@ func (x *fastReflection_Worker_Reputation) Get(descriptor protoreflect.FieldDesc
 		return protoreflect.ValueOfInt64(value)
 	case "janction.videoRendering.v1.Worker.Reputation.validations":
 		value := x.Validations
-		return protoreflect.ValueOfUint32(value)
+		return protoreflect.ValueOfInt32(value)
 	case "janction.videoRendering.v1.Worker.Reputation.solutions":
 		value := x.Solutions
-		return protoreflect.ValueOfUint32(value)
+		return protoreflect.ValueOfInt32(value)
 	case "janction.videoRendering.v1.Worker.Reputation.winnings":
 		value := x.Winnings
 		return protoreflect.ValueOfMessage(value.ProtoReflect())
@@ -2350,9 +2350,9 @@ func (x *fastReflection_Worker_Reputation) Set(fd protoreflect.FieldDescriptor, 
 	case "janction.videoRendering.v1.Worker.Reputation.points":
 		x.Points = value.Int()
 	case "janction.videoRendering.v1.Worker.Reputation.validations":
-		x.Validations = uint32(value.Uint())
+		x.Validations = int32(value.Int())
 	case "janction.videoRendering.v1.Worker.Reputation.solutions":
-		x.Solutions = uint32(value.Uint())
+		x.Solutions = int32(value.Int())
 	case "janction.videoRendering.v1.Worker.Reputation.winnings":
 		x.Winnings = value.Message().Interface().(*v1beta1.Coin)
 	default:
@@ -2410,9 +2410,9 @@ func (x *fastReflection_Worker_Reputation) NewField(fd protoreflect.FieldDescrip
 	case "janction.videoRendering.v1.Worker.Reputation.points":
 		return protoreflect.ValueOfInt64(int64(0))
 	case "janction.videoRendering.v1.Worker.Reputation.validations":
-		return protoreflect.ValueOfUint32(uint32(0))
+		return protoreflect.ValueOfInt32(int32(0))
 	case "janction.videoRendering.v1.Worker.Reputation.solutions":
-		return protoreflect.ValueOfUint32(uint32(0))
+		return protoreflect.ValueOfInt32(int32(0))
 	case "janction.videoRendering.v1.Worker.Reputation.winnings":
 		m := new(v1beta1.Coin)
 		return protoreflect.ValueOfMessage(m.ProtoReflect())
@@ -2692,7 +2692,7 @@ func (x *fastReflection_Worker_Reputation) ProtoMethods() *protoiface.Methods {
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.Validations |= uint32(b&0x7F) << shift
+					x.Validations |= int32(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -2711,7 +2711,7 @@ func (x *fastReflection_Worker_Reputation) ProtoMethods() *protoiface.Methods {
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.Solutions |= uint32(b&0x7F) << shift
+					x.Solutions |= int32(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -2948,20 +2948,20 @@ func (x *fastReflection_VideoRenderingTask) Range(f func(protoreflect.FieldDescr
 			return
 		}
 	}
-	if x.StartFrame != uint32(0) {
-		value := protoreflect.ValueOfUint32(x.StartFrame)
+	if x.StartFrame != int32(0) {
+		value := protoreflect.ValueOfInt32(x.StartFrame)
 		if !f(fd_VideoRenderingTask_start_frame, value) {
 			return
 		}
 	}
-	if x.EndFrame != uint32(0) {
-		value := protoreflect.ValueOfUint32(x.EndFrame)
+	if x.EndFrame != int32(0) {
+		value := protoreflect.ValueOfInt32(x.EndFrame)
 		if !f(fd_VideoRenderingTask_end_frame, value) {
 			return
 		}
 	}
-	if x.ThreadAmount != uint32(0) {
-		value := protoreflect.ValueOfUint32(x.ThreadAmount)
+	if x.ThreadAmount != int32(0) {
+		value := protoreflect.ValueOfInt32(x.ThreadAmount)
 		if !f(fd_VideoRenderingTask_threadAmount, value) {
 			return
 		}
@@ -3006,11 +3006,11 @@ func (x *fastReflection_VideoRenderingTask) Has(fd protoreflect.FieldDescriptor)
 	case "janction.videoRendering.v1.VideoRenderingTask.cid":
 		return x.Cid != ""
 	case "janction.videoRendering.v1.VideoRenderingTask.start_frame":
-		return x.StartFrame != uint32(0)
+		return x.StartFrame != int32(0)
 	case "janction.videoRendering.v1.VideoRenderingTask.end_frame":
-		return x.EndFrame != uint32(0)
+		return x.EndFrame != int32(0)
 	case "janction.videoRendering.v1.VideoRenderingTask.threadAmount":
-		return x.ThreadAmount != uint32(0)
+		return x.ThreadAmount != int32(0)
 	case "janction.videoRendering.v1.VideoRenderingTask.completed":
 		return x.Completed != false
 	case "janction.videoRendering.v1.VideoRenderingTask.reward":
@@ -3040,11 +3040,11 @@ func (x *fastReflection_VideoRenderingTask) Clear(fd protoreflect.FieldDescripto
 	case "janction.videoRendering.v1.VideoRenderingTask.cid":
 		x.Cid = ""
 	case "janction.videoRendering.v1.VideoRenderingTask.start_frame":
-		x.StartFrame = uint32(0)
+		x.StartFrame = int32(0)
 	case "janction.videoRendering.v1.VideoRenderingTask.end_frame":
-		x.EndFrame = uint32(0)
+		x.EndFrame = int32(0)
 	case "janction.videoRendering.v1.VideoRenderingTask.threadAmount":
-		x.ThreadAmount = uint32(0)
+		x.ThreadAmount = int32(0)
 	case "janction.videoRendering.v1.VideoRenderingTask.completed":
 		x.Completed = false
 	case "janction.videoRendering.v1.VideoRenderingTask.reward":
@@ -3078,13 +3078,13 @@ func (x *fastReflection_VideoRenderingTask) Get(descriptor protoreflect.FieldDes
 		return protoreflect.ValueOfString(value)
 	case "janction.videoRendering.v1.VideoRenderingTask.start_frame":
 		value := x.StartFrame
-		return protoreflect.ValueOfUint32(value)
+		return protoreflect.ValueOfInt32(value)
 	case "janction.videoRendering.v1.VideoRenderingTask.end_frame":
 		value := x.EndFrame
-		return protoreflect.ValueOfUint32(value)
+		return protoreflect.ValueOfInt32(value)
 	case "janction.videoRendering.v1.VideoRenderingTask.threadAmount":
 		value := x.ThreadAmount
-		return protoreflect.ValueOfUint32(value)
+		return protoreflect.ValueOfInt32(value)
 	case "janction.videoRendering.v1.VideoRenderingTask.completed":
 		value := x.Completed
 		return protoreflect.ValueOfBool(value)
@@ -3124,11 +3124,11 @@ func (x *fastReflection_VideoRenderingTask) Set(fd protoreflect.FieldDescriptor,
 	case "janction.videoRendering.v1.VideoRenderingTask.cid":
 		x.Cid = value.Interface().(string)
 	case "janction.videoRendering.v1.VideoRenderingTask.start_frame":
-		x.StartFrame = uint32(value.Uint())
+		x.StartFrame = int32(value.Int())
 	case "janction.videoRendering.v1.VideoRenderingTask.end_frame":
-		x.EndFrame = uint32(value.Uint())
+		x.EndFrame = int32(value.Int())
 	case "janction.videoRendering.v1.VideoRenderingTask.threadAmount":
-		x.ThreadAmount = uint32(value.Uint())
+		x.ThreadAmount = int32(value.Int())
 	case "janction.videoRendering.v1.VideoRenderingTask.completed":
 		x.Completed = value.Bool()
 	case "janction.videoRendering.v1.VideoRenderingTask.reward":
@@ -3202,11 +3202,11 @@ func (x *fastReflection_VideoRenderingTask) NewField(fd protoreflect.FieldDescri
 	case "janction.videoRendering.v1.VideoRenderingTask.cid":
 		return protoreflect.ValueOfString("")
 	case "janction.videoRendering.v1.VideoRenderingTask.start_frame":
-		return protoreflect.ValueOfUint32(uint32(0))
+		return protoreflect.ValueOfInt32(int32(0))
 	case "janction.videoRendering.v1.VideoRenderingTask.end_frame":
-		return protoreflect.ValueOfUint32(uint32(0))
+		return protoreflect.ValueOfInt32(int32(0))
 	case "janction.videoRendering.v1.VideoRenderingTask.threadAmount":
-		return protoreflect.ValueOfUint32(uint32(0))
+		return protoreflect.ValueOfInt32(int32(0))
 	case "janction.videoRendering.v1.VideoRenderingTask.completed":
 		return protoreflect.ValueOfBool(false)
 	case "janction.videoRendering.v1.VideoRenderingTask.reward":
@@ -3582,7 +3582,7 @@ func (x *fastReflection_VideoRenderingTask) ProtoMethods() *protoiface.Methods {
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.StartFrame |= uint32(b&0x7F) << shift
+					x.StartFrame |= int32(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -3601,7 +3601,7 @@ func (x *fastReflection_VideoRenderingTask) ProtoMethods() *protoiface.Methods {
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.EndFrame |= uint32(b&0x7F) << shift
+					x.EndFrame |= int32(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -3620,7 +3620,7 @@ func (x *fastReflection_VideoRenderingTask) ProtoMethods() *protoiface.Methods {
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.ThreadAmount |= uint32(b&0x7F) << shift
+					x.ThreadAmount |= int32(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -3949,14 +3949,14 @@ func (x *fastReflection_VideoRenderingThread) Range(f func(protoreflect.FieldDes
 			return
 		}
 	}
-	if x.StartFrame != uint32(0) {
-		value := protoreflect.ValueOfUint32(x.StartFrame)
+	if x.StartFrame != int64(0) {
+		value := protoreflect.ValueOfInt64(x.StartFrame)
 		if !f(fd_VideoRenderingThread_start_frame, value) {
 			return
 		}
 	}
-	if x.EndFrame != uint32(0) {
-		value := protoreflect.ValueOfUint32(x.EndFrame)
+	if x.EndFrame != int64(0) {
+		value := protoreflect.ValueOfInt64(x.EndFrame)
 		if !f(fd_VideoRenderingThread_end_frame, value) {
 			return
 		}
@@ -4005,9 +4005,9 @@ func (x *fastReflection_VideoRenderingThread) Has(fd protoreflect.FieldDescripto
 	case "janction.videoRendering.v1.VideoRenderingThread.task_id":
 		return x.TaskId != ""
 	case "janction.videoRendering.v1.VideoRenderingThread.start_frame":
-		return x.StartFrame != uint32(0)
+		return x.StartFrame != int64(0)
 	case "janction.videoRendering.v1.VideoRenderingThread.end_frame":
-		return x.EndFrame != uint32(0)
+		return x.EndFrame != int64(0)
 	case "janction.videoRendering.v1.VideoRenderingThread.completed":
 		return x.Completed != false
 	case "janction.videoRendering.v1.VideoRenderingThread.workers":
@@ -4037,9 +4037,9 @@ func (x *fastReflection_VideoRenderingThread) Clear(fd protoreflect.FieldDescrip
 	case "janction.videoRendering.v1.VideoRenderingThread.task_id":
 		x.TaskId = ""
 	case "janction.videoRendering.v1.VideoRenderingThread.start_frame":
-		x.StartFrame = uint32(0)
+		x.StartFrame = int64(0)
 	case "janction.videoRendering.v1.VideoRenderingThread.end_frame":
-		x.EndFrame = uint32(0)
+		x.EndFrame = int64(0)
 	case "janction.videoRendering.v1.VideoRenderingThread.completed":
 		x.Completed = false
 	case "janction.videoRendering.v1.VideoRenderingThread.workers":
@@ -4072,10 +4072,10 @@ func (x *fastReflection_VideoRenderingThread) Get(descriptor protoreflect.FieldD
 		return protoreflect.ValueOfString(value)
 	case "janction.videoRendering.v1.VideoRenderingThread.start_frame":
 		value := x.StartFrame
-		return protoreflect.ValueOfUint32(value)
+		return protoreflect.ValueOfInt64(value)
 	case "janction.videoRendering.v1.VideoRenderingThread.end_frame":
 		value := x.EndFrame
-		return protoreflect.ValueOfUint32(value)
+		return protoreflect.ValueOfInt64(value)
 	case "janction.videoRendering.v1.VideoRenderingThread.completed":
 		value := x.Completed
 		return protoreflect.ValueOfBool(value)
@@ -4119,9 +4119,9 @@ func (x *fastReflection_VideoRenderingThread) Set(fd protoreflect.FieldDescripto
 	case "janction.videoRendering.v1.VideoRenderingThread.task_id":
 		x.TaskId = value.Interface().(string)
 	case "janction.videoRendering.v1.VideoRenderingThread.start_frame":
-		x.StartFrame = uint32(value.Uint())
+		x.StartFrame = value.Int()
 	case "janction.videoRendering.v1.VideoRenderingThread.end_frame":
-		x.EndFrame = uint32(value.Uint())
+		x.EndFrame = value.Int()
 	case "janction.videoRendering.v1.VideoRenderingThread.completed":
 		x.Completed = value.Bool()
 	case "janction.videoRendering.v1.VideoRenderingThread.workers":
@@ -4199,9 +4199,9 @@ func (x *fastReflection_VideoRenderingThread) NewField(fd protoreflect.FieldDesc
 	case "janction.videoRendering.v1.VideoRenderingThread.task_id":
 		return protoreflect.ValueOfString("")
 	case "janction.videoRendering.v1.VideoRenderingThread.start_frame":
-		return protoreflect.ValueOfUint32(uint32(0))
+		return protoreflect.ValueOfInt64(int64(0))
 	case "janction.videoRendering.v1.VideoRenderingThread.end_frame":
-		return protoreflect.ValueOfUint32(uint32(0))
+		return protoreflect.ValueOfInt64(int64(0))
 	case "janction.videoRendering.v1.VideoRenderingThread.completed":
 		return protoreflect.ValueOfBool(false)
 	case "janction.videoRendering.v1.VideoRenderingThread.workers":
@@ -4544,7 +4544,7 @@ func (x *fastReflection_VideoRenderingThread) ProtoMethods() *protoiface.Methods
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.StartFrame |= uint32(b&0x7F) << shift
+					x.StartFrame |= int64(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -4563,7 +4563,7 @@ func (x *fastReflection_VideoRenderingThread) ProtoMethods() *protoiface.Methods
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.EndFrame |= uint32(b&0x7F) << shift
+					x.EndFrame |= int64(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -5421,8 +5421,8 @@ func (x *fastReflection_VideoRenderingThread_Validation) Range(f func(protorefle
 			return
 		}
 	}
-	if x.AmountFiles != uint64(0) {
-		value := protoreflect.ValueOfUint64(x.AmountFiles)
+	if x.AmountFiles != int64(0) {
+		value := protoreflect.ValueOfInt64(x.AmountFiles)
 		if !f(fd_VideoRenderingThread_Validation_amount_files, value) {
 			return
 		}
@@ -5457,7 +5457,7 @@ func (x *fastReflection_VideoRenderingThread_Validation) Has(fd protoreflect.Fie
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.validator":
 		return x.Validator != ""
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.amount_files":
-		return x.AmountFiles != uint64(0)
+		return x.AmountFiles != int64(0)
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.valid":
 		return x.Valid != false
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.is_reverse":
@@ -5481,7 +5481,7 @@ func (x *fastReflection_VideoRenderingThread_Validation) Clear(fd protoreflect.F
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.validator":
 		x.Validator = ""
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.amount_files":
-		x.AmountFiles = uint64(0)
+		x.AmountFiles = int64(0)
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.valid":
 		x.Valid = false
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.is_reverse":
@@ -5507,7 +5507,7 @@ func (x *fastReflection_VideoRenderingThread_Validation) Get(descriptor protoref
 		return protoreflect.ValueOfString(value)
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.amount_files":
 		value := x.AmountFiles
-		return protoreflect.ValueOfUint64(value)
+		return protoreflect.ValueOfInt64(value)
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.valid":
 		value := x.Valid
 		return protoreflect.ValueOfBool(value)
@@ -5537,7 +5537,7 @@ func (x *fastReflection_VideoRenderingThread_Validation) Set(fd protoreflect.Fie
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.validator":
 		x.Validator = value.Interface().(string)
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.amount_files":
-		x.AmountFiles = value.Uint()
+		x.AmountFiles = value.Int()
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.valid":
 		x.Valid = value.Bool()
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.is_reverse":
@@ -5586,7 +5586,7 @@ func (x *fastReflection_VideoRenderingThread_Validation) NewField(fd protoreflec
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.validator":
 		return protoreflect.ValueOfString("")
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.amount_files":
-		return protoreflect.ValueOfUint64(uint64(0))
+		return protoreflect.ValueOfInt64(int64(0))
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.valid":
 		return protoreflect.ValueOfBool(false)
 	case "janction.videoRendering.v1.VideoRenderingThread.Validation.is_reverse":
@@ -5829,7 +5829,7 @@ func (x *fastReflection_VideoRenderingThread_Validation) ProtoMethods() *protoif
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.AmountFiles |= uint64(b&0x7F) << shift
+					x.AmountFiles |= int64(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -5985,8 +5985,8 @@ func (x *fastReflection_VideoRenderingTaskInfo) Interface() protoreflect.ProtoMe
 // While iterating, mutating operations may only be performed
 // on the current field descriptor.
 func (x *fastReflection_VideoRenderingTaskInfo) Range(f func(protoreflect.FieldDescriptor, protoreflect.Value) bool) {
-	if x.NextId != uint64(0) {
-		value := protoreflect.ValueOfUint64(x.NextId)
+	if x.NextId != int64(0) {
+		value := protoreflect.ValueOfInt64(x.NextId)
 		if !f(fd_VideoRenderingTaskInfo_nextId, value) {
 			return
 		}
@@ -6007,7 +6007,7 @@ func (x *fastReflection_VideoRenderingTaskInfo) Range(f func(protoreflect.FieldD
 func (x *fastReflection_VideoRenderingTaskInfo) Has(fd protoreflect.FieldDescriptor) bool {
 	switch fd.FullName() {
 	case "janction.videoRendering.v1.VideoRenderingTaskInfo.nextId":
-		return x.NextId != uint64(0)
+		return x.NextId != int64(0)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.VideoRenderingTaskInfo"))
@@ -6025,7 +6025,7 @@ func (x *fastReflection_VideoRenderingTaskInfo) Has(fd protoreflect.FieldDescrip
 func (x *fastReflection_VideoRenderingTaskInfo) Clear(fd protoreflect.FieldDescriptor) {
 	switch fd.FullName() {
 	case "janction.videoRendering.v1.VideoRenderingTaskInfo.nextId":
-		x.NextId = uint64(0)
+		x.NextId = int64(0)
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.VideoRenderingTaskInfo"))
@@ -6044,7 +6044,7 @@ func (x *fastReflection_VideoRenderingTaskInfo) Get(descriptor protoreflect.Fiel
 	switch descriptor.FullName() {
 	case "janction.videoRendering.v1.VideoRenderingTaskInfo.nextId":
 		value := x.NextId
-		return protoreflect.ValueOfUint64(value)
+		return protoreflect.ValueOfInt64(value)
 	default:
 		if descriptor.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.VideoRenderingTaskInfo"))
@@ -6066,7 +6066,7 @@ func (x *fastReflection_VideoRenderingTaskInfo) Get(descriptor protoreflect.Fiel
 func (x *fastReflection_VideoRenderingTaskInfo) Set(fd protoreflect.FieldDescriptor, value protoreflect.Value) {
 	switch fd.FullName() {
 	case "janction.videoRendering.v1.VideoRenderingTaskInfo.nextId":
-		x.NextId = value.Uint()
+		x.NextId = value.Int()
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.VideoRenderingTaskInfo"))
@@ -6103,7 +6103,7 @@ func (x *fastReflection_VideoRenderingTaskInfo) Mutable(fd protoreflect.FieldDes
 func (x *fastReflection_VideoRenderingTaskInfo) NewField(fd protoreflect.FieldDescriptor) protoreflect.Value {
 	switch fd.FullName() {
 	case "janction.videoRendering.v1.VideoRenderingTaskInfo.nextId":
-		return protoreflect.ValueOfUint64(uint64(0))
+		return protoreflect.ValueOfInt64(int64(0))
 	default:
 		if fd.IsExtension() {
 			panic(fmt.Errorf("proto3 declared messages do not support extensions: janction.videoRendering.v1.VideoRenderingTaskInfo"))
@@ -6273,7 +6273,7 @@ func (x *fastReflection_VideoRenderingTaskInfo) ProtoMethods() *protoiface.Metho
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					x.NextId |= uint64(b&0x7F) << shift
+					x.NextId |= int64(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
@@ -7955,8 +7955,8 @@ type Params struct {
 	unknownFields protoimpl.UnknownFields
 
 	MinWorkerStaking    *v1beta1.Coin `protobuf:"bytes,1,opt,name=min_worker_staking,json=minWorkerStaking,proto3" json:"min_worker_staking,omitempty"`
-	MaxWorkersPerThread uint64        `protobuf:"varint,2,opt,name=max_workers_per_thread,json=maxWorkersPerThread,proto3" json:"max_workers_per_thread,omitempty"`
-	MinValidators       uint64        `protobuf:"varint,3,opt,name=min_validators,json=minValidators,proto3" json:"min_validators,omitempty"`
+	MaxWorkersPerThread int64         `protobuf:"varint,2,opt,name=max_workers_per_thread,json=maxWorkersPerThread,proto3" json:"max_workers_per_thread,omitempty"`
+	MinValidators       int64         `protobuf:"varint,3,opt,name=min_validators,json=minValidators,proto3" json:"min_validators,omitempty"`
 }
 
 func (x *Params) Reset() {
@@ -7986,14 +7986,14 @@ func (x *Params) GetMinWorkerStaking() *v1beta1.Coin {
 	return nil
 }
 
-func (x *Params) GetMaxWorkersPerThread() uint64 {
+func (x *Params) GetMaxWorkersPerThread() int64 {
 	if x != nil {
 		return x.MaxWorkersPerThread
 	}
 	return 0
 }
 
-func (x *Params) GetMinValidators() uint64 {
+func (x *Params) GetMinValidators() int64 {
 	if x != nil {
 		return x.MinValidators
 	}
@@ -8073,7 +8073,7 @@ type Worker struct {
 	Reputation         *Worker_Reputation `protobuf:"bytes,3,opt,name=reputation,proto3" json:"reputation,omitempty"`
 	Enabled            bool               `protobuf:"varint,4,opt,name=enabled,proto3" json:"enabled,omitempty"`
 	CurrentTaskId      string             `protobuf:"bytes,5,opt,name=current_task_id,json=currentTaskId,proto3" json:"current_task_id,omitempty"`
-	CurrentThreadIndex uint32             `protobuf:"varint,6,opt,name=current_thread_index,json=currentThreadIndex,proto3" json:"current_thread_index,omitempty"`
+	CurrentThreadIndex int32              `protobuf:"varint,6,opt,name=current_thread_index,json=currentThreadIndex,proto3" json:"current_thread_index,omitempty"`
 	PublicIp           string             `protobuf:"bytes,7,opt,name=public_ip,json=publicIp,proto3" json:"public_ip,omitempty"`
 	IpfsId             string             `protobuf:"bytes,8,opt,name=ipfs_id,json=ipfsId,proto3" json:"ipfs_id,omitempty"`
 }
@@ -8126,7 +8126,7 @@ func (x *Worker) GetCurrentTaskId() string {
 	return ""
 }
 
-func (x *Worker) GetCurrentThreadIndex() uint32 {
+func (x *Worker) GetCurrentThreadIndex() int32 {
 	if x != nil {
 		return x.CurrentThreadIndex
 	}
@@ -8157,9 +8157,9 @@ type VideoRenderingTask struct {
 	TaskId       string                  `protobuf:"bytes,1,opt,name=taskId,proto3" json:"taskId,omitempty"`
 	Requester    string                  `protobuf:"bytes,2,opt,name=requester,proto3" json:"requester,omitempty"`
 	Cid          string                  `protobuf:"bytes,3,opt,name=cid,proto3" json:"cid,omitempty"`
-	StartFrame   uint32                  `protobuf:"varint,4,opt,name=start_frame,json=startFrame,proto3" json:"start_frame,omitempty"`
-	EndFrame     uint32                  `protobuf:"varint,5,opt,name=end_frame,json=endFrame,proto3" json:"end_frame,omitempty"`
-	ThreadAmount uint32                  `protobuf:"varint,6,opt,name=threadAmount,proto3" json:"threadAmount,omitempty"`
+	StartFrame   int32                   `protobuf:"varint,4,opt,name=start_frame,json=startFrame,proto3" json:"start_frame,omitempty"`
+	EndFrame     int32                   `protobuf:"varint,5,opt,name=end_frame,json=endFrame,proto3" json:"end_frame,omitempty"`
+	ThreadAmount int32                   `protobuf:"varint,6,opt,name=threadAmount,proto3" json:"threadAmount,omitempty"`
 	Completed    bool                    `protobuf:"varint,7,opt,name=completed,proto3" json:"completed,omitempty"`
 	Reward       *v1beta1.Coin           `protobuf:"bytes,8,opt,name=reward,proto3" json:"reward,omitempty"`
 	Threads      []*VideoRenderingThread `protobuf:"bytes,9,rep,name=threads,proto3" json:"threads,omitempty"`
@@ -8206,21 +8206,21 @@ func (x *VideoRenderingTask) GetCid() string {
 	return ""
 }
 
-func (x *VideoRenderingTask) GetStartFrame() uint32 {
+func (x *VideoRenderingTask) GetStartFrame() int32 {
 	if x != nil {
 		return x.StartFrame
 	}
 	return 0
 }
 
-func (x *VideoRenderingTask) GetEndFrame() uint32 {
+func (x *VideoRenderingTask) GetEndFrame() int32 {
 	if x != nil {
 		return x.EndFrame
 	}
 	return 0
 }
 
-func (x *VideoRenderingTask) GetThreadAmount() uint32 {
+func (x *VideoRenderingTask) GetThreadAmount() int32 {
 	if x != nil {
 		return x.ThreadAmount
 	}
@@ -8257,8 +8257,8 @@ type VideoRenderingThread struct {
 
 	ThreadId    string                             `protobuf:"bytes,1,opt,name=thread_id,json=threadId,proto3" json:"thread_id,omitempty"`
 	TaskId      string                             `protobuf:"bytes,2,opt,name=task_id,json=taskId,proto3" json:"task_id,omitempty"`
-	StartFrame  uint32                             `protobuf:"varint,3,opt,name=start_frame,json=startFrame,proto3" json:"start_frame,omitempty"`
-	EndFrame    uint32                             `protobuf:"varint,4,opt,name=end_frame,json=endFrame,proto3" json:"end_frame,omitempty"`
+	StartFrame  int64                              `protobuf:"varint,3,opt,name=start_frame,json=startFrame,proto3" json:"start_frame,omitempty"`
+	EndFrame    int64                              `protobuf:"varint,4,opt,name=end_frame,json=endFrame,proto3" json:"end_frame,omitempty"`
 	Completed   bool                               `protobuf:"varint,5,opt,name=completed,proto3" json:"completed,omitempty"`
 	Workers     []string                           `protobuf:"bytes,6,rep,name=workers,proto3" json:"workers,omitempty"`
 	Solution    *VideoRenderingThread_Solution     `protobuf:"bytes,7,opt,name=solution,proto3" json:"solution,omitempty"`
@@ -8299,14 +8299,14 @@ func (x *VideoRenderingThread) GetTaskId() string {
 	return ""
 }
 
-func (x *VideoRenderingThread) GetStartFrame() uint32 {
+func (x *VideoRenderingThread) GetStartFrame() int64 {
 	if x != nil {
 		return x.StartFrame
 	}
 	return 0
 }
 
-func (x *VideoRenderingThread) GetEndFrame() uint32 {
+func (x *VideoRenderingThread) GetEndFrame() int64 {
 	if x != nil {
 		return x.EndFrame
 	}
@@ -8347,7 +8347,7 @@ type VideoRenderingTaskInfo struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	NextId uint64 `protobuf:"varint,1,opt,name=nextId,proto3" json:"nextId,omitempty"`
+	NextId int64 `protobuf:"varint,1,opt,name=nextId,proto3" json:"nextId,omitempty"`
 }
 
 func (x *VideoRenderingTaskInfo) Reset() {
@@ -8370,7 +8370,7 @@ func (*VideoRenderingTaskInfo) Descriptor() ([]byte, []int) {
 	return file_janction_videoRendering_v1_types_proto_rawDescGZIP(), []int{5}
 }
 
-func (x *VideoRenderingTaskInfo) GetNextId() uint64 {
+func (x *VideoRenderingTaskInfo) GetNextId() int64 {
 	if x != nil {
 		return x.NextId
 	}
@@ -8471,8 +8471,8 @@ type Worker_Reputation struct {
 
 	Staked      *v1beta1.Coin `protobuf:"bytes,1,opt,name=staked,proto3" json:"staked,omitempty"`
 	Points      int64         `protobuf:"varint,2,opt,name=points,proto3" json:"points,omitempty"`
-	Validations uint32        `protobuf:"varint,3,opt,name=validations,proto3" json:"validations,omitempty"`
-	Solutions   uint32        `protobuf:"varint,4,opt,name=solutions,proto3" json:"solutions,omitempty"`
+	Validations int32         `protobuf:"varint,3,opt,name=validations,proto3" json:"validations,omitempty"`
+	Solutions   int32         `protobuf:"varint,4,opt,name=solutions,proto3" json:"solutions,omitempty"`
 	Winnings    *v1beta1.Coin `protobuf:"bytes,5,opt,name=winnings,proto3" json:"winnings,omitempty"`
 }
 
@@ -8510,14 +8510,14 @@ func (x *Worker_Reputation) GetPoints() int64 {
 	return 0
 }
 
-func (x *Worker_Reputation) GetValidations() uint32 {
+func (x *Worker_Reputation) GetValidations() int32 {
 	if x != nil {
 		return x.Validations
 	}
 	return 0
 }
 
-func (x *Worker_Reputation) GetSolutions() uint32 {
+func (x *Worker_Reputation) GetSolutions() int32 {
 	if x != nil {
 		return x.Solutions
 	}
@@ -8588,7 +8588,7 @@ type VideoRenderingThread_Validation struct {
 	unknownFields protoimpl.UnknownFields
 
 	Validator   string `protobuf:"bytes,1,opt,name=validator,proto3" json:"validator,omitempty"`
-	AmountFiles uint64 `protobuf:"varint,2,opt,name=amount_files,json=amountFiles,proto3" json:"amount_files,omitempty"`
+	AmountFiles int64  `protobuf:"varint,2,opt,name=amount_files,json=amountFiles,proto3" json:"amount_files,omitempty"`
 	Valid       bool   `protobuf:"varint,3,opt,name=valid,proto3" json:"valid,omitempty"`
 	IsReverse   bool   `protobuf:"varint,4,opt,name=is_reverse,json=isReverse,proto3" json:"is_reverse,omitempty"`
 }
@@ -8620,7 +8620,7 @@ func (x *VideoRenderingThread_Validation) GetValidator() string {
 	return ""
 }
 
-func (x *VideoRenderingThread_Validation) GetAmountFiles() uint64 {
+func (x *VideoRenderingThread_Validation) GetAmountFiles() int64 {
 	if x != nil {
 		return x.AmountFiles
 	}
@@ -8711,10 +8711,10 @@ var file_janction_videoRendering_v1_types_proto_rawDesc = []byte{
 	0x61, 0x31, 0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x52, 0x10, 0x6d, 0x69, 0x6e, 0x57, 0x6f, 0x72, 0x6b,
 	0x65, 0x72, 0x53, 0x74, 0x61, 0x6b, 0x69, 0x6e, 0x67, 0x12, 0x33, 0x0a, 0x16, 0x6d, 0x61, 0x78,
 	0x5f, 0x77, 0x6f, 0x72, 0x6b, 0x65, 0x72, 0x73, 0x5f, 0x70, 0x65, 0x72, 0x5f, 0x74, 0x68, 0x72,
-	0x65, 0x61, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x13, 0x6d, 0x61, 0x78, 0x57, 0x6f,
+	0x65, 0x61, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x13, 0x6d, 0x61, 0x78, 0x57, 0x6f,
 	0x72, 0x6b, 0x65, 0x72, 0x73, 0x50, 0x65, 0x72, 0x54, 0x68, 0x72, 0x65, 0x61, 0x64, 0x12, 0x25,
 	0x0a, 0x0e, 0x6d, 0x69, 0x6e, 0x5f, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f, 0x72, 0x73,
-	0x18, 0x03, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0d, 0x6d, 0x69, 0x6e, 0x56, 0x61, 0x6c, 0x69, 0x64,
+	0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0d, 0x6d, 0x69, 0x6e, 0x56, 0x61, 0x6c, 0x69, 0x64,
 	0x61, 0x74, 0x6f, 0x72, 0x73, 0x22, 0xfb, 0x02, 0x0a, 0x0c, 0x47, 0x65, 0x6e, 0x65, 0x73, 0x69,
 	0x73, 0x53, 0x74, 0x61, 0x74, 0x65, 0x12, 0x40, 0x0a, 0x06, 0x70, 0x61, 0x72, 0x61, 0x6d, 0x73,
 	0x18, 0x01, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x22, 0x2e, 0x6a, 0x61, 0x6e, 0x63, 0x74, 0x69, 0x6f,
@@ -8754,7 +8754,7 @@ var file_janction_videoRendering_v1_types_proto_rawDesc = []byte{
 	0x20, 0x01, 0x28, 0x09, 0x52, 0x0d, 0x63, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x54, 0x61, 0x73,
 	0x6b, 0x49, 0x64, 0x12, 0x30, 0x0a, 0x14, 0x63, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x5f, 0x74,
 	0x68, 0x72, 0x65, 0x61, 0x64, 0x5f, 0x69, 0x6e, 0x64, 0x65, 0x78, 0x18, 0x06, 0x20, 0x01, 0x28,
-	0x0d, 0x52, 0x12, 0x63, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x54, 0x68, 0x72, 0x65, 0x61, 0x64,
+	0x05, 0x52, 0x12, 0x63, 0x75, 0x72, 0x72, 0x65, 0x6e, 0x74, 0x54, 0x68, 0x72, 0x65, 0x61, 0x64,
 	0x49, 0x6e, 0x64, 0x65, 0x78, 0x12, 0x1b, 0x0a, 0x09, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63, 0x5f,
 	0x69, 0x70, 0x18, 0x07, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x70, 0x75, 0x62, 0x6c, 0x69, 0x63,
 	0x49, 0x70, 0x12, 0x17, 0x0a, 0x07, 0x69, 0x70, 0x66, 0x73, 0x5f, 0x69, 0x64, 0x18, 0x08, 0x20,
@@ -8765,9 +8765,9 @@ var file_janction_videoRendering_v1_types_proto_rawDesc = []byte{
 	0x2e, 0x43, 0x6f, 0x69, 0x6e, 0x52, 0x06, 0x73, 0x74, 0x61, 0x6b, 0x65, 0x64, 0x12, 0x16, 0x0a,
 	0x06, 0x70, 0x6f, 0x69, 0x6e, 0x74, 0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x06, 0x70,
 	0x6f, 0x69, 0x6e, 0x74, 0x73, 0x12, 0x20, 0x0a, 0x0b, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74,
-	0x69, 0x6f, 0x6e, 0x73, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x0b, 0x76, 0x61, 0x6c, 0x69,
+	0x69, 0x6f, 0x6e, 0x73, 0x18, 0x03, 0x20, 0x01, 0x28, 0x05, 0x52, 0x0b, 0x76, 0x61, 0x6c, 0x69,
 	0x64, 0x61, 0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x1c, 0x0a, 0x09, 0x73, 0x6f, 0x6c, 0x75, 0x74,
-	0x69, 0x6f, 0x6e, 0x73, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x09, 0x73, 0x6f, 0x6c, 0x75,
+	0x69, 0x6f, 0x6e, 0x73, 0x18, 0x04, 0x20, 0x01, 0x28, 0x05, 0x52, 0x09, 0x73, 0x6f, 0x6c, 0x75,
 	0x74, 0x69, 0x6f, 0x6e, 0x73, 0x12, 0x3b, 0x0a, 0x08, 0x77, 0x69, 0x6e, 0x6e, 0x69, 0x6e, 0x67,
 	0x73, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0b, 0x32, 0x19, 0x2e, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73,
 	0x2e, 0x62, 0x61, 0x73, 0x65, 0x2e, 0x76, 0x31, 0x62, 0x65, 0x74, 0x61, 0x31, 0x2e, 0x43, 0x6f,
@@ -8780,11 +8780,11 @@ var file_janction_videoRendering_v1_types_proto_rawDesc = []byte{
 	0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73, 0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x09,
 	0x72, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x65, 0x72, 0x12, 0x10, 0x0a, 0x03, 0x63, 0x69, 0x64,
 	0x18, 0x03, 0x20, 0x01, 0x28, 0x09, 0x52, 0x03, 0x63, 0x69, 0x64, 0x12, 0x1f, 0x0a, 0x0b, 0x73,
-	0x74, 0x61, 0x72, 0x74, 0x5f, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0d,
+	0x74, 0x61, 0x72, 0x74, 0x5f, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x05,
 	0x52, 0x0a, 0x73, 0x74, 0x61, 0x72, 0x74, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x12, 0x1b, 0x0a, 0x09,
-	0x65, 0x6e, 0x64, 0x5f, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x0d, 0x52,
+	0x65, 0x6e, 0x64, 0x5f, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x18, 0x05, 0x20, 0x01, 0x28, 0x05, 0x52,
 	0x08, 0x65, 0x6e, 0x64, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x12, 0x22, 0x0a, 0x0c, 0x74, 0x68, 0x72,
-	0x65, 0x61, 0x64, 0x41, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x06, 0x20, 0x01, 0x28, 0x0d, 0x52,
+	0x65, 0x61, 0x64, 0x41, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x18, 0x06, 0x20, 0x01, 0x28, 0x05, 0x52,
 	0x0c, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x41, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x12, 0x1c, 0x0a,
 	0x09, 0x63, 0x6f, 0x6d, 0x70, 0x6c, 0x65, 0x74, 0x65, 0x64, 0x18, 0x07, 0x20, 0x01, 0x28, 0x08,
 	0x52, 0x09, 0x63, 0x6f, 0x6d, 0x70, 0x6c, 0x65, 0x74, 0x65, 0x64, 0x12, 0x31, 0x0a, 0x06, 0x72,
@@ -8801,9 +8801,9 @@ var file_janction_videoRendering_v1_types_proto_rawDesc = []byte{
 	0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x74, 0x68, 0x72, 0x65, 0x61, 0x64, 0x49, 0x64,
 	0x12, 0x17, 0x0a, 0x07, 0x74, 0x61, 0x73, 0x6b, 0x5f, 0x69, 0x64, 0x18, 0x02, 0x20, 0x01, 0x28,
 	0x09, 0x52, 0x06, 0x74, 0x61, 0x73, 0x6b, 0x49, 0x64, 0x12, 0x1f, 0x0a, 0x0b, 0x73, 0x74, 0x61,
-	0x72, 0x74, 0x5f, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x0a,
+	0x72, 0x74, 0x5f, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x18, 0x03, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0a,
 	0x73, 0x74, 0x61, 0x72, 0x74, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x12, 0x1b, 0x0a, 0x09, 0x65, 0x6e,
-	0x64, 0x5f, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x0d, 0x52, 0x08, 0x65,
+	0x64, 0x5f, 0x66, 0x72, 0x61, 0x6d, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x08, 0x65,
 	0x6e, 0x64, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x12, 0x1c, 0x0a, 0x09, 0x63, 0x6f, 0x6d, 0x70, 0x6c,
 	0x65, 0x74, 0x65, 0x64, 0x18, 0x05, 0x20, 0x01, 0x28, 0x08, 0x52, 0x09, 0x63, 0x6f, 0x6d, 0x70,
 	0x6c, 0x65, 0x74, 0x65, 0x64, 0x12, 0x18, 0x0a, 0x07, 0x77, 0x6f, 0x72, 0x6b, 0x65, 0x72, 0x73,
@@ -8832,14 +8832,14 @@ var file_janction_videoRendering_v1_types_proto_rawDesc = []byte{
 	0x2d, 0x14, 0x63, 0x6f, 0x73, 0x6d, 0x6f, 0x73, 0x2e, 0x41, 0x64, 0x64, 0x72, 0x65, 0x73, 0x73,
 	0x53, 0x74, 0x72, 0x69, 0x6e, 0x67, 0x52, 0x09, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x61, 0x74, 0x6f,
 	0x72, 0x12, 0x21, 0x0a, 0x0c, 0x61, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x5f, 0x66, 0x69, 0x6c, 0x65,
-	0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x04, 0x52, 0x0b, 0x61, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x46,
+	0x73, 0x18, 0x02, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0b, 0x61, 0x6d, 0x6f, 0x75, 0x6e, 0x74, 0x46,
 	0x69, 0x6c, 0x65, 0x73, 0x12, 0x14, 0x0a, 0x05, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x18, 0x03, 0x20,
 	0x01, 0x28, 0x08, 0x52, 0x05, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x12, 0x1d, 0x0a, 0x0a, 0x69, 0x73,
 	0x5f, 0x72, 0x65, 0x76, 0x65, 0x72, 0x73, 0x65, 0x18, 0x04, 0x20, 0x01, 0x28, 0x08, 0x52, 0x09,
 	0x69, 0x73, 0x52, 0x65, 0x76, 0x65, 0x72, 0x73, 0x65, 0x22, 0x30, 0x0a, 0x16, 0x56, 0x69, 0x64,
 	0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64, 0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x61, 0x73, 0x6b, 0x49,
 	0x6e, 0x66, 0x6f, 0x12, 0x16, 0x0a, 0x06, 0x6e, 0x65, 0x78, 0x74, 0x49, 0x64, 0x18, 0x01, 0x20,
-	0x01, 0x28, 0x04, 0x52, 0x06, 0x6e, 0x65, 0x78, 0x74, 0x49, 0x64, 0x22, 0x97, 0x01, 0x0a, 0x19,
+	0x01, 0x28, 0x03, 0x52, 0x06, 0x6e, 0x65, 0x78, 0x74, 0x49, 0x64, 0x22, 0x97, 0x01, 0x0a, 0x19,
 	0x49, 0x6e, 0x64, 0x65, 0x78, 0x65, 0x64, 0x56, 0x69, 0x64, 0x65, 0x6f, 0x52, 0x65, 0x6e, 0x64,
 	0x65, 0x72, 0x69, 0x6e, 0x67, 0x54, 0x61, 0x73, 0x6b, 0x12, 0x14, 0x0a, 0x05, 0x69, 0x6e, 0x64,
 	0x65, 0x78, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x05, 0x69, 0x6e, 0x64, 0x65, 0x78, 0x12,

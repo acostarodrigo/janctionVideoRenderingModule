@@ -52,7 +52,7 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string,
 		db.AddLogEntry(t.ThreadId, fmt.Sprintf("Successfully downloaded IPFS file %s in %v seconds.", cid, int(difference.Seconds())), finish, 0)
 
 		// we start rendering
-		vm.RenderVideo(ctx, cid, uint64(t.StartFrame), uint64(t.EndFrame), t.ThreadId, path, t.IsReverse(worker), db)
+		vm.RenderVideo(ctx, cid, t.StartFrame, t.EndFrame, t.ThreadId, path, t.IsReverse(worker), db)
 
 		rendersPath := filepath.Join(path, "output")
 		_, err = os.Stat(rendersPath)

@@ -46,7 +46,7 @@ func (ms msgServer) CreateVideoRenderingTask(ctx context.Context, msg *videoRend
 
 	var nextId = taskInfo.NextId
 	// we get the taskId in string
-	taskId := strconv.FormatUint(nextId, 10)
+	taskId := strconv.FormatInt(nextId, 10)
 
 	// and increase the task id counter for next task
 	nextId++
@@ -153,7 +153,7 @@ func (ms msgServer) SubscribeWorkerToTask(ctx context.Context, msg *videoRenderi
 
 			ms.k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
 			worker.CurrentTaskId = task.TaskId
-			worker.CurrentThreadIndex = uint32(i)
+			worker.CurrentThreadIndex = int32(i)
 			ms.k.Workers.Set(ctx, msg.Address, worker)
 
 			err := ms.k.VideoRenderingTasks.Set(ctx, task.TaskId, task)

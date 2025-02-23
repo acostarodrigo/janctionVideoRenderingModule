@@ -161,7 +161,7 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 	}
 	// we adjust the min validators dinamycally
 	if count > 1 && count < 7 {
-		params.MinValidators = uint64(count)
+		params.MinValidators = int64(count)
 		k.Params.Set(ctx, params)
 	}
 

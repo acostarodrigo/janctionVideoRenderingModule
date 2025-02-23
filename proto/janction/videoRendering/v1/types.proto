@@ -12,8 +12,8 @@ import "gogoproto/gogo.proto";
 // Params defines the parameters of the module.
 message Params {
   cosmos.base.v1beta1.Coin min_worker_staking = 1;
-  uint64 max_workers_per_thread = 2;
-  uint64 min_validators = 3;
+  int64 max_workers_per_thread = 2;
+  int64 min_validators = 3;
 }
 
 // GenesisState is the state that must be provided at genesis.
@@ -36,8 +36,8 @@ message Worker {
   message Reputation {
     cosmos.base.v1beta1.Coin staked = 1;
     int64 points = 2;
-    uint32 validations = 3;
-    uint32 solutions = 4;
+    int32 validations = 3;
+    int32 solutions = 4;
     cosmos.base.v1beta1.Coin winnings = 5 [(gogoproto.nullable) = false];
   }
 
@@ -45,7 +45,7 @@ message Worker {
   Reputation reputation = 3;
   bool enabled = 4;
   string current_task_id = 5;
-  uint32 current_thread_index = 6;
+  int32 current_thread_index = 6;
   string public_ip = 7;
   string ipfs_id = 8;
 }
@@ -61,9 +61,9 @@ message VideoRenderingTask {
   string taskId = 1;
   string requester = 2 [(cosmos_proto.scalar) = "cosmos.AddressString"];
   string cid = 3;
-  uint32 start_frame = 4;
-  uint32 end_frame = 5;
-  uint32 threadAmount = 6;
+  int32 start_frame = 4;
+  int32 end_frame = 5;
+  int32 threadAmount = 6;
   bool completed = 7;
   cosmos.base.v1beta1.Coin reward = 8;
   repeated VideoRenderingThread  threads = 9;
@@ -77,8 +77,8 @@ message VideoRenderingTask {
   message VideoRenderingThread {
     string thread_id = 1;
     string task_id = 2;
-    uint32 start_frame = 3;
-    uint32 end_frame = 4;
+    int64 start_frame = 3;
+    int64 end_frame = 4;
     bool completed = 5;
     repeated string workers = 6;
     Solution solution = 7;
@@ -93,7 +93,7 @@ message VideoRenderingTask {
 
     message Validation {
       string validator = 1[(cosmos_proto.scalar) = "cosmos.AddressString"];
-      uint64 amount_files = 2;
+      int64 amount_files = 2;
       bool valid = 3;
       bool is_reverse = 4;
     }
@@ -101,7 +101,7 @@ message VideoRenderingTask {
 
   // Stores information about the Video Rendering  task 
   message VideoRenderingTaskInfo {
-    uint64 nextId = 1;
+    int64 nextId = 1;
   }
   
   // Stores the Video Rendering Task with the index

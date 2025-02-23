@@ -32,19 +32,21 @@ func IsContainerRunning(ctx context.Context, threadId string) bool {
 	return containerName == name
 }
 
-func RenderVideo(ctx context.Context, cid string, start uint64, end uint64, id string, path string, reverse bool, db *db.DB) {
+func RenderVideo(ctx context.Context, cid string, start int64, end int64, id string, path string, reverse bool, db *db.DB) {
 	if reverse {
 		for i := end; i >= start; i-- {
+			log.Printf("Rendering frame %v", i)
 			renderVideoFrame(ctx, cid, i, id, path, db)
 		}
 	} else {
 		for i := start; i <= end; i++ {
+			log.Printf("Rendering frame %v", i)
 			renderVideoFrame(ctx, cid, i, id, path, db)
 		}
 	}
 }
 
-func renderVideoFrame(ctx context.Context, cid string, frameNumber uint64, id string, path string, db *db.DB) error {
+func renderVideoFrame(ctx context.Context, cid string, frameNumber int64, id string, path string, db *db.DB) error {
 	n := "myBlender" + id
 
 	started := time.Now().Unix()

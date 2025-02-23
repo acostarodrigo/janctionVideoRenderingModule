@@ -24,7 +24,7 @@ func (t *VideoRenderingTask) GenerateThreads(taskId string) (res []*VideoRenderi
 	// Print the result
 
 	for i, r := range frameRanges {
-		thread := VideoRenderingThread{ThreadId: t.TaskId + strconv.FormatInt(int64(i), 10), StartFrame: uint32(r.StartFrame), EndFrame: uint32(r.EndFrame), TaskId: taskId}
+		thread := VideoRenderingThread{ThreadId: t.TaskId + strconv.FormatInt(int64(i), 10), StartFrame: int64(r.StartFrame), EndFrame: int64(r.EndFrame), TaskId: taskId}
 		res = append(res, &thread)
 	}
 

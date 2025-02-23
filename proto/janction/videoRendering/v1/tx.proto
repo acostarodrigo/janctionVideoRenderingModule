@@ -41,9 +41,9 @@ message MsgCreateVideoRenderingTask {
   // creator is the message sender.
   string creator = 1;
   string cid = 2 ;
-  uint32 startFrame = 3 ;
-  uint32 endFrame = 4 ;
-  uint32 threads = 5;
+  int32 startFrame = 3 ;
+  int32 endFrame = 4 ;
+  int32 threads = 5;
   cosmos.base.v1beta1.Coin reward = 6;
 }
 
@@ -98,7 +98,7 @@ message MsgSubmitValidation {
   string creator = 1;
   string taskId = 2;
   string threadId = 3;
-  uint64 filesAmount = 4;
+  int64 filesAmount = 4;
   bool valid = 5;
 }
 
