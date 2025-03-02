@@ -2,6 +2,7 @@ package keeper
 
 import (
 	"fmt"
+	"path/filepath"
 
 	"cosmossdk.io/collections"
 	"cosmossdk.io/core/address"
@@ -20,6 +21,10 @@ type Keeper struct {
 	// authority is the address capable of executing a MsgUpdateParams and other authority-gated message.
 	// typically, this should be the x/gov module account.
 	authority string
+
+	// ZKP
+	ProvingKeyPath    string
+	ValidatingKeyPath string
 
 	// state management
 	Schema                 collections.Schema
@@ -63,6 +68,10 @@ func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService s
 	if err != nil {
 		panic(err)
 	}
+
+	// we set the paths of the ZKP proving and verifying keys
+	k.ProvingKeyPath = filepath.Join(config.RootPath, "proving_key.pk")
+	k.ProvingKeyPath = filepath.Join(config.RootPath, "verifying_key.vk")
 
 	k.Schema = schema
 

@@ -28,15 +28,15 @@ func (c *FrameProofCircuit) Define(api frontend.API) error {
 }
 
 // InitGnark generates proving and verification keys and returns the proving key path
-func InitGnark(path string) (string, string, error) {
+func InitGnark(path string) error {
 	r1cs, err := frontend.Compile(ecc.BN254.ScalarField(), r1cs.NewBuilder, &FrameProofCircuit{})
 	if err != nil {
-		return "", "", fmt.Errorf("failed to compile circuit: %w", err)
+		return fmt.Errorf("failed to compile circuit: %w", err)
 	}
 
 	provingKey, verifyingKey, err := groth16.Setup(r1cs)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to generate keys: %w", err)
+		return fmt.Errorf("failed to generate keys: %w", err)
 	}
 
 	provingKeyPath := filepath.Join(path, "proving_key.pk")
@@ -44,25 +44,25 @@ func InitGnark(path string) (string, string, error) {
 
 	pkFile, err := os.Create(provingKeyPath)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to create proving key file: %w", err)
+		return fmt.Errorf("failed to create proving key file: %w", err)
 	}
 	defer pkFile.Close()
 
 	vkFile, err := os.Create(verifyingKeyPath)
 	if err != nil {
-		return "", "", fmt.Errorf("failed to create verifying key file: %w", err)
+		return fmt.Errorf("failed to create verifying key file: %w", err)
 	}
 	defer vkFile.Close()
 
 	if _, err := provingKey.WriteTo(pkFile); err != nil {
-		return "", "", fmt.Errorf("failed to write proving key: %w", err)
+		return fmt.Errorf("failed to write proving key: %w", err)
 	}
 
 	if _, err := verifyingKey.WriteTo(vkFile); err != nil {
-		return "", "", fmt.Errorf("failed to write verifying key: %w", err)
+		return fmt.Errorf("failed to write verifying key: %w", err)
 	}
 
-	return provingKeyPath, verifyingKeyPath, nil
+	return nil
 }
 
 // Function to generate ZK proof after rendering a frame
