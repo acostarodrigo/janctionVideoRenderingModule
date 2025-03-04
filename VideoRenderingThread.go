@@ -2,16 +2,12 @@ package videoRendering
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	fmt "fmt"
 	"log"
 	"os"
-	"os/exec"
 	"path"
 	"path/filepath"
-	"strconv"
-	"strings"
 	"time"
 
 	"cosmossdk.io/math"
@@ -19,6 +15,7 @@ import (
 	"github.com/janction/videoRendering/db"
 	"github.com/janction/videoRendering/ipfs"
 	"github.com/janction/videoRendering/vm"
+	"github.com/janction/videoRendering/zkp"
 )
 
 func (t *VideoRenderingThread) StartWork(worker string, cid string, path string, db *db.DB) error {
@@ -83,7 +80,7 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string,
 	return nil
 }
 
-func (t VideoRenderingThread) ProposeSolution(ctx context.Context, workerAddress string, rootPath string, db *db.DB) error {
+func (t VideoRenderingThread) ProposeSolution(ctx context.Context, workerAddress string, rootPath string, db *db.DB, provingKeyPath string) error {
 	db.UpdateThread(t.ThreadId, true, true, true, false, false)
 	count := vm.CountFilesInDirectory(rootPath)
 
@@ -92,15 +89,26 @@ func (t VideoRenderingThread) ProposeSolution(ctx context.Context, workerAddress
 	}
 
 	output := path.Join(rootPath, "output")
-	hashes, err := ipfs.CalculateCIDs(output)
+	cids, err := ipfs.CalculateCIDs(output)
 
-	solution := MapToKeyValueFormat(hashes)
+	for key, cid := range cids {
+		prove, err := zkp.GenerateFrameProof(cid, workerAddress, provingKeyPath)
+		if err != nil {
+			log.Printf("Error %s, %s", cid, provingKeyPath)
+			log.Printf("Error %s", err.Error())
+			panic(err)
+		}
+		log.Printf("Calcularing prove %s for cid %s", prove, cid)
+		// TODO handle error
+		cids[key] = prove
+	}
+
+	solution := MapToKeyValueFormat(cids)
 	if err != nil {
 		log.Printf("Unable to get hashes in path %s. %s", rootPath, err.Error())
 		return err
 	}
 
-	executableName := "janctiond"
 	// Base arguments
 	args := []string{
 		"tx", "videoRendering", "propose-solution",
@@ -112,10 +120,7 @@ func (t VideoRenderingThread) ProposeSolution(ctx context.Context, workerAddress
 
 	// Append flags
 	args = append(args, "--yes", "--from", workerAddress)
-
-	cmd := exec.Command(executableName, args...)
-	log.Printf("Executing %s", cmd.String())
-	_, err = cmd.Output()
+	err = ExecuteCli(args)
 	if err != nil {
 		log.Printf("Error Executing %s", err.Error())
 		return err
@@ -126,70 +131,7 @@ func (t VideoRenderingThread) ProposeSolution(ctx context.Context, workerAddress
 	return nil
 }
 
-// MapToKeyValueFormat converts a map[string]string to a "key=value,key=value" format
-func MapToKeyValueFormat(inputMap map[string]string) []string {
-	var parts []string
-
-	// Iterate through the map and build the key=value pairs
-	for key, value := range inputMap {
-		parts = append(parts, fmt.Sprintf("%s=%s", key, value))
-	}
-
-	// Join the key=value pairs with commas
-	return parts
-}
-
-func transformSliceToMap(input []string) (map[string]string, error) {
-	result := make(map[string]string)
-
-	for _, item := range input {
-		parts := strings.SplitN(item, "=", 2) // Split into 2 parts: filename and hash
-		if len(parts) != 2 {
-			return nil, fmt.Errorf("invalid format: %s", item)
-		}
-		filename := parts[0]
-		hash := parts[1]
-		result[filename] = hash
-	}
-
-	return result, nil
-}
-
-func GetAccountSequence(account string) (string, error) {
-	executableName := "janctiond"
-	cmd := exec.Command(executableName, "query", "auth", "account", account, "--output", "json")
-	output, err := cmd.Output()
-	if err != nil {
-		return "", fmt.Errorf("failed to query account: %v", err)
-	}
-
-	sequence, err := ParseSequenceFromOutput(string(output))
-	if err != nil {
-		return "", fmt.Errorf("failed to parse sequence: %v", err)
-	}
-
-	return sequence, nil
-}
-
-func ParseSequenceFromOutput(output string) (string, error) {
-	// Parse the YAML or JSON response to extract the sequence number
-	type AccountResponse struct {
-		Account struct {
-			Value struct {
-				Sequence string `yaml:"sequence" json:"sequence"`
-			} `yaml:"value" json:"value"`
-		} `yaml:"account" json:"account"`
-	}
-
-	var response AccountResponse
-	if err := json.Unmarshal([]byte(output), &response); err != nil {
-		return "", fmt.Errorf("failed to parse account output: %v", err)
-	}
-
-	return response.Account.Value.Sequence, nil
-}
-
-func (t VideoRenderingThread) Verify(ctx context.Context, workerAddress string, rootPath string, db *db.DB) error {
+func (t VideoRenderingThread) Verify(ctx context.Context, workerAddress string, rootPath string, db *db.DB, provingKeyPath string) error {
 	// we will verify any file we already have rendered.
 	db.UpdateThread(t.ThreadId, true, true, true, true, false)
 
@@ -208,26 +150,33 @@ func (t VideoRenderingThread) Verify(ctx context.Context, workerAddress string, 
 		return err
 	}
 
-	solution, _ := transformSliceToMap(t.Solution.Hashes)
-	var valid bool = true
-	db.AddLogEntry(t.ThreadId, "Starting verification of solution...", time.Now().Unix(), 0)
-	for filename, hash := range solution {
-		if myWork[filename] != hash {
-			valid = false
-			break
+	for key, cid := range myWork {
+		proof, err := zkp.GenerateFrameProof(cid, workerAddress, provingKeyPath)
+		if err != nil {
+			return err
 		}
+
+		myWork[key] = proof
 	}
 
-	submitValidation(workerAddress, t.TaskId, t.ThreadId, int64(files), valid)
+	db.AddLogEntry(t.ThreadId, "Starting verification of solution...", time.Now().Unix(), 0)
+
+	submitValidation(workerAddress, t.TaskId, t.ThreadId, MapToKeyValueFormat(myWork))
 	db.AddLogEntry(t.ThreadId, "Solution verified", time.Now().Unix(), 0)
 	return nil
 }
 
-func submitValidation(validator string, taskId, threadId string, amount_files int64, valid bool) error {
-	executableName := "janctiond"
-	cmd := exec.Command(executableName, "tx", "videoRendering", "submit-validation", taskId, threadId, strconv.FormatInt(amount_files, 10), strconv.FormatBool(valid), "--from", validator, "--yes")
-	_, err := cmd.Output()
-	log.Printf("executing %s", cmd.String())
+func submitValidation(validator string, taskId, threadId string, zkps []string) error {
+	// Base arguments
+	args := []string{
+		"tx", "videoRendering", "submit-validation",
+		taskId, threadId,
+	}
+	args = append(args, zkps...)
+	args = append(args, "--from")
+	args = append(args, validator)
+	args = append(args, "--yes")
+	err := ExecuteCli(args)
 	if err != nil {
 		return err
 	}
@@ -253,7 +202,6 @@ func (t VideoRenderingThread) SubmitSolution(ctx context.Context, workerAddress,
 }
 
 func submitSolution(address, taskId, threadId string, cid string) error {
-	executableName := "janctiond"
 	args := []string{
 		"tx", "videoRendering", "submit-solution",
 		taskId, threadId,
@@ -265,9 +213,7 @@ func submitSolution(address, taskId, threadId string, cid string) error {
 	// Append flags
 	args = append(args, "--yes", "--from", address)
 
-	cmd := exec.Command(executableName, args...)
-	_, err := cmd.Output()
-	log.Printf("executing %s", cmd.String())
+	err := ExecuteCli(args)
 	if err != nil {
 		return err
 	}
@@ -280,7 +226,7 @@ func (t VideoRenderingThread) VerifySubmittedSolution(cid string) error {
 		return err
 	}
 
-	solution, err := transformSliceToMap(t.Solution.Hashes)
+	solution, err := TransformSliceToMap(t.Solution.Zkps)
 	if err != nil {
 		return err
 	}
@@ -305,11 +251,11 @@ func (t VideoRenderingThread) IsReverse(worker string) bool {
 func (t *VideoRenderingThread) GetValidatorReward(worker string, totalReward types.Coin) types.Coin {
 	var totalFiles int
 	for _, validation := range t.Validations {
-		totalFiles = totalFiles + int(validation.AmountFiles)
+		totalFiles = totalFiles + int(len(validation.Zkps))
 	}
 	for _, validation := range t.Validations {
 		if validation.Validator == worker {
-			amount := calculateValidatorPayment(int(validation.AmountFiles), totalFiles, totalReward.Amount)
+			amount := calculateValidatorPayment(int(len(validation.Zkps)), totalFiles, totalReward.Amount)
 			return types.NewCoin("jct", amount)
 		}
 	}
@@ -324,4 +270,31 @@ func calculateValidatorPayment(filesValidated, totalFilesValidated int, totalVal
 
 	// (filesValidated * totalValidatorReward) / totalFilesValidated
 	return totalValidatorReward.Mul(math.NewInt(int64(filesValidated))).Quo(math.NewInt(int64(totalFilesValidated)))
+}
+
+func (t *VideoRenderingThread) RevealSolution(rootPath string) error {
+	output := path.Join(rootPath, "renders", t.ThreadId, "output")
+	cids, err := ipfs.CalculateCIDs(output)
+	if err != nil {
+		log.Println(err.Error())
+		return err
+	}
+	solution := MapToKeyValueFormat(cids)
+
+	// Base arguments
+	args := []string{
+		"tx", "videoRendering", "reveal-solution",
+		t.TaskId, t.ThreadId,
+	}
+	args = append(args, solution...)
+	args = append(args, "--from")
+	args = append(args, t.Solution.ProposedBy)
+	args = append(args, "--yes")
+	err = ExecuteCli(args)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
