@@ -24,6 +24,7 @@ const (
 	Msg_SubscribeWorkerToTask_FullMethodName    = "/janction.videoRendering.v1.Msg/SubscribeWorkerToTask"
 	Msg_ProposeSolution_FullMethodName          = "/janction.videoRendering.v1.Msg/ProposeSolution"
 	Msg_SubmitValidation_FullMethodName         = "/janction.videoRendering.v1.Msg/SubmitValidation"
+	Msg_RevealSolution_FullMethodName           = "/janction.videoRendering.v1.Msg/RevealSolution"
 	Msg_SubmitSolution_FullMethodName           = "/janction.videoRendering.v1.Msg/SubmitSolution"
 )
 
@@ -40,6 +41,8 @@ type MsgClient interface {
 	ProposeSolution(ctx context.Context, in *MsgProposeSolution, opts ...grpc.CallOption) (*MsgProposeSolutionResponse, error)
 	// Propose a solution for the test of the nodes to validate
 	SubmitValidation(ctx context.Context, in *MsgSubmitValidation, opts ...grpc.CallOption) (*MsgSubmitValidationResponse, error)
+	// Propose a solution for the test of the nodes to validate
+	RevealSolution(ctx context.Context, in *MsgRevealSolution, opts ...grpc.CallOption) (*MsgRevealSolutionResponse, error)
 	// Submits the solution to IPFS
 	SubmitSolution(ctx context.Context, in *MsgSubmitSolution, opts ...grpc.CallOption) (*MsgSubmitSolutionResponse, error)
 }
@@ -97,6 +100,15 @@ func (c *msgClient) SubmitValidation(ctx context.Context, in *MsgSubmitValidatio
 	return out, nil
 }
 
+func (c *msgClient) RevealSolution(ctx context.Context, in *MsgRevealSolution, opts ...grpc.CallOption) (*MsgRevealSolutionResponse, error) {
+	out := new(MsgRevealSolutionResponse)
+	err := c.cc.Invoke(ctx, Msg_RevealSolution_FullMethodName, in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *msgClient) SubmitSolution(ctx context.Context, in *MsgSubmitSolution, opts ...grpc.CallOption) (*MsgSubmitSolutionResponse, error) {
 	out := new(MsgSubmitSolutionResponse)
 	err := c.cc.Invoke(ctx, Msg_SubmitSolution_FullMethodName, in, out, opts...)
@@ -119,6 +131,8 @@ type MsgServer interface {
 	ProposeSolution(context.Context, *MsgProposeSolution) (*MsgProposeSolutionResponse, error)
 	// Propose a solution for the test of the nodes to validate
 	SubmitValidation(context.Context, *MsgSubmitValidation) (*MsgSubmitValidationResponse, error)
+	// Propose a solution for the test of the nodes to validate
+	RevealSolution(context.Context, *MsgRevealSolution) (*MsgRevealSolutionResponse, error)
 	// Submits the solution to IPFS
 	SubmitSolution(context.Context, *MsgSubmitSolution) (*MsgSubmitSolutionResponse, error)
 	mustEmbedUnimplementedMsgServer()
@@ -142,6 +156,9 @@ func (UnimplementedMsgServer) ProposeSolution(context.Context, *MsgProposeSoluti
 }
 func (UnimplementedMsgServer) SubmitValidation(context.Context, *MsgSubmitValidation) (*MsgSubmitValidationResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SubmitValidation not implemented")
+}
+func (UnimplementedMsgServer) RevealSolution(context.Context, *MsgRevealSolution) (*MsgRevealSolutionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method RevealSolution not implemented")
 }
 func (UnimplementedMsgServer) SubmitSolution(context.Context, *MsgSubmitSolution) (*MsgSubmitSolutionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method SubmitSolution not implemented")
@@ -249,6 +266,24 @@ func _Msg_SubmitValidation_Handler(srv interface{}, ctx context.Context, dec fun
 	return interceptor(ctx, in, info, handler)
 }
 
+func _Msg_RevealSolution_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MsgRevealSolution)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(MsgServer).RevealSolution(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: Msg_RevealSolution_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(MsgServer).RevealSolution(ctx, req.(*MsgRevealSolution))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 func _Msg_SubmitSolution_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(MsgSubmitSolution)
 	if err := dec(in); err != nil {
@@ -293,6 +328,10 @@ var Msg_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "SubmitValidation",
 			Handler:    _Msg_SubmitValidation_Handler,
+		},
+		{
+			MethodName: "RevealSolution",
+			Handler:    _Msg_RevealSolution_Handler,
 		},
 		{
 			MethodName: "SubmitSolution",

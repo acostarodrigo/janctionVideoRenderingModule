@@ -28,6 +28,8 @@ service Msg {
   rpc ProposeSolution(MsgProposeSolution) returns (MsgProposeSolutionResponse);
   // Propose a solution for the test of the nodes to validate
   rpc SubmitValidation(MsgSubmitValidation) returns (MsgSubmitValidationResponse);
+  // Propose a solution for the test of the nodes to validate
+  rpc RevealSolution(MsgRevealSolution) returns (MsgRevealSolutionResponse);
 
   // Submits the solution to IPFS
   rpc SubmitSolution(MsgSubmitSolution) returns (MsgSubmitSolutionResponse);
@@ -83,7 +85,7 @@ message MsgProposeSolution {
   string creator = 1;
   string taskId = 2;
   string threadId = 3;
-  repeated string solution = 4;
+  repeated string zkps = 4;
 }
 
 
@@ -93,13 +95,29 @@ message MsgProposeSolutionResponse {
   
 }
 
+// Msg to Propose a solution to an specific thread
+// Actual solution is a map of hashes
+message MsgRevealSolution {
+  option (cosmos.msg.v1.signer) = "creator";
+  string creator = 1;
+  string taskId = 2;
+  string threadId = 3;
+  repeated string cids = 4;
+}
+
+
+
+// no response needed to a proposed solution
+message MsgRevealSolutionResponse {
+  
+}
+
 message MsgSubmitValidation {
   option (cosmos.msg.v1.signer) = "creator";
   string creator = 1;
   string taskId = 2;
   string threadId = 3;
-  int64 filesAmount = 4;
-  bool valid = 5;
+  repeated string zkps = 4;
 }
 
 message MsgSubmitValidationResponse {
@@ -111,7 +129,7 @@ message MsgSubmitSolution {
   string creator = 1;
   string taskId = 2;
   string threadId = 3;
-  string cid = 4;
+  string dir = 4;
 }
 message MsgSubmitSolutionResponse {
   

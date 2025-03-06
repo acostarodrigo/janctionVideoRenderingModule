@@ -71,7 +71,7 @@ func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService s
 
 	// we set the paths of the ZKP proving and verifying keys
 	k.ProvingKeyPath = filepath.Join(config.RootPath, "proving_key.pk")
-	k.ProvingKeyPath = filepath.Join(config.RootPath, "verifying_key.vk")
+	k.ValidatingKeyPath = filepath.Join(config.RootPath, "verifying_key.vk")
 
 	k.Schema = schema
 

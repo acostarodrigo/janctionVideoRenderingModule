@@ -2,7 +2,6 @@ package videoRendering
 
 import (
 	"context"
-	"errors"
 	fmt "fmt"
 	"log"
 	"os"
@@ -21,7 +20,7 @@ import (
 func (t *VideoRenderingThread) StartWork(worker string, cid string, path string, db *db.DB) error {
 	ctx := context.Background()
 
-	if err := db.UpdateThread(t.ThreadId, true, false, false, false, false); err != nil {
+	if err := db.UpdateThread(t.ThreadId, true, false, false, false, false, false); err != nil {
 		log.Printf("Unable to update thread status, err: %s", err.Error())
 	}
 
@@ -59,16 +58,16 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string,
 			// output path was not created so no rendering happened. we will start over
 			log.Printf("Unable to complete rendering of task, retrying. No files at %s", rendersPath)
 
-			db.UpdateThread(t.ThreadId, false, false, false, false, false)
+			db.UpdateThread(t.ThreadId, false, false, false, false, false, false)
 			return nil
 		}
 		files, _ := os.ReadDir(rendersPath)
 		if len(files) != int(t.EndFrame)-int(t.StartFrame)+1 {
-			db.UpdateThread(t.ThreadId, false, false, false, false, false)
+			db.UpdateThread(t.ThreadId, false, false, false, false, false, false)
 			log.Printf("Not the amount we expected. retrying. Amount of files %v", len(files))
 			return nil
 		}
-		db.UpdateThread(t.ThreadId, true, true, false, false, false)
+		db.UpdateThread(t.ThreadId, true, true, false, false, false, false)
 		db.AddLogEntry(t.ThreadId, fmt.Sprintf("Thread %s completed succesfully in %v seconds.", t.ThreadId, int(difference.Seconds())), finish, 1)
 	} else {
 		// Container is running, so we update worker status
@@ -81,7 +80,7 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string,
 }
 
 func (t VideoRenderingThread) ProposeSolution(ctx context.Context, workerAddress string, rootPath string, db *db.DB, provingKeyPath string) error {
-	db.UpdateThread(t.ThreadId, true, true, true, false, false)
+	db.UpdateThread(t.ThreadId, true, true, true, false, false, false)
 	count := vm.CountFilesInDirectory(rootPath)
 
 	if count != (int(t.EndFrame)-int(t.StartFrame))+1 {
@@ -133,7 +132,7 @@ func (t VideoRenderingThread) ProposeSolution(ctx context.Context, workerAddress
 
 func (t VideoRenderingThread) Verify(ctx context.Context, workerAddress string, rootPath string, db *db.DB, provingKeyPath string) error {
 	// we will verify any file we already have rendered.
-	db.UpdateThread(t.ThreadId, true, true, true, true, false)
+	db.UpdateThread(t.ThreadId, true, true, true, true, false, false)
 
 	files := vm.CountFilesInDirectory(rootPath)
 	if files == 0 {
@@ -184,7 +183,7 @@ func submitValidation(validator string, taskId, threadId string, zkps []string) 
 }
 
 func (t VideoRenderingThread) SubmitSolution(ctx context.Context, workerAddress, rootPath string, db *db.DB) error {
-	db.UpdateThread(t.ThreadId, true, true, true, true, true)
+	db.UpdateThread(t.ThreadId, true, true, true, true, true, true)
 
 	db.AddLogEntry(t.ThreadId, "Submiting solution to IPFS...", time.Now().Unix(), 0)
 	cid, err := ipfs.UploadSolution(ctx, rootPath, t.ThreadId)
@@ -220,25 +219,6 @@ func submitSolution(address, taskId, threadId string, cid string) error {
 	return nil
 }
 
-func (t VideoRenderingThread) VerifySubmittedSolution(cid string) error {
-	result, err := ipfs.ListDirectory(cid)
-	if err != nil {
-		return err
-	}
-
-	solution, err := TransformSliceToMap(t.Solution.Zkps)
-	if err != nil {
-		return err
-	}
-
-	for key, value := range solution {
-		if result[key] != value {
-			return errors.New("provided solution is incorrect")
-		}
-	}
-	return nil
-}
-
 func (t VideoRenderingThread) IsReverse(worker string) bool {
 	for i, v := range t.Workers {
 		if v == worker {
@@ -251,11 +231,11 @@ func (t VideoRenderingThread) IsReverse(worker string) bool {
 func (t *VideoRenderingThread) GetValidatorReward(worker string, totalReward types.Coin) types.Coin {
 	var totalFiles int
 	for _, validation := range t.Validations {
-		totalFiles = totalFiles + int(len(validation.Zkps))
+		totalFiles = totalFiles + int(len(validation.Frames))
 	}
 	for _, validation := range t.Validations {
 		if validation.Validator == worker {
-			amount := calculateValidatorPayment(int(len(validation.Zkps)), totalFiles, totalReward.Amount)
+			amount := calculateValidatorPayment(int(len(validation.Frames)), totalFiles, totalReward.Amount)
 			return types.NewCoin("jct", amount)
 		}
 	}
@@ -272,7 +252,7 @@ func calculateValidatorPayment(filesValidated, totalFilesValidated int, totalVal
 	return totalValidatorReward.Mul(math.NewInt(int64(filesValidated))).Quo(math.NewInt(int64(totalFilesValidated)))
 }
 
-func (t *VideoRenderingThread) RevealSolution(rootPath string) error {
+func (t *VideoRenderingThread) RevealSolution(rootPath string, db *db.DB) error {
 	output := path.Join(rootPath, "renders", t.ThreadId, "output")
 	cids, err := ipfs.CalculateCIDs(output)
 	if err != nil {
@@ -295,6 +275,9 @@ func (t *VideoRenderingThread) RevealSolution(rootPath string) error {
 	if err != nil {
 		return err
 	}
-
+	err = db.UpdateThread(t.ThreadId, true, true, true, true, true, false)
+	if err != nil {
+		return err
+	}
 	return nil
 }

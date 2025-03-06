@@ -159,7 +159,7 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 		count++
 		iterator.Next()
 	}
-	// we adjust the min validators dinamycally
+	// we adjust the min validators dinamycally. Max 7
 	if count > 1 && count < 7 {
 		params.MinValidators = int64(count)
 		k.Params.Set(ctx, params)
@@ -187,12 +187,12 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 
 			if thread.Solution == nil && dbThread.WorkCompleted && !dbThread.SolutionProposed {
 				log.Printf("thread %v of task %v started", thread.ThreadId, task.TaskId)
-				go thread.ProposeSolution(ctx, worker.Address, workPath, &k.DB)
+				go thread.ProposeSolution(ctx, worker.Address, workPath, &k.DB, k.ProvingKeyPath)
 			}
 
 			if thread.Solution != nil && !dbThread.VerificationStarted {
 				// start verification
-				go thread.Verify(ctx, worker.Address, workPath, &k.DB)
+				go thread.Verify(ctx, worker.Address, workPath, &k.DB, k.ProvingKeyPath)
 			}
 		}
 	}
@@ -236,20 +236,27 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 	for i := 0; i < int(maxId.NextId); i++ {
 		task, _ := k.VideoRenderingTasks.Get(ctx, strconv.Itoa(i))
 		if !task.Completed {
-			for k, thread := range task.Threads {
-				if len(thread.Validations) >= int(params.MinValidators) && !thread.Completed {
-					log.Println("we are ready to validate", thread.ThreadId)
-					am.EvaluateCompletedThread(ctx, &task, k)
+			for _, thread := range task.Threads {
+				if len(thread.Validations) >= int(params.MinValidators) && !thread.Completed && thread.Solution.ProposedBy == am.keeper.Configuration.WorkerAddress {
 
-					// PAY to validators
-
-					// if we are the node that proposed the solution, then we upload it
-					if thread.Solution.ProposedBy == am.keeper.Configuration.WorkerAddress {
-						localThread, _ := am.keeper.DB.ReadThread(thread.ThreadId)
-						if !localThread.SubmitionStarted {
-							go thread.SubmitSolution(ctx, am.keeper.Configuration.WorkerAddress, am.keeper.Configuration.RootPath, &am.keeper.DB)
-						}
+					db, _ := k.DB.ReadThread(thread.ThreadId)
+					if !db.SolutionRevealed {
+						// We have reached enought validations, if we are the winning node, is time to reveal the solution
+						log.Printf("Time to reveal solution!!!!!!")
+						go thread.RevealSolution(am.keeper.Configuration.RootPath, &k.DB)
 					}
+					// log.Println("we are ready to validate", thread.ThreadId)
+					// am.EvaluateCompletedThread(ctx, &task, k)
+
+					// // PAY to validators
+
+					// // if we are the node that proposed the solution, then we upload it
+					// if thread.Solution.ProposedBy == am.keeper.Configuration.WorkerAddress {
+					// 	localThread, _ := am.keeper.DB.ReadThread(thread.ThreadId)
+					// 	if !localThread.SubmitionStarted {
+					// 		go thread.SubmitSolution(ctx, am.keeper.Configuration.WorkerAddress, am.keeper.Configuration.RootPath, &am.keeper.DB)
+					// 	}
+					// }
 				}
 			}
 		}

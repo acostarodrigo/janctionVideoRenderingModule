@@ -5,7 +5,6 @@ import (
 	"log"
 	"slices"
 	"strconv"
-	"strings"
 
 	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/types"
@@ -13,6 +12,7 @@ import (
 	"github.com/ipfs/go-cid"
 
 	"github.com/janction/videoRendering"
+	"github.com/janction/videoRendering/zkp"
 )
 
 type msgServer struct {
@@ -170,7 +170,7 @@ func (ms msgServer) ProposeSolution(ctx context.Context, msg *videoRendering.Msg
 	// creator of the solution must be a valid worker
 	worker, err := ms.k.Workers.Get(ctx, msg.Creator)
 	if err != nil {
-		return &videoRendering.MsgProposeSolutionResponse{}, err
+		return nil, err
 	}
 
 	if !worker.Enabled {
@@ -203,35 +203,133 @@ func (ms msgServer) ProposeSolution(ctx context.Context, msg *videoRendering.Msg
 			}
 
 			// solution len must be equal to the frames generated
-			if len(msg.Solution) != (int(v.EndFrame) - int(v.StartFrame) + 1) {
-				log.Printf("amount of files in solution is incorrect, %v ", len(msg.Solution))
-				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "amount of files in solution is incorrect, %v ", len(msg.Solution))
+			if len(msg.Zkps) != (int(v.EndFrame) - int(v.StartFrame) + 1) {
+				log.Printf("amount of files in solution is incorrect, %v ", len(msg.Zkps))
+				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "amount of files in solution is incorrect, %v ", len(msg.Zkps))
 			}
 
 			// we have passed all validations, lets add the solution to the thread
-			parsedSolution := make(map[string]string)
-			for _, pair := range msg.Solution {
-				parts := strings.SplitN(pair, "=", 2)
-				if len(parts) != 2 {
-					log.Printf("invalid solution format; expected key=value")
-					return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "invalid solution format; expected key=value")
-				}
-				parsedSolution[parts[0]] = parts[1]
+
+			mappedSolution, err := videoRendering.TransformSliceToMap(msg.Zkps)
+			if err != nil {
+				return nil, err
 			}
 
-			// TODO parse file names equals thread's frames
+			var frames []*videoRendering.VideoRenderingThread_Frame
+			for filename, zkp := range mappedSolution {
+				frame := videoRendering.VideoRenderingThread_Frame{Filename: filename, Zkp: zkp}
+				frames = append(frames, &frame)
+			}
 
-			task.Threads[i].Solution = &videoRendering.VideoRenderingThread_Solution{ProposedBy: msg.Creator, Hashes: msg.Solution}
+			task.Threads[i].Solution = &videoRendering.VideoRenderingThread_Solution{ProposedBy: msg.Creator, Frames: frames}
 			err = ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
+
 			if err != nil {
 				log.Printf("unable to propose solution %s", err.Error())
 				return nil, err
 			}
-			log.Printf("Proposing solution %s", msg.Solution)
+			log.Printf("Proposing solution %s", msg.Zkps)
 		}
 	}
 
 	return &videoRendering.MsgProposeSolutionResponse{}, nil
+}
+
+// TODO Implement
+func (ms msgServer) RevealSolution(ctx context.Context, msg *videoRendering.MsgRevealSolution) (*videoRendering.MsgRevealSolutionResponse, error) {
+	// Solution must be from a worker on the thread
+	task, err := ms.k.VideoRenderingTasks.Get(ctx, msg.TaskId)
+
+	if err != nil {
+		return nil, err
+	}
+
+	worker, err := ms.k.Workers.Get(ctx, msg.Creator)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if worker.CurrentTaskId != msg.TaskId {
+		log.Printf("worker is not working on task")
+		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "worker is not working on task")
+	}
+
+	if task.Completed {
+		log.Printf("task is already completed. No more validations accepted")
+		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "task is already completed. No more validations accepted")
+	}
+
+	thread := task.Threads[worker.CurrentThreadIndex]
+
+	if thread.Solution.Accepted {
+		log.Printf("solution has already been accepted")
+		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "solution has already been accepted.")
+	}
+
+	// TODO verify amount of CIDS equals amount of frames of this thread
+
+	if thread.Solution.ProposedBy != msg.Creator {
+		log.Printf("creator is not the winner.")
+		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "creator is not the winner.")
+	}
+
+	if thread.ThreadId != msg.ThreadId {
+		log.Printf("worker is not working on thread")
+		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "worker is not working on thread")
+	}
+
+	// this shouldn't happen.
+	if !slices.Contains(thread.Workers, msg.Creator) {
+		log.Printf("worker is not working on thread")
+		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "worker is not working on thread")
+	}
+
+	// we make sure we have enought validations
+	params, err := ms.k.Params.Get(ctx)
+	if err != nil {
+		return nil, err
+	}
+	if len(thread.Validations) < int(params.MinValidators) {
+		log.Printf("not enought validators to perform verification")
+		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "not enought validators to perform verification")
+	}
+
+	// for each validation, we verify it
+	cids, err := videoRendering.TransformSliceToMap(msg.Cids)
+	if err != nil {
+		return nil, err
+	}
+	for _, validation := range thread.Validations {
+		for _, frame := range validation.Frames {
+			err = zkp.VerifyFrameProof(frame.Zkp, ms.k.ValidatingKeyPath, cids[frame.Filename], validation.Validator)
+
+			// we search the index of this filename in the solution frame
+			idx := slices.IndexFunc(thread.Solution.Frames, func(f *videoRendering.VideoRenderingThread_Frame) bool { return f.Filename == frame.Filename })
+			if err == nil {
+				// validation is correct
+				// we increse the counter of the solution frame
+				thread.Solution.Frames[idx].ValidCount++
+				// TODO release the validator and pay reward
+
+				// we add the CID into the solution
+				if thread.Solution.Frames[idx].Cid == "" {
+					thread.Solution.Frames[idx].Cid = cids[frame.Filename]
+				}
+
+				if !thread.Solution.Accepted {
+					thread.Solution.Accepted = true
+				}
+			} else {
+				thread.Solution.Frames[idx].InvalidCount++
+			}
+		}
+
+	}
+
+	task.Threads[worker.CurrentThreadIndex] = thread
+	ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
+	return nil, nil
 }
 
 func (ms msgServer) SubmitValidation(ctx context.Context, msg *videoRendering.MsgSubmitValidation) (*videoRendering.MsgSubmitValidationResponse, error) {
@@ -276,8 +374,16 @@ func (ms msgServer) SubmitValidation(ctx context.Context, msg *videoRendering.Ms
 	}
 
 	// TODO Validate the validation is ok with ZKP
-
-	validation := videoRendering.VideoRenderingThread_Validation{Validator: msg.Creator, AmountFiles: msg.FilesAmount, Valid: msg.Valid, IsReverse: thread.IsReverse(worker.Address)}
+	zkpMap, err := videoRendering.TransformSliceToMap(msg.Zkps)
+	if err != nil {
+		return nil, err
+	}
+	var frames []*videoRendering.VideoRenderingThread_Frame
+	for filename, zkp := range zkpMap {
+		frame := videoRendering.VideoRenderingThread_Frame{Filename: filename, Zkp: zkp}
+		frames = append(frames, &frame)
+	}
+	validation := videoRendering.VideoRenderingThread_Validation{Validator: msg.Creator, IsReverse: thread.IsReverse(worker.Address), Frames: frames}
 	task.Threads[worker.CurrentThreadIndex].Validations = append(thread.Validations, &validation)
 	ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
 
@@ -313,7 +419,7 @@ func (ms msgServer) SubmitSolution(ctx context.Context, msg *videoRendering.MsgS
 			addr, _ := types.AccAddressFromBech32(msg.Creator)
 			payment := task.GetWinnerReward()
 			ms.k.BankKeeper.SendCoinsFromModuleToAccount(ctx, videoRendering.ModuleName, addr, types.NewCoins(payment))
-			task.Threads[i].Solution.Files = msg.Cid
+			task.Threads[i].Solution.Dir = msg.Dir
 			ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
 
 			// we increase the reputation of the winner

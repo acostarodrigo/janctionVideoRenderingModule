@@ -75,7 +75,7 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{ProtoField: "taskId"},
 						{ProtoField: "threadId"},
-						{ProtoField: "solution", Varargs: true},
+						{ProtoField: "zkps", Varargs: true},
 					},
 				},
 				{
@@ -87,7 +87,7 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{ProtoField: "taskId"},
 						{ProtoField: "threadId"},
-						{ProtoField: "cid", Varargs: false},
+						{ProtoField: "dir", Varargs: false},
 					},
 				},
 				{
@@ -99,8 +99,19 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{ProtoField: "taskId"},
 						{ProtoField: "threadId"},
-						{ProtoField: "filesAmount"},
-						{ProtoField: "valid"},
+						{ProtoField: "zkps", Varargs: true},
+					},
+				},
+				{
+					RpcMethod: "RevealSolution",
+					Use:       "reveal-solution [taskId] [threadId] [solution] --from [workerAddress]",
+					Short:     "Reveals the CiDs of the solution",
+					Long:      "", // TODO Add long
+					Example:   "", // TODO add exampe
+					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
+						{ProtoField: "taskId"},
+						{ProtoField: "threadId"},
+						{ProtoField: "cids", Varargs: true},
 					},
 				},
 			},

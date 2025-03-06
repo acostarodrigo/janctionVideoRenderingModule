@@ -87,15 +87,23 @@ message VideoRenderingTask {
 
     message Solution {
       string proposed_by = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
-      repeated string hashes = 2;
-      string files = 3;
+      repeated Frame frames = 2;
+      string dir = 3;
+      bool accepted = 4;
     }
 
     message Validation {
       string validator = 1[(cosmos_proto.scalar) = "cosmos.AddressString"];
-      int64 amount_files = 2;
-      bool valid = 3;
-      bool is_reverse = 4;
+      repeated Frame frames = 2;
+      bool is_reverse = 3;
+    }
+
+    message Frame {
+      string filename = 1;
+      string zkp = 2;
+      string cid = 3;
+      int64 validCount = 4;
+      int64 invalidCount = 5;
     }
   }
 
