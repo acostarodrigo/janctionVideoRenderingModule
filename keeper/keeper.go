@@ -34,6 +34,7 @@ type Keeper struct {
 	Workers                collections.Map[string, videoRendering.Worker]
 	Configuration          VideoConfiguration
 	DB                     db.DB
+	logger                 *VideoRenderingLogger
 }
 
 // NewKeeper creates a new Keeper instance
@@ -62,6 +63,7 @@ func NewKeeper(cdc codec.BinaryCodec, addressCodec address.Codec, storeService s
 		Configuration:          *config,
 		DB:                     *db,
 		BankKeeper:             bankKeeper,
+		logger:                 NewVideoRenderingLogger(),
 	}
 
 	schema, err := sb.Build()
