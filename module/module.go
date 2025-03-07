@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"path/filepath"
 	"slices"
 	"strconv"
@@ -22,6 +21,7 @@ import (
 	"github.com/janction/videoRendering"
 	"github.com/janction/videoRendering/ipfs"
 	"github.com/janction/videoRendering/keeper"
+	"github.com/janction/videoRendering/videoRenderingLogger"
 	"github.com/janction/videoRendering/zkp"
 )
 
@@ -173,27 +173,28 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 			// we have to start some work!
 			task, err := k.VideoRenderingTasks.Get(ctx, worker.CurrentTaskId)
 			if err != nil {
-				log.Printf("error processing task %v. %v", task.TaskId, err.Error())
+				videoRenderingLogger.Logger.Error("error processing task %v. %v", task.TaskId, err.Error())
 				return nil
 			}
 			thread := *task.Threads[worker.CurrentThreadIndex]
 			dbThread, _ := k.DB.ReadThread(thread.ThreadId)
-			log.Printf("local thread is %s, %v, %v, %v, %v", dbThread.ID, dbThread.WorkStarted, dbThread.WorkCompleted, dbThread.SolutionProposed, dbThread.VerificationStarted)
+			videoRenderingLogger.Logger.Info("local thread is id: %s, workStarted: %v, WorkCompleted: %v, SolutionProposed: %v, verificationStarted: %v, solutionRevealed: %s", dbThread.ID, dbThread.WorkStarted, dbThread.WorkCompleted, dbThread.SolutionProposed, dbThread.VerificationStarted, dbThread.SolutionRevealed)
 
 			workPath := filepath.Join(k.Configuration.RootPath, "renders", thread.ThreadId)
 
 			if thread.Solution == nil && !dbThread.WorkStarted {
-				log.Printf("thread %v of task %v started", thread.ThreadId, task.TaskId)
+				videoRenderingLogger.Logger.Info("thread %v of task %v started", thread.ThreadId, task.TaskId)
 				go thread.StartWork(worker.Address, task.Cid, workPath, &k.DB)
 			}
 
 			if thread.Solution == nil && dbThread.WorkCompleted && !dbThread.SolutionProposed {
-				log.Printf("thread %v of task %v started", thread.ThreadId, task.TaskId)
+				videoRenderingLogger.Logger.Info("thread %v of task %v started", thread.ThreadId, task.TaskId)
 				go thread.ProposeSolution(ctx, worker.Address, workPath, &k.DB, k.ProvingKeyPath)
 			}
 
 			if thread.Solution != nil && !dbThread.VerificationStarted {
 				// start verification
+				videoRenderingLogger.Logger.Info("Started verification for thread %s", thread.ThreadId)
 				go thread.Verify(ctx, worker.Address, workPath, &k.DB, k.ProvingKeyPath)
 			}
 		}
@@ -217,16 +218,17 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 			if !isRegistered {
 				// the worker is not registered, so we do it with the stake
 				params, _ := am.keeper.Params.Get(ctx)
+				videoRenderingLogger.Logger.Info("Registering Worker %s", k.Configuration.WorkerAddress)
 				go worker.RegisterWorker(k.Configuration.WorkerAddress, *params.MinWorkerStaking, &k.DB)
 			}
 		}
 
 		if worker.Enabled && worker.CurrentTaskId == "" {
 			// we find any task in progress that has enought reward
-			log.Printf(" worker %v is idle ", worker.Address)
+			videoRenderingLogger.Logger.Info(" worker %v is idle ", worker.Address)
 			found, task := am.getPendingVideoRenderingTask(ctx)
 			if found {
-				log.Printf(" registering worker %v in task %v ", worker.Address, task.TaskId)
+				videoRenderingLogger.Logger.Info(" registering worker %v in task %v ", worker.Address, task.TaskId)
 				go task.SubscribeWorkerToTask(ctx, worker.Address)
 
 			}
@@ -245,7 +247,7 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 					db, _ := k.DB.ReadThread(thread.ThreadId)
 					if !db.SolutionRevealed {
 						// We have reached enought validations, if we are the winning node, is time to reveal the solution
-						log.Printf("Time to reveal solution!!!!!!")
+						videoRenderingLogger.Logger.Info("Time to reveal solution!!!!!!")
 						go thread.RevealSolution(am.keeper.Configuration.RootPath, &k.DB)
 					}
 
@@ -265,7 +267,7 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 
 				// we check if we have a revealed solution waiting to be accepted
 				if len(thread.Validations) >= int(params.MinValidators) && !thread.Completed && thread.Solution.Frames[0].Cid != "" && !thread.Solution.Accepted {
-					log.Printf("ZKP verifiation for thread %s ", thread.ThreadId)
+					videoRenderingLogger.Logger.Info("ZKP verifiation for thread %s ", thread.ThreadId)
 					var accepted bool = true
 					for _, frame := range thread.Solution.Frames {
 						for _, verification := range thread.Validations {
@@ -315,7 +317,7 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 	k.Workers.Walk(ctx, nil, func(address string, worker videoRendering.Worker) (stop bool, err error) {
 		isAdded, _ := k.DB.IsIPFSWorkerAdded(address)
 		if worker.IpfsId != "" && worker.PublicIp != "" && !isAdded {
-			log.Printf("Connecting to IPFS node %s at %s", worker.IpfsId, worker.PublicIp)
+			videoRenderingLogger.Logger.Info("Connecting to IPFS node %s at %s", worker.IpfsId, worker.PublicIp)
 			ipfs.EnsureIPFSRunning()
 			go ipfs.ConnectToIPFSNode(worker.PublicIp, worker.IpfsId)
 
