@@ -294,21 +294,13 @@ func (ms msgServer) RevealSolution(ctx context.Context, msg *videoRendering.MsgR
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "invalid amount of cids for the solution")
 	}
 
-	// we are ready to insert the cids in the solution
-	mappedCid, err := videoRendering.TransformSliceToMap(msg.Cids)
-	if err != nil {
-		return nil, err
-	}
-
-	for filename, cid := range mappedCid {
-		log.Printf("Looking frame with filename %s ", filename)
-		idx := slices.IndexFunc(thread.Solution.Frames, func(f *videoRendering.VideoRenderingThread_Frame) bool { return f.Filename == filename })
+	for _, cids := range msg.Cids {
+		parts := strings.SplitN(cids, "=", 2)
+		idx := slices.IndexFunc(thread.Solution.Frames, func(f *videoRendering.VideoRenderingThread_Frame) bool { return f.Filename == parts[0] })
 		if idx == -1 {
-			log.Printf("frame %s not found in solution", filename)
-			return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "frame %s not found in solution", filename)
+			return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "frame %s not found in solution", parts[0])
 		}
-		log.Printf("Found frame index %v: %s ", idx, thread.Solution.Frames[idx])
-		thread.Solution.Frames[idx].Cid = cid
+		thread.Solution.Frames[idx].Cid = parts[1]
 	}
 
 	task.Threads[worker.CurrentThreadIndex] = thread
@@ -357,14 +349,10 @@ func (ms msgServer) SubmitValidation(ctx context.Context, msg *videoRendering.Ms
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "worker is not working on thread")
 	}
 
-	// TODO Validate the validation is ok with ZKP
-	zkpMap, err := videoRendering.TransformSliceToMap(msg.Zkps)
-	if err != nil {
-		return nil, err
-	}
 	var frames []*videoRendering.VideoRenderingThread_Frame
-	for filename, zkp := range zkpMap {
-		frame := videoRendering.VideoRenderingThread_Frame{Filename: filename, Zkp: zkp}
+	for _, zkps := range msg.Zkps {
+		parts := strings.SplitN(zkps, "=", 2)
+		frame := videoRendering.VideoRenderingThread_Frame{Filename: parts[0], Zkp: parts[1]}
 		frames = append(frames, &frame)
 	}
 	validation := videoRendering.VideoRenderingThread_Validation{Validator: msg.Creator, IsReverse: thread.IsReverse(worker.Address), Frames: frames}
