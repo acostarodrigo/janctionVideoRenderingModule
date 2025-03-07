@@ -121,7 +121,6 @@ func (t VideoRenderingThread) ProposeSolution(ctx context.Context, workerAddress
 	args = append(args, "--yes", "--from", workerAddress)
 	err = ExecuteCli(args)
 	if err != nil {
-		log.Printf("Error Executing %s", err.Error())
 		return err
 	}
 
