@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"path/filepath"
+	"slices"
 	"strconv"
 
 	"cosmossdk.io/core/appmodule"
@@ -21,6 +22,7 @@ import (
 	"github.com/janction/videoRendering"
 	"github.com/janction/videoRendering/ipfs"
 	"github.com/janction/videoRendering/keeper"
+	"github.com/janction/videoRendering/zkp"
 )
 
 var (
@@ -237,6 +239,7 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 		task, _ := k.VideoRenderingTasks.Get(ctx, strconv.Itoa(i))
 		if !task.Completed {
 			for _, thread := range task.Threads {
+				// we check if we have enought validations to reveal the solution
 				if len(thread.Validations) >= int(params.MinValidators) && !thread.Completed && thread.Solution.ProposedBy == am.keeper.Configuration.WorkerAddress {
 
 					db, _ := k.DB.ReadThread(thread.ThreadId)
@@ -245,6 +248,7 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 						log.Printf("Time to reveal solution!!!!!!")
 						go thread.RevealSolution(am.keeper.Configuration.RootPath, &k.DB)
 					}
+
 					// log.Println("we are ready to validate", thread.ThreadId)
 					// am.EvaluateCompletedThread(ctx, &task, k)
 
@@ -257,6 +261,26 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 					// 		go thread.SubmitSolution(ctx, am.keeper.Configuration.WorkerAddress, am.keeper.Configuration.RootPath, &am.keeper.DB)
 					// 	}
 					// }
+				}
+
+				// we check if we have a revealed solution waiting to be accepted
+				if len(thread.Validations) >= int(params.MinValidators) && !thread.Completed && thread.Solution.Frames[0].Cid != "" && !thread.Solution.Accepted {
+					log.Printf("ZKP verifiation for thread %s ", thread.ThreadId)
+					for _, frame := range thread.Solution.Frames {
+						for _, verification := range thread.Validations {
+							idx := slices.IndexFunc(verification.Frames, func(f *videoRendering.VideoRenderingThread_Frame) bool { return f.Filename == frame.Filename })
+
+							err := zkp.VerifyFrameProof(verification.Frames[idx].Zkp, k.ValidatingKeyPath, frame.Cid, verification.Validator)
+							if err == nil {
+								// verification passed
+								frame.ValidCount++
+								thread.Solution.Accepted = true
+							} else {
+								frame.InvalidCount++
+							}
+						}
+					}
+					k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
 				}
 			}
 		}
