@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
 	"os"
 	"os/exec"
 	"path"
@@ -13,6 +12,7 @@ import (
 	"time"
 
 	"github.com/janction/videoRendering/db"
+	"github.com/janction/videoRendering/videoRenderingLogger"
 )
 
 func IsContainerRunning(ctx context.Context, threadId string) bool {
@@ -23,7 +23,7 @@ func IsContainerRunning(ctx context.Context, threadId string) bool {
 
 	output, err := cmd.Output()
 	if err != nil {
-		fmt.Printf("Error executing Docker command: %v\n", err)
+		videoRenderingLogger.Logger.Error("Error executing Docker command: %v\n", err)
 		return false
 	}
 
@@ -35,12 +35,12 @@ func IsContainerRunning(ctx context.Context, threadId string) bool {
 func RenderVideo(ctx context.Context, cid string, start int64, end int64, id string, path string, reverse bool, db *db.DB) {
 	if reverse {
 		for i := end; i >= start; i-- {
-			log.Printf("Rendering frame %v", i)
+			videoRenderingLogger.Logger.Info("Rendering frame %v in reverse", i)
 			renderVideoFrame(ctx, cid, i, id, path, db)
 		}
 	} else {
 		for i := start; i <= end; i++ {
-			log.Printf("Rendering frame %v", i)
+			videoRenderingLogger.Logger.Info("Rendering frame %v", i)
 			renderVideoFrame(ctx, cid, i, id, path, db)
 		}
 	}
@@ -57,12 +57,14 @@ func renderVideoFrame(ctx context.Context, cid string, frameNumber int64, id str
 	output, err := checkCmd.Output()
 	if err != nil {
 		db.AddLogEntry(id, "Error trying to verify if container already exists.", started, 2)
-		return fmt.Errorf("failed to check container existence: %w", err)
+		fail := fmt.Errorf("failed to check container existence: %w", err)
+		videoRenderingLogger.Logger.Error(fail.Error())
+		return fail
 	}
 
 	// If the container already exists, exit the function
 	if string(output) != "" {
-		fmt.Println("Container already exists.")
+		videoRenderingLogger.Logger.Debug("Container already exists.")
 		return nil
 	}
 
@@ -75,10 +77,11 @@ func renderVideoFrame(ctx context.Context, cid string, frameNumber int64, id str
 
 	// Create and start the container
 	runCmd := exec.CommandContext(ctx, "docker", "run", "--name", n, "-v", bindPath, "-d", "blender_render", "sh", "-c", command)
-	log.Printf("Starting docker: %s", runCmd.String())
+	videoRenderingLogger.Logger.Info("Starting docker: %s", runCmd.String())
 	err = runCmd.Run()
 	if err != nil {
 		db.AddLogEntry(id, fmt.Sprintf("Error in crearing the container. %s", err.Error()), started, 1)
+		videoRenderingLogger.Logger.Error("failed to create and start container: %s", err.Error())
 		return fmt.Errorf("failed to create and start container: %w", err)
 	}
 
@@ -86,6 +89,7 @@ func renderVideoFrame(ctx context.Context, cid string, frameNumber int64, id str
 	waitCmd := exec.CommandContext(ctx, "docker", "wait", n)
 	err = waitCmd.Run()
 	if err != nil {
+		videoRenderingLogger.Logger.Error("failed to wait for container: %s", err.Error())
 		return fmt.Errorf("failed to wait for container: %w", err)
 	}
 
@@ -93,10 +97,11 @@ func renderVideoFrame(ctx context.Context, cid string, frameNumber int64, id str
 	logsCmd := exec.CommandContext(ctx, "docker", "logs", n)
 	logsOutput, err := logsCmd.Output()
 	if err != nil {
+		videoRenderingLogger.Logger.Error("failed to retrieve container logs: %s", err.Error())
 		return fmt.Errorf("failed to retrieve container logs: %w", err)
 	}
-	fmt.Println("Container logs:")
-	fmt.Println(string(logsOutput))
+	videoRenderingLogger.Logger.Info("Container logs:")
+	videoRenderingLogger.Logger.Info(string(logsOutput))
 
 	RemoveContainer(ctx, n)
 
@@ -117,6 +122,7 @@ func RemoveContainer(ctx context.Context, name string) error {
 	// Remove the container after completion
 	rmCmd := exec.CommandContext(ctx, "docker", "rm", name)
 	err := rmCmd.Run()
+	videoRenderingLogger.Logger.Error(err.Error())
 	return err
 }
 
@@ -126,6 +132,7 @@ func CountFilesInDirectory(directoryPath string) int {
 	// Read the directory contents
 	files, err := os.ReadDir(output)
 	if err != nil {
+		videoRenderingLogger.Logger.Error(err.Error())
 		return 0
 	}
 
