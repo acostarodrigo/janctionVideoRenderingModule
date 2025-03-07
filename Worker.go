@@ -2,27 +2,33 @@ package videoRendering
 
 import (
 	io "io"
-	"log"
 	"net/http"
-	"os/exec"
 	"strings"
 
 	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/janction/videoRendering/db"
 	"github.com/janction/videoRendering/ipfs"
+	"github.com/janction/videoRendering/videoRenderingLogger"
 )
 
 func (w Worker) RegisterWorker(address string, stake types.Coin, db *db.DB) error {
 	db.Addworker(address)
-	executableName := "janctiond"
+	// Base arguments
+	args := []string{
+		"tx", "videoRendering", "add-worker",
+	}
 	ip, _ := getPublicIP()
 	ipfsId, _ := ipfs.GetIPFSPeerID()
-	cmd := exec.Command(executableName, "tx", "videoRendering", "add-worker", ip, ipfsId, stake.String(), "--from", address, "--yes")
-	_, err := cmd.Output()
-	log.Printf("executing %s", cmd.String())
+	args = append(args, ip)
+	args = append(args, ipfsId)
+	args = append(args, stake.String())
+	args = append(args, "--from")
+	args = append(args, address)
+	args = append(args, "--yes")
+
+	err := ExecuteCli(args)
 	if err != nil {
 		db.DeleteWorker(address)
-		return err
 	}
 	return nil
 }
@@ -31,12 +37,14 @@ func (w Worker) RegisterWorker(address string, stake types.Coin, db *db.DB) erro
 func getPublicIP() (string, error) {
 	resp, err := http.Get("https://api.ipify.org")
 	if err != nil {
+		videoRenderingLogger.Logger.Error(err.Error())
 		return "", err
 	}
 	defer resp.Body.Close()
 
 	ip, err := io.ReadAll(resp.Body)
 	if err != nil {
+		videoRenderingLogger.Logger.Error(err.Error())
 		return "", err
 	}
 
