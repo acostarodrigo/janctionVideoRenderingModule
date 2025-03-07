@@ -305,7 +305,13 @@ func (ms msgServer) RevealSolution(ctx context.Context, msg *videoRendering.MsgR
 	}
 
 	for filename, cid := range mappedCid {
+		log.Printf("Looking frame with filename %s ", filename)
 		idx := slices.IndexFunc(thread.Solution.Frames, func(f *videoRendering.VideoRenderingThread_Frame) bool { return f.Filename == filename })
+		if idx == -1 {
+			log.Printf("frame %s not found in solution", filename)
+			return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "frame %s not found in solution", filename)
+		}
+		log.Printf("Found frame index %v: %s ", idx, thread.Solution.Frames[idx])
 		thread.Solution.Frames[idx].Cid = cid
 	}
 

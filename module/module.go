@@ -266,6 +266,7 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 				// we check if we have a revealed solution waiting to be accepted
 				if len(thread.Validations) >= int(params.MinValidators) && !thread.Completed && thread.Solution.Frames[0].Cid != "" && !thread.Solution.Accepted {
 					log.Printf("ZKP verifiation for thread %s ", thread.ThreadId)
+					var accepted bool = true
 					for _, frame := range thread.Solution.Frames {
 						for _, verification := range thread.Validations {
 							idx := slices.IndexFunc(verification.Frames, func(f *videoRendering.VideoRenderingThread_Frame) bool { return f.Filename == frame.Filename })
@@ -274,12 +275,17 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 							if err == nil {
 								// verification passed
 								frame.ValidCount++
-								thread.Solution.Accepted = true
 							} else {
 								frame.InvalidCount++
 							}
 						}
+						// if we find a frame which has not been validated then we don't accept the solution
+						if frame.ValidCount == 0 {
+							accepted = false
+						}
+						thread.Solution.Accepted = accepted
 					}
+
 					k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
 				}
 			}
