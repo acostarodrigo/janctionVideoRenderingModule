@@ -5,6 +5,7 @@ import (
 	"log"
 	"slices"
 	"strconv"
+	"strings"
 
 	"cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/types"
@@ -208,15 +209,10 @@ func (ms msgServer) ProposeSolution(ctx context.Context, msg *videoRendering.Msg
 			}
 
 			// we have passed all validations, lets add the solution to the thread
-
-			mappedSolution, err := videoRendering.TransformSliceToMap(msg.Zkps)
-			if err != nil {
-				return nil, err
-			}
-
 			var frames []*videoRendering.VideoRenderingThread_Frame
-			for filename, zkp := range mappedSolution {
-				frame := videoRendering.VideoRenderingThread_Frame{Filename: filename, Zkp: zkp}
+			for _, val := range msg.Zkps {
+				parts := strings.SplitN(val, "=", 2)
+				frame := videoRendering.VideoRenderingThread_Frame{Filename: parts[0], Zkp: parts[1]}
 				frames = append(frames, &frame)
 			}
 
