@@ -2,9 +2,10 @@ package videoRendering
 
 import (
 	fmt "fmt"
-	"log"
 	"os/exec"
 	"strings"
+
+	"github.com/janction/videoRendering/videoRenderingLogger"
 )
 
 // Transforms a slice with format [key]=[value] to a map
@@ -41,12 +42,12 @@ func MapToKeyValueFormat(inputMap map[string]string) []string {
 func ExecuteCli(args []string) error {
 	executableName := "janctiond"
 	cmd := exec.Command(executableName, args...)
-	log.Printf("Executing %s", cmd.String())
+	videoRenderingLogger.Logger.Info("Executing %s", cmd.String())
 
 	_, err := cmd.Output()
 
 	if err != nil {
-		log.Printf("Error Executing %s", err.Error())
+		videoRenderingLogger.Logger.Error("Error Executing %s", err.Error())
 		return err
 	}
 
