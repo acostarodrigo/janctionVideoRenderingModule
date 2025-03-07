@@ -12,7 +12,6 @@ import (
 	"github.com/ipfs/go-cid"
 
 	"github.com/janction/videoRendering"
-	"github.com/janction/videoRendering/zkp"
 )
 
 type msgServer struct {
@@ -267,8 +266,6 @@ func (ms msgServer) RevealSolution(ctx context.Context, msg *videoRendering.MsgR
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "solution has already been accepted.")
 	}
 
-	// TODO verify amount of CIDS equals amount of frames of this thread
-
 	if thread.Solution.ProposedBy != msg.Creator {
 		log.Printf("creator is not the winner.")
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "creator is not the winner.")
@@ -295,36 +292,21 @@ func (ms msgServer) RevealSolution(ctx context.Context, msg *videoRendering.MsgR
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "not enought validators to perform verification")
 	}
 
-	// for each validation, we verify it
-	cids, err := videoRendering.TransformSliceToMap(msg.Cids)
+	// cids amount must be equal to the amount of frames
+	if len(msg.Cids) != len(thread.Solution.Frames) {
+		log.Printf("invalid amount of cids for the solution")
+		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "invalid amount of cids for the solution")
+	}
+
+	// we are ready to insert the cids in the solution
+	mappedCid, err := videoRendering.TransformSliceToMap(msg.Cids)
 	if err != nil {
 		return nil, err
 	}
-	for _, validation := range thread.Validations {
-		for _, frame := range validation.Frames {
-			err = zkp.VerifyFrameProof(frame.Zkp, ms.k.ValidatingKeyPath, cids[frame.Filename], validation.Validator)
 
-			// we search the index of this filename in the solution frame
-			idx := slices.IndexFunc(thread.Solution.Frames, func(f *videoRendering.VideoRenderingThread_Frame) bool { return f.Filename == frame.Filename })
-			if err == nil {
-				// validation is correct
-				// we increse the counter of the solution frame
-				thread.Solution.Frames[idx].ValidCount++
-				// TODO release the validator and pay reward
-
-				// we add the CID into the solution
-				if thread.Solution.Frames[idx].Cid == "" {
-					thread.Solution.Frames[idx].Cid = cids[frame.Filename]
-				}
-
-				if !thread.Solution.Accepted {
-					thread.Solution.Accepted = true
-				}
-			} else {
-				thread.Solution.Frames[idx].InvalidCount++
-			}
-		}
-
+	for filename, cid := range mappedCid {
+		idx := slices.IndexFunc(thread.Solution.Frames, func(f *videoRendering.VideoRenderingThread_Frame) bool { return f.Filename == filename })
+		thread.Solution.Frames[idx].Cid = cid
 	}
 
 	task.Threads[worker.CurrentThreadIndex] = thread
