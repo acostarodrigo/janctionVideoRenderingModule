@@ -1,4 +1,4 @@
-package keeper
+package videoRenderingLogger
 
 import (
 	"fmt"
@@ -25,6 +25,9 @@ func NewVideoRenderingLogger() *VideoRenderingLogger {
 		logger: log.New(os.Stdout, colorRed+"[VideoRendering] ", log.LstdFlags),
 	}
 }
+
+// GlobalLogger provides a globally accessible logger instance
+var Logger = NewVideoRenderingLogger()
 
 // Info logs informational messages (Green)
 func (v *VideoRenderingLogger) Info(format string, args ...interface{}) {
