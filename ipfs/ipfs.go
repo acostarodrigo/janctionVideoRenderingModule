@@ -6,7 +6,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"log"
 	"net/http"
 	"os"
 	"os/exec"
@@ -15,15 +14,14 @@ import (
 	"time"
 
 	shell "github.com/ipfs/go-ipfs-api"
+	"github.com/janction/videoRendering/videoRenderingLogger"
 )
 
 func IPFSGet(cid string, path string) error {
-	fmt.Println("**********************")
-	fmt.Println("IPFS Downloading CID " + cid)
-	fmt.Println("**********************")
-
+	videoRenderingLogger.Logger.Info("IPFS Downloading started for %s at %s", cid, path)
 	err := os.MkdirAll(path, os.ModePerm)
 	if err != nil {
+		videoRenderingLogger.Logger.Error("Error Downloading IPFS %s: %s", cid, err.Error())
 		return err
 	}
 
@@ -33,11 +31,11 @@ func IPFSGet(cid string, path string) error {
 	// Download the file from IPFS using the CID
 	err = sh.Get(cid, path)
 	if err != nil {
-		fmt.Println("Error downloading from IPFS:", err)
+		videoRenderingLogger.Logger.Error("Error Downloading IPFS %s: %s", cid, err.Error())
 		return err
 	}
 
-	fmt.Println("Download completed successfully.")
+	videoRenderingLogger.Logger.Info("Download completed successfully")
 	return nil
 }
 
@@ -48,11 +46,14 @@ func CalculateCIDs(dirPath string) (map[string]string, error) {
 	// Walk through the directory
 	err := filepath.Walk(dirPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
-			return fmt.Errorf("error accessing path %s: %w", path, err)
+			fail := fmt.Errorf("error accessing path %s: %w", path, err)
+			videoRenderingLogger.Logger.Error(fail.Error())
+			return fail
 		}
 
 		// Skip directories
 		if info.IsDir() {
+			videoRenderingLogger.Logger.Debug("Skipping directory %s", info.Name())
 			return nil
 		}
 
@@ -63,7 +64,9 @@ func CalculateCIDs(dirPath string) (map[string]string, error) {
 		cmd.Stderr = &out
 
 		if err := cmd.Run(); err != nil {
-			return fmt.Errorf("failed to calculate CID for %s: %s, %w", path, out.String(), err)
+			fail := fmt.Errorf("failed to calculate CID for %s: %s, %w", path, out.String(), err)
+			videoRenderingLogger.Logger.Error(fail.Error())
+			return fail
 		}
 
 		// Extract only the file name and add the result to the map
@@ -90,15 +93,21 @@ func UploadSolution(ctx context.Context, rootPath, threadId string) (string, err
 	// Ensure the thread output path exists
 	info, err := os.Stat(threadOutputPath)
 	if err != nil {
-		return "", fmt.Errorf("failed to access thread output path: %w", err)
+		fail := fmt.Errorf("failed to access thread output path: %w", err)
+		videoRenderingLogger.Logger.Error(fail.Error())
+		return "", fail
 	}
 	if !info.IsDir() {
-		return "", fmt.Errorf("thread output path is not a directory: %s", threadOutputPath)
+		fail := fmt.Errorf("thread output path is not a directory: %s", threadOutputPath)
+		videoRenderingLogger.Logger.Error(fail.Error())
+		return "", fail
 	}
 
 	cid, err := sh.AddDir(threadOutputPath)
 	if err != nil {
-		return "", fmt.Errorf("failed to upload files for threadId %s: %w", threadId, err)
+		fail := fmt.Errorf("failed to upload files for threadId %s: %w", threadId, err)
+		videoRenderingLogger.Logger.Error(fail.Error())
+		return "", fail
 	}
 
 	return cid, nil
@@ -112,20 +121,26 @@ func CheckIPFSStatus() error {
 
 	req, err := http.NewRequest("POST", "http://localhost:5001/api/v0/id", nil) // Use POST
 	if err != nil {
-		return fmt.Errorf("failed to create request: %v", err)
+		fail := fmt.Errorf("failed to create request: %v", err)
+		videoRenderingLogger.Logger.Error(fail.Error())
+		return fail
 	}
 
 	resp, err := client.Do(req)
 	if err != nil {
-		return fmt.Errorf("IPFS node unreachable: %v", err)
+		fail := fmt.Errorf("IPFS node unreachable: %v", err)
+		videoRenderingLogger.Logger.Error(fail.Error())
+		return fail
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return fmt.Errorf("IPFS node returned non-200 status: %d", resp.StatusCode)
+		fail := fmt.Errorf("IPFS node returned non-200 status: %d", resp.StatusCode)
+		videoRenderingLogger.Logger.Error(fail.Error())
+		return fail
 	}
 
-	fmt.Println("✅ IPFS node is running")
+	videoRenderingLogger.Logger.Info("✅ IPFS node is running")
 	return nil
 }
 
@@ -137,10 +152,12 @@ func StartIPFS() error {
 
 	err := cmd.Start() // Start IPFS as a background process
 	if err != nil {
-		return fmt.Errorf("failed to start IPFS daemon: %v", err)
+		fail := fmt.Errorf("failed to start IPFS daemon: %v", err)
+		videoRenderingLogger.Logger.Error(fail.Error())
+		return fail
 	}
 
-	fmt.Println("IPFS daemon started successfully")
+	videoRenderingLogger.Logger.Info("IPFS daemon started successfully")
 	return nil
 }
 
@@ -148,12 +165,12 @@ func StartIPFS() error {
 func EnsureIPFSRunning() {
 	err := CheckIPFSStatus()
 	if err != nil {
-		fmt.Println("⚠️ IPFS not running. Attempting to start...")
+		videoRenderingLogger.Logger.Info("⚠️ IPFS not running. Attempting to start...")
 		startErr := StartIPFS()
 		if startErr != nil {
-			fmt.Printf("Failed to start IPFS: %v\n", startErr)
+			videoRenderingLogger.Logger.Error("Failed to start IPFS: %v\n", startErr.Error())
 		} else {
-			fmt.Println("✅ IPFS started successfully")
+			videoRenderingLogger.Logger.Info("✅ IPFS started successfully")
 		}
 	}
 }
@@ -170,10 +187,14 @@ func ListDirectory(cid string) (map[string]string, error) {
 
 	err := cmd.Run()
 	if ctx.Err() == context.DeadlineExceeded {
-		return nil, fmt.Errorf("timeout: ipfs ls command took too long")
+		fail := fmt.Errorf("timeout: ipfs ls command took too long")
+		videoRenderingLogger.Logger.Error(fail.Error())
+		return nil, fail
 	}
 	if err != nil {
-		return nil, fmt.Errorf("failed to execute ipfs ls: %v", err)
+		fail := fmt.Errorf("failed to execute ipfs ls: %v", err)
+		videoRenderingLogger.Logger.Error(fail.Error())
+		return nil, fail
 	}
 
 	result := make(map[string]string)
@@ -190,7 +211,9 @@ func ListDirectory(cid string) (map[string]string, error) {
 	}
 
 	if err := scanner.Err(); err != nil {
-		return nil, fmt.Errorf("error reading command output: %v", err)
+		fail := fmt.Errorf("error reading command output: %v", err)
+		videoRenderingLogger.Logger.Error(fail.Error())
+		return nil, fail
 	}
 
 	return result, nil
@@ -202,9 +225,9 @@ func ConnectToIPFSNode(ip, peerId string) {
 	cmd := exec.Command("ipfs", "swarm", "connect", seed)
 	output, err := cmd.CombinedOutput()
 	if err != nil {
-		log.Printf("Failed to connect to %s: %v\nOutput: %s", seed, err, output)
+		videoRenderingLogger.Logger.Error("Failed to connect to %s: %v\nOutput: %s", seed, err, output)
 	} else {
-		fmt.Printf("Connected to IPFS node: %s\n", seed)
+		videoRenderingLogger.Logger.Info("Connected to IPFS node: %s\n", seed)
 	}
 }
 
@@ -218,12 +241,16 @@ func GetIPFSPeerID() (string, error) {
 	cmd := exec.Command("ipfs", "id")
 	output, err := cmd.Output()
 	if err != nil {
-		return "", fmt.Errorf("failed to run ipfs id: %w", err)
+		fail := fmt.Errorf("failed to run ipfs id: %w", err)
+		videoRenderingLogger.Logger.Error(fail.Error())
+		return "", fail
 	}
 
 	var response IPFSIDResponse
 	if err := json.Unmarshal(output, &response); err != nil {
-		return "", fmt.Errorf("failed to parse ipfs id output: %w", err)
+		fail := fmt.Errorf("failed to parse ipfs id output: %w", err)
+		videoRenderingLogger.Logger.Error(fail.Error())
+		return "", fail
 	}
 
 	return response.ID, nil
