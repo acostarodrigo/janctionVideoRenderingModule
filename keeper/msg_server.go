@@ -315,10 +315,19 @@ func (ms msgServer) RevealSolution(ctx context.Context, msg *videoRendering.MsgR
 	for _, cids := range msg.Cids {
 		parts := strings.SplitN(cids, "=", 2)
 		idx := slices.IndexFunc(thread.Solution.Frames, func(f *videoRendering.VideoRenderingThread_Frame) bool { return f.Filename == parts[0] })
-		if idx == -1 {
+		if idx < 0 {
+			videoRenderingLogger.Logger.Error("Unable to find frame with filename %s in solution", parts[0])
 			return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "frame %s not found in solution", parts[0])
 		}
 		thread.Solution.Frames[idx].Cid = parts[1]
+	}
+
+	// We verify all frames in the solution have a CID revealed
+	for _, frame := range thread.Solution.Frames {
+		if frame.Cid == "" {
+			videoRenderingLogger.Logger.Error("Frame %s doesn't have a CID revelaed", frame.Filename)
+			return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "Frame %s doesn't have a CID revelaed", frame.Filename)
+		}
 	}
 
 	task.Threads[worker.CurrentThreadIndex] = thread
