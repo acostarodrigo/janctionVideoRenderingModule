@@ -122,7 +122,9 @@ func RemoveContainer(ctx context.Context, name string) error {
 	// Remove the container after completion
 	rmCmd := exec.CommandContext(ctx, "docker", "rm", name)
 	err := rmCmd.Run()
-	videoRenderingLogger.Logger.Error(err.Error())
+	if err != nil {
+		videoRenderingLogger.Logger.Error(err.Error())
+	}
 	return err
 }
 

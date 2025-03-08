@@ -178,7 +178,7 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 			}
 			thread := *task.Threads[worker.CurrentThreadIndex]
 			dbThread, _ := k.DB.ReadThread(thread.ThreadId)
-			videoRenderingLogger.Logger.Info("local thread is id: %s, workStarted: %v, WorkCompleted: %v, SolutionProposed: %v, verificationStarted: %v, solutionRevealed: %s", dbThread.ID, dbThread.WorkStarted, dbThread.WorkCompleted, dbThread.SolutionProposed, dbThread.VerificationStarted, dbThread.SolutionRevealed)
+			videoRenderingLogger.Logger.Info("local thread %s is: workStarted: %s, workCompleted: %s, solutionProposed: %s, verificationStarted: %s, solutionRevealed: %s, submitionStarted: %s", dbThread.ID, strconv.FormatBool(dbThread.WorkStarted), strconv.FormatBool(dbThread.WorkCompleted), strconv.FormatBool(dbThread.SolutionProposed), strconv.FormatBool(dbThread.VerificationStarted), strconv.FormatBool(dbThread.SolutionRevealed), strconv.FormatBool(dbThread.SubmitionStarted))
 
 			workPath := filepath.Join(k.Configuration.RootPath, "renders", thread.ThreadId)
 
