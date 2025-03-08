@@ -273,6 +273,12 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 						for _, verification := range thread.Validations {
 							idx := slices.IndexFunc(verification.Frames, func(f *videoRendering.VideoRenderingThread_Frame) bool { return f.Filename == frame.Filename })
 
+							if idx < 0 {
+								// This verification doesn't have the frame of the solution, we skip it
+								videoRenderingLogger.Logger.Debug("Solution Frame %s, not found at validation of validator %s ", frame.Filename, verification.Validator)
+								continue
+							}
+
 							err := zkp.VerifyFrameProof(verification.Frames[idx].Zkp, k.ValidatingKeyPath, frame.Cid, verification.Validator)
 							if err == nil {
 								// verification passed
