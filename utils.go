@@ -47,7 +47,7 @@ func ExecuteCli(args []string) error {
 	_, err := cmd.Output()
 
 	if err != nil {
-		videoRenderingLogger.Logger.Error("Error Executing %s", err.Error())
+		videoRenderingLogger.Logger.Error("Error Executing CLI %s: %s", cmd.String(), err.Error())
 		return err
 	}
 
