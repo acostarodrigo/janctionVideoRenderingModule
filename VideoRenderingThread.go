@@ -3,7 +3,6 @@ package videoRendering
 import (
 	"context"
 	fmt "fmt"
-	"log"
 	"os"
 	"path"
 	"path/filepath"
@@ -13,6 +12,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types"
 	"github.com/janction/videoRendering/db"
 	"github.com/janction/videoRendering/ipfs"
+	"github.com/janction/videoRendering/videoRenderingLogger"
 	"github.com/janction/videoRendering/vm"
 	"github.com/janction/videoRendering/zkp"
 )
@@ -21,7 +21,7 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string,
 	ctx := context.Background()
 
 	if err := db.UpdateThread(t.ThreadId, true, false, false, false, false, false); err != nil {
-		log.Printf("Unable to update thread status, err: %s", err.Error())
+		videoRenderingLogger.Logger.Error("Unable to update thread status, err: %s", err.Error())
 	}
 
 	isRunning := vm.IsContainerRunning(ctx, t.ThreadId)
@@ -31,7 +31,7 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string,
 		// we remove the container just in case it already exists.
 		vm.RemoveContainer(ctx, "myBlender"+t.ThreadId)
 
-		log.Printf("No solution for thread %s. Starting work", t.ThreadId)
+		videoRenderingLogger.Logger.Info("No solution for thread %s. Starting work", t.ThreadId)
 		// we don't have a solution, start working
 		started := time.Now().Unix()
 		ipfs.EnsureIPFSRunning()
@@ -39,7 +39,7 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string,
 		err := ipfs.IPFSGet(cid, path)
 		if err != nil {
 			db.AddLogEntry(t.ThreadId, fmt.Sprintf("Error getting IPFS file %s. %s", cid, err.Error()), started, 2)
-			log.Printf("Error getting cid %s", cid)
+			videoRenderingLogger.Logger.Error("Error getting cid %s", cid)
 			return err
 		}
 
@@ -56,7 +56,7 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string,
 		difference = time.Unix(finish, 0).Sub(time.Unix(started, 0))
 		if err != nil {
 			// output path was not created so no rendering happened. we will start over
-			log.Printf("Unable to complete rendering of task, retrying. No files at %s", rendersPath)
+			videoRenderingLogger.Logger.Error("Unable to complete rendering of task, retrying. No files at %s", rendersPath)
 
 			db.UpdateThread(t.ThreadId, false, false, false, false, false, false)
 			return nil
@@ -64,7 +64,7 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string,
 		files, _ := os.ReadDir(rendersPath)
 		if len(files) != int(t.EndFrame)-int(t.StartFrame)+1 {
 			db.UpdateThread(t.ThreadId, false, false, false, false, false, false)
-			log.Printf("Not the amount we expected. retrying. Amount of files %v", len(files))
+			videoRenderingLogger.Logger.Error("Not the amount we expected. retrying. Amount of files %v", len(files))
 			return nil
 		}
 		db.UpdateThread(t.ThreadId, true, true, false, false, false, false)
@@ -72,7 +72,7 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string,
 	} else {
 		// Container is running, so we update worker status
 		// if worker status is idle, we change it
-		log.Printf("Work for thread %s is already going", t.ThreadId)
+		videoRenderingLogger.Logger.Info("Work for thread %s is already going", t.ThreadId)
 
 	}
 
@@ -93,18 +93,18 @@ func (t VideoRenderingThread) ProposeSolution(ctx context.Context, workerAddress
 	for key, cid := range cids {
 		prove, err := zkp.GenerateFrameProof(cid, workerAddress, provingKeyPath)
 		if err != nil {
-			log.Printf("Error %s, %s", cid, provingKeyPath)
-			log.Printf("Error %s", err.Error())
+			videoRenderingLogger.Logger.Error("Error %s, %s", cid, provingKeyPath)
+			videoRenderingLogger.Logger.Error("Error %s", err.Error())
 			panic(err)
 		}
-		log.Printf("Calcularing prove %s for cid %s", prove, cid)
+		videoRenderingLogger.Logger.Info("Calculating prove %s for cid %s", prove, cid)
 		// TODO handle error
 		cids[key] = prove
 	}
 
 	solution := MapToKeyValueFormat(cids)
 	if err != nil {
-		log.Printf("Unable to get hashes in path %s. %s", rootPath, err.Error())
+		videoRenderingLogger.Logger.Error("Unable to get hashes in path %s. %s", rootPath, err.Error())
 		return err
 	}
 
@@ -121,6 +121,7 @@ func (t VideoRenderingThread) ProposeSolution(ctx context.Context, workerAddress
 	args = append(args, "--yes", "--from", workerAddress)
 	err = ExecuteCli(args)
 	if err != nil {
+		videoRenderingLogger.Logger.Error(err.Error())
 		return err
 	}
 
@@ -135,7 +136,7 @@ func (t VideoRenderingThread) Verify(ctx context.Context, workerAddress string, 
 
 	files := vm.CountFilesInDirectory(rootPath)
 	if files == 0 {
-		log.Printf("found %v files in path %s", files, rootPath)
+		videoRenderingLogger.Logger.Error("found %v files in path %s", files, rootPath)
 		return nil
 	}
 
@@ -144,13 +145,14 @@ func (t VideoRenderingThread) Verify(ctx context.Context, workerAddress string, 
 	myWork, err := ipfs.CalculateCIDs(output)
 
 	if err != nil {
-		log.Printf("Error getting hashes. Err: %s", err.Error())
+		videoRenderingLogger.Logger.Error("Error getting hashes. Err: %s", err.Error())
 		return err
 	}
 
 	for key, cid := range myWork {
 		proof, err := zkp.GenerateFrameProof(cid, workerAddress, provingKeyPath)
 		if err != nil {
+			videoRenderingLogger.Logger.Error(err.Error())
 			return err
 		}
 
@@ -187,6 +189,7 @@ func (t VideoRenderingThread) SubmitSolution(ctx context.Context, workerAddress,
 	db.AddLogEntry(t.ThreadId, "Submiting solution to IPFS...", time.Now().Unix(), 0)
 	cid, err := ipfs.UploadSolution(ctx, rootPath, t.ThreadId)
 	if err != nil {
+		videoRenderingLogger.Logger.Error(err.Error())
 		return err
 	}
 	err = submitSolution(workerAddress, t.TaskId, t.ThreadId, cid)
@@ -255,7 +258,7 @@ func (t *VideoRenderingThread) RevealSolution(rootPath string, db *db.DB) error 
 	output := path.Join(rootPath, "renders", t.ThreadId, "output")
 	cids, err := ipfs.CalculateCIDs(output)
 	if err != nil {
-		log.Println(err.Error())
+		videoRenderingLogger.Logger.Error(err.Error())
 		return err
 	}
 	solution := MapToKeyValueFormat(cids)
