@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/janction/videoRendering/videoRenderingLogger"
 	_ "github.com/mattn/go-sqlite3" // SQLite driver
 )
 
@@ -183,7 +184,7 @@ func (db *DB) DeleteWorker(address string) error {
 // inserts a new log entry
 func (db *DB) AddLogEntry(threadId, log string, timestamp, severity int64) error {
 	insertQuery := `INSERT INTO logs (threadId, log, timestamp, severity) VALUES (?,?,?,?)`
-	fmt.Printf("inserting log %s", log)
+	videoRenderingLogger.Logger.Info("inserting log %s", log)
 	_, err := db.conn.Exec(insertQuery, threadId, log, timestamp, severity)
 	if err != nil {
 		return fmt.Errorf("failed to insert log entry: %w", err)
@@ -201,7 +202,7 @@ func (db *DB) ReadLogs(threadId string) []LogEntry {
 		log := LogEntry{}
 		err := rows.Scan(&log.Log, &log.Timestamp, &log.Severity)
 		if err != nil {
-			fmt.Println(err.Error())
+			videoRenderingLogger.Logger.Error(err.Error())
 		}
 		logs = append(logs, log)
 	}

@@ -42,7 +42,7 @@ var Logger = NewVideoRenderingLogger(LevelInfo)
 // Info logs informational messages (Bold Green) if log level allows
 func (v *VideoRenderingLogger) Info(format string, args ...interface{}) {
 	if v.logLevel <= LevelInfo {
-		v.logger.Println(colorBold + colorGreen + "INFO: " + fmt.Sprintf(format, args...) + colorReset)
+		v.logger.Println(colorBold + colorGreen + "INFO: " + colorReset + fmt.Sprintf(format, args...))
 	}
 }
 
