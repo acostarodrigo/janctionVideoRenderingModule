@@ -2,8 +2,6 @@ package videoRendering
 
 import (
 	"context"
-	"log"
-	"os/exec"
 	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/types"
@@ -63,16 +61,14 @@ func splitFrames(startFrame, endFrame, threads int) []frameRange {
 
 func (t *VideoRenderingTask) SubscribeWorkerToTask(ctx context.Context, workerAddress string) error {
 	// TODO call cmd with message subscribeWorkerToTask
-	executableName := "janctiond"
-
-	cmd := exec.Command(executableName, "tx", "videoRendering", "subscribe-worker-to-task", workerAddress, t.TaskId, "--yes", "--from", workerAddress)
-	_, err := cmd.Output()
+	args := []string{
+		"tx", "videoRendering", "subscribe-worker-to-task",
+		workerAddress, t.TaskId, "--yes", "--from", workerAddress,
+	}
+	err := ExecuteCli(args)
 	if err != nil {
-		log.Printf("task %v", cmd.String())
-		log.Printf("unable to subscribe worker %v to task %v . Error %v", workerAddress, t.TaskId, err)
 		return err
 	}
-
 	return nil
 }
 
