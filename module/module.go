@@ -197,6 +197,35 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 				videoRenderingLogger.Logger.Info("Started verification for thread %s", thread.ThreadId)
 				go thread.Verify(ctx, worker.Address, workPath, &k.DB, k.ProvingKeyPath)
 			}
+
+			// we check if we have a revealed solution waiting to be accepted
+			if len(thread.Validations) >= int(params.MinValidators) && !thread.Completed && thread.Solution.Frames[0].Cid != "" && !thread.Solution.Accepted {
+				videoRenderingLogger.Logger.Info("ZKP verifiation for thread %s ", thread.ThreadId)
+				for _, frame := range thread.Solution.Frames {
+					for _, verification := range thread.Validations {
+						idx := slices.IndexFunc(verification.Frames, func(f *videoRendering.VideoRenderingThread_Frame) bool { return f.Filename == frame.Filename })
+
+						if idx < 0 {
+							// This verification doesn't have the frame of the solution, we skip it hoping another validation has it
+							videoRenderingLogger.Logger.Debug("Solution Frame %s, not found at validation of validator %s ", frame.Filename, verification.Validator)
+							continue
+						}
+
+						videoRenderingLogger.Logger.Debug("Verifying frame %s from validator %s", verification.Frames[idx].Filename, verification.Validator)
+						err := zkp.VerifyFrameProof(verification.Frames[idx].Zkp, k.ValidatingKeyPath, frame.Cid, verification.Validator)
+						if err == nil {
+							// verification passed
+							videoRenderingLogger.Logger.Debug("Verification for frame %s from validator %s passed! %s", verification.Frames[idx].Filename, verification.Validator)
+							frame.ValidCount++
+						} else {
+							videoRenderingLogger.Logger.Debug("Verification for frame %s from validator %s not passed! %s", verification.Frames[idx].Filename, verification.Validator, err.Error())
+							frame.InvalidCount++
+						}
+					}
+				}
+
+				k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
+			}
 		}
 	}
 
@@ -263,38 +292,6 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 					// 		go thread.SubmitSolution(ctx, am.keeper.Configuration.WorkerAddress, am.keeper.Configuration.RootPath, &am.keeper.DB)
 					// 	}
 					// }
-				}
-
-				// we check if we have a revealed solution waiting to be accepted
-				if len(thread.Validations) >= int(params.MinValidators) && !thread.Completed && thread.Solution.Frames[0].Cid != "" && !thread.Solution.Accepted {
-					videoRenderingLogger.Logger.Info("ZKP verifiation for thread %s ", thread.ThreadId)
-					var accepted bool = true
-					for _, frame := range thread.Solution.Frames {
-						for _, verification := range thread.Validations {
-							idx := slices.IndexFunc(verification.Frames, func(f *videoRendering.VideoRenderingThread_Frame) bool { return f.Filename == frame.Filename })
-
-							if idx < 0 {
-								// This verification doesn't have the frame of the solution, we skip it
-								videoRenderingLogger.Logger.Debug("Solution Frame %s, not found at validation of validator %s ", frame.Filename, verification.Validator)
-								continue
-							}
-
-							err := zkp.VerifyFrameProof(verification.Frames[idx].Zkp, k.ValidatingKeyPath, frame.Cid, verification.Validator)
-							if err == nil {
-								// verification passed
-								frame.ValidCount++
-							} else {
-								frame.InvalidCount++
-							}
-						}
-						// if we find a frame which has not been validated then we don't accept the solution
-						if frame.ValidCount == 0 {
-							accepted = false
-						}
-						thread.Solution.Accepted = accepted
-					}
-
-					k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
 				}
 			}
 		}
