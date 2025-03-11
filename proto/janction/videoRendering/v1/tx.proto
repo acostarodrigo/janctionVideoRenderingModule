@@ -8,6 +8,7 @@ import "cosmos/base/v1beta1/coin.proto";
 import "gogoproto/gogo.proto";
 import "janction/videoRendering/v1/types.proto";
 import "cosmos_proto/cosmos.proto";
+import "tendermint/crypto/keys.proto";
 
 // Msg defines the module Msg service.
 service Msg {
@@ -85,7 +86,6 @@ message MsgProposeSolution {
   string creator = 1;
   string taskId = 2;
   string threadId = 3;
-  repeated string zkps = 4;
 }
 
 
@@ -117,7 +117,8 @@ message MsgSubmitValidation {
   string creator = 1;
   string taskId = 2;
   string threadId = 3;
-  repeated string zkps = 4;
+  tendermint.crypto.PublicKey public_key = 4;
+  repeated string signatures = 5;
 }
 
 message MsgSubmitValidationResponse {
