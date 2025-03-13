@@ -86,6 +86,8 @@ message MsgProposeSolution {
   string creator = 1;
   string taskId = 2;
   string threadId = 3;
+  string public_key = 4;
+  repeated string signatures = 5;
 }
 
 
@@ -117,7 +119,7 @@ message MsgSubmitValidation {
   string creator = 1;
   string taskId = 2;
   string threadId = 3;
-  tendermint.crypto.PublicKey public_key = 4;
+  string public_key = 4;
   repeated string signatures = 5;
 }
 

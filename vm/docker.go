@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"strings"
 	"time"
@@ -130,9 +129,8 @@ func RemoveContainer(ctx context.Context, name string) error {
 
 // CountFilesInDirectory counts the number of files in a given directory
 func CountFilesInDirectory(directoryPath string) int {
-	output := path.Join(directoryPath, "output")
 	// Read the directory contents
-	files, err := os.ReadDir(output)
+	files, err := os.ReadDir(directoryPath)
 	if err != nil {
 		videoRenderingLogger.Logger.Error(err.Error())
 		return 0

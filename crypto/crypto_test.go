@@ -24,7 +24,11 @@ func TestPublicKeyMatch(t *testing.T) {
 	}
 }
 func TestWorkerSignAndValidation(t *testing.T) {
-	message := []byte("Validate file possession") // The message to sign
+	message, err := videoRenderingCrypto.GenerateSignableMessage("cid", "address")
+	if err != nil {
+		t.Error(err)
+	}
+
 	cdc := moduletestutil.MakeTestEncodingConfig().Codec
 	signature, publicKey, err := videoRenderingCrypto.SignMessage("/Users/rodrigoacosta/.janctiond", "alice", message, cdc)
 	if err != nil {
@@ -39,23 +43,48 @@ func TestWorkerSignAndValidation(t *testing.T) {
 	}
 }
 
-func TestSerialization(t *testing.T) {
+func TestSerializationPublicKey(t *testing.T) {
 	cdc := moduletestutil.MakeTestEncodingConfig().Codec
 	pk, err := videoRenderingCrypto.GetPublicKey("/Users/rodrigoacosta/.janctiond", "alice", cdc)
 	if err != nil {
 		t.Error(err)
 	}
-	protoPk, err := videoRenderingCrypto.PubKeyToProto(pk)
+
+	encodedPk := videoRenderingCrypto.EncodePublicKeyForCLI(pk)
+	t.Log("base 64 publicKey", encodedPk)
+
+	pubkey, err := videoRenderingCrypto.DecodePublicKeyFromCLI(encodedPk)
 	if err != nil {
 		t.Error(err)
 	}
 
-	serializedPk, err := videoRenderingCrypto.ProtoToPubKey(*protoPk)
+	t.Log("decoded public key", pubkey.String())
+}
+
+func TestSerializationSignature(t *testing.T) {
+	message, err := videoRenderingCrypto.GenerateSignableMessage("cid", "address")
 	if err != nil {
 		t.Error(err)
 	}
 
-	if pk.String() != serializedPk.String() {
-		t.Errorf("incorrect serialization")
+	cdc := moduletestutil.MakeTestEncodingConfig().Codec
+	signature, publicKey, err := videoRenderingCrypto.SignMessage("/Users/rodrigoacosta/.janctiond", "alice", message, cdc)
+	encodedSig := videoRenderingCrypto.EncodeSignatureForCLI(signature)
+	encodedPubkey := videoRenderingCrypto.EncodePublicKeyForCLI(publicKey)
+
+	t.Log("Signature:", encodedSig, "pubKey:", encodedPubkey)
+	sig, err := videoRenderingCrypto.DecodeSignatureFromCLI(encodedSig)
+	if err != nil {
+		t.Error(err)
+	}
+	pubkey, err := videoRenderingCrypto.DecodePublicKeyFromCLI(encodedPubkey)
+	if err != nil {
+		t.Error(err)
+	}
+	valid := pubkey.VerifySignature(message, sig)
+	if !valid {
+		t.Error("Signature is not valid")
+	} else {
+		t.Log("signature is valid!")
 	}
 }

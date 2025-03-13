@@ -1,13 +1,15 @@
 package videoRenderingCrypto
 
 import (
+	"crypto/sha256"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
 
-	protocrypto "github.com/cometbft/cometbft/proto/tendermint/crypto"
 	"github.com/cosmos/cosmos-sdk/codec"
-	cryptocodec "github.com/cosmos/cosmos-sdk/crypto/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
-	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
+	"github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
+	"github.com/cosmos/cosmos-sdk/crypto/types"
 	"github.com/cosmos/cosmos-sdk/types/tx/signing"
 	"github.com/janction/videoRendering/videoRenderingLogger"
 )
@@ -29,7 +31,7 @@ func getKeyRing(rootDir string, codec codec.Codec) (keyring.Keyring, error) {
 	}
 
 	if len(keys) == 0 {
-		videoRenderingLogger.Logger.Info("No keys found in keyring")
+		videoRenderingLogger.Logger.Info("No keys found in keyring at dir %s", rootDir)
 	} else {
 		videoRenderingLogger.Logger.Info("Loaded %v keys succesfully", len(keys))
 	}
@@ -37,7 +39,7 @@ func getKeyRing(rootDir string, codec codec.Codec) (keyring.Keyring, error) {
 	return kr, nil
 }
 
-func GetPublicKey(rootDir, alias string, codec codec.Codec) (cryptotypes.PubKey, error) {
+func GetPublicKey(rootDir, alias string, codec codec.Codec) (types.PubKey, error) {
 	keyRing, err := getKeyRing(rootDir, codec)
 	if err != nil {
 		videoRenderingLogger.Logger.Error("Unable to load key ring at %s: %s", rootDir, err.Error())
@@ -53,7 +55,7 @@ func GetPublicKey(rootDir, alias string, codec codec.Codec) (cryptotypes.PubKey,
 	return pk, nil
 }
 
-func SignMessage(rootDir, alias string, message []byte, codec codec.Codec) ([]byte, cryptotypes.PubKey, error) {
+func SignMessage(rootDir, alias string, message []byte, codec codec.Codec) ([]byte, types.PubKey, error) {
 	keyRing, err := getKeyRing(rootDir, codec)
 	if err != nil {
 		videoRenderingLogger.Logger.Error("Unable to load key ring at %s: %s", rootDir, err.Error())
@@ -77,14 +79,15 @@ func SignMessage(rootDir, alias string, message []byte, codec codec.Codec) ([]by
 }
 
 // checks if the signed message, correspond to the publick key
-func VerifyMessage(pubKey cryptotypes.PubKey, message []byte, signature []byte) bool {
+func VerifyMessage(pubKey types.PubKey, message []byte, signature []byte) bool {
 	return pubKey.VerifySignature(message, signature)
 }
 
 // extract public key for the specified alias from the Key ring
-func ExtractPublicKey(rootDir, alias string, codec codec.Codec) (cryptotypes.PubKey, error) {
+func ExtractPublicKey(rootDir, alias string, codec codec.Codec) (types.PubKey, error) {
 	kr, err := getKeyRing(rootDir, codec)
 	if err != nil {
+		videoRenderingLogger.Logger.Error("ExtractPublicKey rootDir: %s, alias %s", rootDir, alias)
 		return nil, err
 	}
 
@@ -102,20 +105,48 @@ func ExtractPublicKey(rootDir, alias string, codec codec.Codec) (cryptotypes.Pub
 	return pubKey, nil
 }
 
-func ProtoToPubKey(protoPubKey protocrypto.PublicKey) (cryptotypes.PubKey, error) {
-	// Correct way to unmarshal
-	pubKey, err := cryptocodec.FromCmtProtoPublicKey(protoPubKey)
-	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal public key: %w", err)
-	}
-	return pubKey, nil
+// Generate the message to sign
+type SignableMessage struct {
+	Cid           string
+	workerAddress string
 }
 
-func PubKeyToProto(pk cryptotypes.PubKey) (*protocrypto.PublicKey, error) {
-	pubKey, err := cryptocodec.ToCmtProtoPublicKey(pk)
+func GenerateSignableMessage(cid, workerAddr string) ([]byte, error) {
+	msg := SignableMessage{workerAddress: workerAddr, Cid: cid}
+
+	// Serialize the message using Protobuf
+	msgBytes, err := json.Marshal(msg)
 	if err != nil {
-		return nil, fmt.Errorf("failed to unmarshal public key: %w", err)
+		return nil, err
 	}
 
-	return &pubKey, nil
+	// Hash the serialized message
+	hash := sha256.Sum256(msgBytes)
+	return hash[:], nil
+}
+
+// Convert signature bytes to a Base64 string for CLI usage
+func EncodeSignatureForCLI(signature []byte) string {
+	return base64.StdEncoding.EncodeToString(signature)
+}
+
+// Decode Base64 string back to signature bytes after CLI submission
+func DecodeSignatureFromCLI(encodedSig string) ([]byte, error) {
+	return base64.StdEncoding.DecodeString(encodedSig)
+}
+
+func EncodePublicKeyForCLI(publicKey types.PubKey) string {
+	return base64.StdEncoding.EncodeToString(publicKey.Bytes())
+}
+
+func DecodePublicKeyFromCLI(encodedPubKey string) (types.PubKey, error) {
+	decoded, _ := base64.StdEncoding.DecodeString(encodedPubKey)
+	return fromBytes(decoded)
+}
+
+// FromBytes converts a byte slice back to a types.PubKey
+func fromBytes(pubKeyBytes []byte) (types.PubKey, error) {
+	// Create the pubKey from the byte slice (secp256k1 in this case)
+	pubKey := &secp256k1.PubKey{Key: pubKeyBytes}
+	return pubKey, nil
 }

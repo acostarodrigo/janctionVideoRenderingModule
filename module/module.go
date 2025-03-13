@@ -22,7 +22,6 @@ import (
 	"github.com/janction/videoRendering/ipfs"
 	"github.com/janction/videoRendering/keeper"
 	"github.com/janction/videoRendering/videoRenderingLogger"
-	"github.com/janction/videoRendering/zkp"
 )
 
 var (
@@ -189,13 +188,13 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 
 			if thread.Solution == nil && dbThread.WorkCompleted && !dbThread.SolutionProposed {
 				videoRenderingLogger.Logger.Info("thread %v of task %v started", thread.ThreadId, task.TaskId)
-				go thread.ProposeSolution(ctx, worker.Address, workPath, &k.DB, k.ProvingKeyPath)
+				go thread.ProposeSolution(am.cdc, k.Configuration.WorkerName, worker.Address, k.Configuration.RootPath, &k.DB)
 			}
 
 			if thread.Solution != nil && !dbThread.VerificationStarted {
 				// start verification
 				videoRenderingLogger.Logger.Info("Started verification for thread %s", thread.ThreadId)
-				go thread.Verify(ctx, worker.Address, workPath, &k.DB, k.ProvingKeyPath)
+				// go thread.Verify(ctx, worker.Address, workPath, &k.DB, k.ProvingKeyPath)
 			}
 
 			// we check if we have a revealed solution waiting to be accepted
@@ -212,10 +211,10 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 						}
 
 						videoRenderingLogger.Logger.Debug("Verifying frame %s from validator %s", verification.Frames[idx].Filename, verification.Validator)
-						err := zkp.VerifyFrameProof(verification.Frames[idx].Zkp, k.ValidatingKeyPath, frame.Cid, verification.Validator)
+						// err := zkp.VerifyFrameProof(verification.Frames[idx].Zkp, k.ValidatingKeyPath, frame.Cid, verification.Validator)
 						if err == nil {
 							// verification passed
-							videoRenderingLogger.Logger.Debug("Verification for frame %s from validator %s passed! %s", verification.Frames[idx].Filename, verification.Validator)
+							videoRenderingLogger.Logger.Debug("Verification for frame %s from validator %s passed!", verification.Frames[idx].Filename, verification.Validator)
 							frame.ValidCount++
 						} else {
 							videoRenderingLogger.Logger.Debug("Verification for frame %s from validator %s not passed! %s", verification.Frames[idx].Filename, verification.Validator, err.Error())

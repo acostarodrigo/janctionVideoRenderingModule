@@ -9,7 +9,9 @@ import (
 	"time"
 
 	"cosmossdk.io/math"
+	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/types"
+	videoRenderingCrypto "github.com/janction/videoRendering/crypto"
 	"github.com/janction/videoRendering/db"
 	"github.com/janction/videoRendering/ipfs"
 	"github.com/janction/videoRendering/videoRenderingLogger"
@@ -79,27 +81,44 @@ func (t *VideoRenderingThread) StartWork(worker string, cid string, path string,
 	return nil
 }
 
-func (t VideoRenderingThread) ProposeSolution(ctx context.Context, workerAddress string, rootPath string, db *db.DB, provingKeyPath string) error {
+func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAddress string, rootPath string, db *db.DB) error {
 	db.UpdateThread(t.ThreadId, true, true, true, false, false, false)
-	count := vm.CountFilesInDirectory(rootPath)
+
+	output := path.Join(rootPath, "renders", t.ThreadId, "output")
+	count := vm.CountFilesInDirectory(output)
 
 	if count != (int(t.EndFrame)-int(t.StartFrame))+1 {
 		return nil
 	}
 
-	output := path.Join(rootPath, "output")
 	cids, err := ipfs.CalculateCIDs(output)
+	if err != nil {
+		videoRenderingLogger.Logger.Error("Unable to calculate CIDs: %s", err.Error())
+		return err
+	}
 
+	pkey, err := videoRenderingCrypto.ExtractPublicKey(rootPath, alias, codec)
+	if err != nil {
+		videoRenderingLogger.Logger.Error("Unable to extract public key for alias %s at path %s: %s", alias, rootPath, err.Error())
+		return err
+	}
+
+	publicKey := videoRenderingCrypto.EncodePublicKeyForCLI(pkey)
 	for key, cid := range cids {
-		prove, err := zkp.GenerateFrameProof(cid, workerAddress, provingKeyPath)
+		sigMsg, err := videoRenderingCrypto.GenerateSignableMessage(cid, workerAddress)
+
 		if err != nil {
-			videoRenderingLogger.Logger.Error("Error %s, %s", cid, provingKeyPath)
-			videoRenderingLogger.Logger.Error("Error %s", err.Error())
-			panic(err)
+			videoRenderingLogger.Logger.Error("Unable to generate message for worker %s and CID %s: %s", workerAddress, cid, err.Error())
+			return err
 		}
-		videoRenderingLogger.Logger.Info("Calculating prove %s for cid %s", prove, cid)
-		// TODO handle error
-		cids[key] = prove
+
+		signature, _, err := videoRenderingCrypto.SignMessage(rootPath, alias, sigMsg, codec)
+
+		if err != nil {
+			videoRenderingLogger.Logger.Error("Unable to sign message for worker %s and CID %s: %s", workerAddress, cid, err.Error())
+			return err
+		}
+		cids[key] = videoRenderingCrypto.EncodeSignatureForCLI(signature)
 	}
 
 	solution := MapToKeyValueFormat(cids)
@@ -115,6 +134,7 @@ func (t VideoRenderingThread) ProposeSolution(ctx context.Context, workerAddress
 	}
 
 	// Append solution arguments
+	args = append(args, publicKey)
 	args = append(args, solution...)
 
 	// Append flags

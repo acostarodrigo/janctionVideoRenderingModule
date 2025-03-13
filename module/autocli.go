@@ -68,14 +68,15 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "ProposeSolution",
-					Use:       "propose-solution [taskId] [threadId] [solution] --from [workerAddress]",
+					Use:       "propose-solution [taskId] [threadId] [publicKey] [signatures] --from [workerAddress]",
 					Short:     "Proposes a solution to a thread.",
 					Long:      "", // TODO Add long
 					Example:   "", // TODO add exampe
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{ProtoField: "taskId"},
 						{ProtoField: "threadId"},
-						{ProtoField: "zkps", Varargs: true},
+						{ProtoField: "public_key"},
+						{ProtoField: "signatures", Varargs: true},
 					},
 				},
 				{
@@ -92,14 +93,15 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "SubmitValidation",
-					Use:       "submit-validation [taskId] [threadId] [filesAmount] [valid] --from [workerAddress]",
+					Use:       "submit-validation [taskId] [threadId] [publicKey] [signatures] --from [workerAddress]",
 					Short:     "Submit a validation to a proposed solution",
 					Long:      "", // TODO Add long
 					Example:   "", // TODO add exampe
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{ProtoField: "taskId"},
 						{ProtoField: "threadId"},
-						{ProtoField: "zkps", Varargs: true},
+						{ProtoField: "public_key"},
+						{ProtoField: "signatures", Varargs: true},
 					},
 				},
 				{

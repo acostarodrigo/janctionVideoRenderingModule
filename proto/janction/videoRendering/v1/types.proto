@@ -6,7 +6,6 @@ option go_package = "github.com/janction/videoRendering";
 import "cosmos/base/v1beta1/coin.proto";
 import "cosmos_proto/cosmos.proto";
 import "gogoproto/gogo.proto";
-import "tendermint/crypto/keys.proto";
 
 
 // Params defines the parameters of the module.
@@ -88,14 +87,15 @@ message VideoRenderingTask {
     message Solution {
       string proposed_by = 1 [(cosmos_proto.scalar) = "cosmos.AddressString"];
       repeated Frame frames = 2;
-      string dir = 3;
-      bool accepted = 4;
+      string public_key = 3;
+      string dir = 4;
+      bool accepted = 5;
     }
 
     message Validation {
       string validator = 1[(cosmos_proto.scalar) = "cosmos.AddressString"];
       repeated Frame frames = 2;
-      tendermint.crypto.PublicKey public_key = 3;
+      string public_key = 3;
       bool is_reverse = 4;
     }
 

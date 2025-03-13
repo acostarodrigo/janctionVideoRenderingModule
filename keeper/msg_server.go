@@ -12,6 +12,7 @@ import (
 	"github.com/ipfs/go-cid"
 
 	"github.com/janction/videoRendering"
+	videoRenderingCrypto "github.com/janction/videoRendering/crypto"
 	"github.com/janction/videoRendering/videoRenderingLogger"
 )
 
@@ -176,7 +177,7 @@ func (ms msgServer) SubscribeWorkerToTask(ctx context.Context, msg *videoRenderi
 }
 
 func (ms msgServer) ProposeSolution(ctx context.Context, msg *videoRendering.MsgProposeSolution) (*videoRendering.MsgProposeSolutionResponse, error) {
-	videoRenderingLogger.Logger.Info("ProposeSolution - creator: %s, taskId: %s, threadId: %s, ZKPs: %s", msg.Creator, msg.TaskId, msg.ThreadId, msg.Zkps)
+	videoRenderingLogger.Logger.Info("ProposeSolution - creator: %s, taskId: %s, threadId: %s, publicKey: %s, signatures: %s", msg.Creator, msg.TaskId, msg.ThreadId, msg.PublicKey, msg.Signatures)
 
 	// creator of the solution must be a valid worker
 	worker, err := ms.k.Workers.Get(ctx, msg.Creator)
@@ -216,27 +217,40 @@ func (ms msgServer) ProposeSolution(ctx context.Context, msg *videoRendering.Msg
 			}
 
 			// solution len must be equal to the frames generated
-			if len(msg.Zkps) != (int(v.EndFrame) - int(v.StartFrame) + 1) {
-				videoRenderingLogger.Logger.Error("amount of files in solution is incorrect, %v ", len(msg.Zkps))
-				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "amount of files in solution is incorrect, %v ", len(msg.Zkps))
+			if len(msg.Signatures) != (int(v.EndFrame) - int(v.StartFrame) + 1) {
+				videoRenderingLogger.Logger.Error("amount of files in solution is incorrect, %v ", len(msg.Signatures))
+				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "amount of files in solution is incorrect, %v ", len(msg.Signatures))
 			}
 
 			// we have passed all validations, lets add the solution to the thread
 			var frames []*videoRendering.VideoRenderingThread_Frame
-			for _, val := range msg.Zkps {
+
+			for _, val := range msg.Signatures {
 				parts := strings.SplitN(val, "=", 2)
-				frame := videoRendering.VideoRenderingThread_Frame{Filename: parts[0], Zkp: parts[1]}
+				decodedSignature, err := videoRenderingCrypto.DecodeSignatureFromCLI(parts[1])
+
+				if err != nil {
+					videoRenderingLogger.Logger.Error("unable to decode signature from msg %s: %s", parts[1], err.Error())
+					return nil, err
+				}
+
+				frame := videoRendering.VideoRenderingThread_Frame{Filename: parts[0], Signature: decodedSignature}
 				frames = append(frames, &frame)
 			}
 
-			task.Threads[i].Solution = &videoRendering.VideoRenderingThread_Solution{ProposedBy: msg.Creator, Frames: frames}
+			_, err := videoRenderingCrypto.DecodePublicKeyFromCLI(msg.PublicKey)
+
+			if err != nil {
+				videoRenderingLogger.Logger.Error("unable to decode publicKey from msg %s: %s", msg.PublicKey, err.Error())
+				return nil, err
+			}
+			task.Threads[i].Solution = &videoRendering.VideoRenderingThread_Solution{ProposedBy: msg.Creator, Frames: frames, PublicKey: msg.PublicKey}
 			err = ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
 
 			if err != nil {
 				videoRenderingLogger.Logger.Error("unable to propose solution %s", err.Error())
 				return nil, err
 			}
-			videoRenderingLogger.Logger.Info("Proposing solution %s", msg.Zkps)
 		}
 	}
 
@@ -336,7 +350,7 @@ func (ms msgServer) RevealSolution(ctx context.Context, msg *videoRendering.MsgR
 }
 
 func (ms msgServer) SubmitValidation(ctx context.Context, msg *videoRendering.MsgSubmitValidation) (*videoRendering.MsgSubmitValidationResponse, error) {
-	videoRenderingLogger.Logger.Info("SubmitValidation - creator: %s, taskId: %s, threadId: %s, ZKPs: %s", msg.Creator, msg.TaskId, msg.ThreadId, msg.Zkps)
+	videoRenderingLogger.Logger.Info("SubmitValidation - creator: %s, taskId: %s, threadId: %s, publicKey: %s, Signatures: %s", msg.Creator, msg.TaskId, msg.ThreadId, msg.PublicKey, msg.Signatures)
 
 	// validation must be from a worker on the thread
 	task, err := ms.k.VideoRenderingTasks.Get(ctx, msg.TaskId)
@@ -381,9 +395,9 @@ func (ms msgServer) SubmitValidation(ctx context.Context, msg *videoRendering.Ms
 	}
 
 	var frames []*videoRendering.VideoRenderingThread_Frame
-	for _, zkps := range msg.Zkps {
-		parts := strings.SplitN(zkps, "=", 2)
-		frame := videoRendering.VideoRenderingThread_Frame{Filename: parts[0], Zkp: parts[1]}
+	for _, signatures := range msg.Signatures {
+		parts := strings.SplitN(signatures, "=", 2)
+		frame := videoRendering.VideoRenderingThread_Frame{Filename: parts[0], Signature: []byte(parts[1])}
 		frames = append(frames, &frame)
 	}
 	validation := videoRendering.VideoRenderingThread_Validation{Validator: msg.Creator, IsReverse: thread.IsReverse(worker.Address), Frames: frames}
