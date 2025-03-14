@@ -19,6 +19,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 
 	"github.com/janction/videoRendering"
+	videoRenderingCrypto "github.com/janction/videoRendering/crypto"
 	"github.com/janction/videoRendering/ipfs"
 	"github.com/janction/videoRendering/keeper"
 	"github.com/janction/videoRendering/videoRenderingLogger"
@@ -194,30 +195,43 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 			if thread.Solution != nil && !dbThread.VerificationStarted {
 				// start verification
 				videoRenderingLogger.Logger.Info("Started verification for thread %s", thread.ThreadId)
-				// go thread.Verify(ctx, worker.Address, workPath, &k.DB, k.ProvingKeyPath)
+				go thread.Verify(am.cdc, k.Configuration.WorkerName, worker.Address, k.Configuration.RootPath, &k.DB)
 			}
 
 			// we check if we have a revealed solution waiting to be accepted
 			if len(thread.Validations) >= int(params.MinValidators) && !thread.Completed && thread.Solution.Frames[0].Cid != "" && !thread.Solution.Accepted {
-				videoRenderingLogger.Logger.Info("ZKP verifiation for thread %s ", thread.ThreadId)
+				videoRenderingLogger.Logger.Info("Solution revealed, we verify it for thread %s ", thread.ThreadId)
+
 				for _, frame := range thread.Solution.Frames {
-					for _, verification := range thread.Validations {
-						idx := slices.IndexFunc(verification.Frames, func(f *videoRendering.VideoRenderingThread_Frame) bool { return f.Filename == frame.Filename })
+					for _, validation := range thread.Validations {
+						idx := slices.IndexFunc(validation.Frames, func(f *videoRendering.VideoRenderingThread_Frame) bool { return f.Filename == frame.Filename })
 
 						if idx < 0 {
 							// This verification doesn't have the frame of the solution, we skip it hoping another validation has it
-							videoRenderingLogger.Logger.Debug("Solution Frame %s, not found at validation of validator %s ", frame.Filename, verification.Validator)
+							videoRenderingLogger.Logger.Debug("Solution Frame %s, not found at validation of validator %s ", frame.Filename, validation.Validator)
 							continue
 						}
 
-						videoRenderingLogger.Logger.Debug("Verifying frame %s from validator %s", verification.Frames[idx].Filename, verification.Validator)
-						// err := zkp.VerifyFrameProof(verification.Frames[idx].Zkp, k.ValidatingKeyPath, frame.Cid, verification.Validator)
-						if err == nil {
+						videoRenderingLogger.Logger.Debug("Verifying frame %s from validator %s", validation.Frames[idx].Filename, validation.Validator)
+						pk, err := videoRenderingCrypto.DecodePublicKeyFromCLI(validation.PublicKey)
+						if err != nil {
+							videoRenderingLogger.Logger.Error("unable to get public key from cli: %s", err.Error())
+						}
+
+						message, err := videoRenderingCrypto.GenerateSignableMessage(frame.Cid, validation.Validator)
+						if err != nil {
+							videoRenderingLogger.Logger.Error("unable to recreate original message %sto verify: %s", message, err.Error())
+						}
+
+						valid := pk.VerifySignature(message, validation.Frames[idx].Signature)
+
+						videoRenderingLogger.Logger.Debug("Verifying message cid: %s, address: %s with signature %s from pk %s ", frame.Cid, validation.Validator, videoRenderingCrypto.EncodeSignatureForCLI(validation.Frames[idx].Signature), validation.PublicKey)
+						if valid {
 							// verification passed
-							videoRenderingLogger.Logger.Debug("Verification for frame %s from validator %s passed!", verification.Frames[idx].Filename, verification.Validator)
+							videoRenderingLogger.Logger.Debug("Verification for frame %s from validator %s passed!", validation.Frames[idx].Filename, validation.Validator)
 							frame.ValidCount++
 						} else {
-							videoRenderingLogger.Logger.Debug("Verification for frame %s from validator %s not passed! %s", verification.Frames[idx].Filename, verification.Validator, err.Error())
+							videoRenderingLogger.Logger.Debug("Verification for frame %s from pk %s not passed!", validation.Frames[idx].Filename, validation.Validator)
 							frame.InvalidCount++
 						}
 					}

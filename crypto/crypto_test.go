@@ -62,7 +62,7 @@ func TestSerializationPublicKey(t *testing.T) {
 }
 
 func TestSerializationSignature(t *testing.T) {
-	message, err := videoRenderingCrypto.GenerateSignableMessage("cid", "address")
+	message, err := videoRenderingCrypto.GenerateSignableMessage("QmRe3MVV1NeF84sgiBCeKBhwDGFVcyLPzcky4fN2cKvTzs", "janction1lxwfqmcfcwunzchskvc3vrztthkwkgst6zd9y7")
 	if err != nil {
 		t.Error(err)
 	}

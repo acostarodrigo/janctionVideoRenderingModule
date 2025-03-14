@@ -16,7 +16,6 @@ import (
 	"github.com/janction/videoRendering/ipfs"
 	"github.com/janction/videoRendering/videoRenderingLogger"
 	"github.com/janction/videoRendering/vm"
-	"github.com/janction/videoRendering/zkp"
 )
 
 func (t *VideoRenderingThread) StartWork(worker string, cid string, path string, db *db.DB) error {
@@ -88,18 +87,22 @@ func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAd
 	count := vm.CountFilesInDirectory(output)
 
 	if count != (int(t.EndFrame)-int(t.StartFrame))+1 {
+		videoRenderingLogger.Logger.Error("not enought local frames to propose solution: %v", count)
+		db.UpdateThread(t.ThreadId, true, true, false, false, false, false)
 		return nil
 	}
 
 	cids, err := ipfs.CalculateCIDs(output)
 	if err != nil {
 		videoRenderingLogger.Logger.Error("Unable to calculate CIDs: %s", err.Error())
+		db.UpdateThread(t.ThreadId, true, true, false, false, false, false)
 		return err
 	}
 
 	pkey, err := videoRenderingCrypto.ExtractPublicKey(rootPath, alias, codec)
 	if err != nil {
 		videoRenderingLogger.Logger.Error("Unable to extract public key for alias %s at path %s: %s", alias, rootPath, err.Error())
+		db.UpdateThread(t.ThreadId, true, true, false, false, false, false)
 		return err
 	}
 
@@ -109,6 +112,7 @@ func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAd
 
 		if err != nil {
 			videoRenderingLogger.Logger.Error("Unable to generate message for worker %s and CID %s: %s", workerAddress, cid, err.Error())
+			db.UpdateThread(t.ThreadId, true, true, false, false, false, false)
 			return err
 		}
 
@@ -116,6 +120,7 @@ func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAd
 
 		if err != nil {
 			videoRenderingLogger.Logger.Error("Unable to sign message for worker %s and CID %s: %s", workerAddress, cid, err.Error())
+			db.UpdateThread(t.ThreadId, true, true, false, false, false, false)
 			return err
 		}
 		cids[key] = videoRenderingCrypto.EncodeSignatureForCLI(signature)
@@ -124,6 +129,7 @@ func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAd
 	solution := MapToKeyValueFormat(cids)
 	if err != nil {
 		videoRenderingLogger.Logger.Error("Unable to get hashes in path %s. %s", rootPath, err.Error())
+		db.UpdateThread(t.ThreadId, true, true, false, false, false, false)
 		return err
 	}
 
@@ -150,49 +156,66 @@ func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAd
 	return nil
 }
 
-func (t VideoRenderingThread) Verify(ctx context.Context, workerAddress string, rootPath string, db *db.DB, provingKeyPath string) error {
+func (t VideoRenderingThread) Verify(codec codec.Codec, alias, workerAddress string, rootPath string, db *db.DB) error {
 	// we will verify any file we already have rendered.
 	db.UpdateThread(t.ThreadId, true, true, true, true, false, false)
-
+	output := path.Join(rootPath, "renders", t.ThreadId, "output")
 	files := vm.CountFilesInDirectory(rootPath)
 	if files == 0 {
 		videoRenderingLogger.Logger.Error("found %v files in path %s", files, rootPath)
+		db.UpdateThread(t.ThreadId, true, true, true, false, false, false)
 		return nil
 	}
 
 	// we do have some work, lets compare it with the solution
-	output := path.Join(rootPath, "output")
 	myWork, err := ipfs.CalculateCIDs(output)
 
 	if err != nil {
-		videoRenderingLogger.Logger.Error("Error getting hashes. Err: %s", err.Error())
+		videoRenderingLogger.Logger.Error("error getting hashes. Err: %s", err.Error())
+		db.UpdateThread(t.ThreadId, true, true, true, false, false, false)
+		return err
+	}
+
+	publicKey, err := videoRenderingCrypto.GetPublicKey(rootPath, alias, codec)
+	if err != nil {
+		videoRenderingLogger.Logger.Error("Error getting public key for alias %s at path %s: %s", alias, rootPath, err.Error())
+		db.UpdateThread(t.ThreadId, true, true, true, false, false, false)
 		return err
 	}
 
 	for key, cid := range myWork {
-		proof, err := zkp.GenerateFrameProof(cid, workerAddress, provingKeyPath)
+		message, err := videoRenderingCrypto.GenerateSignableMessage(cid, workerAddress)
 		if err != nil {
-			videoRenderingLogger.Logger.Error(err.Error())
+			videoRenderingLogger.Logger.Error("unable to generate message to sign %s: %s", message, err.Error())
+			db.UpdateThread(t.ThreadId, true, true, true, false, false, false)
 			return err
 		}
 
-		myWork[key] = proof
+		signature, _, err := videoRenderingCrypto.SignMessage(rootPath, alias, message, codec)
+
+		if err != nil {
+			videoRenderingLogger.Logger.Error("unable to sign message %s: %s", message, err.Error())
+			db.UpdateThread(t.ThreadId, true, true, true, false, false, false)
+			return err
+		}
+		myWork[key] = videoRenderingCrypto.EncodeSignatureForCLI(signature)
 	}
 
 	db.AddLogEntry(t.ThreadId, "Starting verification of solution...", time.Now().Unix(), 0)
 
-	submitValidation(workerAddress, t.TaskId, t.ThreadId, MapToKeyValueFormat(myWork))
+	submitValidation(workerAddress, t.TaskId, t.ThreadId, videoRenderingCrypto.EncodePublicKeyForCLI(publicKey), MapToKeyValueFormat(myWork))
 	db.AddLogEntry(t.ThreadId, "Solution verified", time.Now().Unix(), 0)
 	return nil
 }
 
-func submitValidation(validator string, taskId, threadId string, zkps []string) error {
+func submitValidation(validator string, taskId, threadId, publicKey string, signatures []string) error {
 	// Base arguments
 	args := []string{
 		"tx", "videoRendering", "submit-validation",
 		taskId, threadId,
 	}
-	args = append(args, zkps...)
+	args = append(args, publicKey)
+	args = append(args, signatures...)
 	args = append(args, "--from")
 	args = append(args, validator)
 	args = append(args, "--yes")
