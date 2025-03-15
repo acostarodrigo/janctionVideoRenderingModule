@@ -186,13 +186,13 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 			}
 
 			// we completed the work, so lets propose a solution
-			if thread.Solution == nil && dbThread.WorkCompleted && !dbThread.SolutionProposed {
+			if thread.Solution.ProposedBy == "" && dbThread.WorkCompleted && !dbThread.SolutionProposed {
 				videoRenderingLogger.Logger.Info("thread %v of task %v started", thread.ThreadId, task.TaskId)
 				go thread.ProposeSolution(am.cdc, k.Configuration.WorkerName, worker.Address, k.Configuration.RootPath, &k.DB)
 			}
 
 			// someone already submited solution, lets submit our verification
-			if thread.Solution != nil && !dbThread.VerificationStarted {
+			if thread.Solution.ProposedBy != "" && !dbThread.VerificationStarted {
 				// start verification
 				videoRenderingLogger.Logger.Info("Started verification for thread %s", thread.ThreadId)
 				go thread.SubmitVerification(am.cdc, k.Configuration.WorkerName, k.Configuration.WorkerAddress, k.Configuration.RootPath, &k.DB)
