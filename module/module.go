@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
-	"slices"
 	"strconv"
 
 	"cosmossdk.io/core/appmodule"
@@ -19,7 +18,6 @@ import (
 	"github.com/cosmos/cosmos-sdk/types/module"
 
 	"github.com/janction/videoRendering"
-	videoRenderingCrypto "github.com/janction/videoRendering/crypto"
 	"github.com/janction/videoRendering/ipfs"
 	"github.com/janction/videoRendering/keeper"
 	"github.com/janction/videoRendering/videoRenderingLogger"
@@ -202,41 +200,23 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 			if len(thread.Validations) >= int(params.MinValidators) && !thread.Completed && thread.Solution.Frames[0].Cid != "" && !thread.Solution.Accepted {
 				videoRenderingLogger.Logger.Info("Solution revealed, we verify it for thread %s ", thread.ThreadId)
 
-				for _, frame := range thread.Solution.Frames {
-					for _, validation := range thread.Validations {
-						idx := slices.IndexFunc(validation.Frames, func(f *videoRendering.VideoRenderingThread_Frame) bool { return f.Filename == frame.Filename })
+				thread.EvaluateVerifications()
+				accepted := thread.IsSolutionAccepted()
+				if accepted {
+					// distribute rewards, upload solution, release verifiers
+					// release verifiers
 
-						if idx < 0 {
-							// This verification doesn't have the frame of the solution, we skip it hoping another validation has it
-							videoRenderingLogger.Logger.Debug("Solution Frame %s, not found at validation of validator %s ", frame.Filename, validation.Validator)
-							continue
-						}
-
-						videoRenderingLogger.Logger.Debug("Verifying frame %s from validator %s", validation.Frames[idx].Filename, validation.Validator)
-						pk, err := videoRenderingCrypto.DecodePublicKeyFromCLI(validation.PublicKey)
-						if err != nil {
-							videoRenderingLogger.Logger.Error("unable to get public key from cli: %s", err.Error())
-						}
-
-						message, err := videoRenderingCrypto.GenerateSignableMessage(frame.Cid, validation.Validator)
-						if err != nil {
-							videoRenderingLogger.Logger.Error("unable to recreate original message %sto verify: %s", message, err.Error())
-						}
-
-						valid := pk.VerifySignature(message, validation.Frames[idx].Signature)
-
-						videoRenderingLogger.Logger.Debug("Verifying message cid: %s, address: %s with signature %s from pk %s ", frame.Cid, validation.Validator, videoRenderingCrypto.EncodeSignatureForCLI(validation.Frames[idx].Signature), validation.PublicKey)
-						if valid {
-							// verification passed
-							videoRenderingLogger.Logger.Debug("Verification for frame %s from validator %s passed!", validation.Frames[idx].Filename, validation.Validator)
-							frame.ValidCount++
-						} else {
-							videoRenderingLogger.Logger.Debug("Verification for frame %s from pk %s not passed!", validation.Frames[idx].Filename, validation.Validator)
-							frame.InvalidCount++
+					// if we are the node that proposed the solution, then we upload it
+					if thread.Solution.ProposedBy == am.keeper.Configuration.WorkerAddress {
+						localThread, _ := am.keeper.DB.ReadThread(thread.ThreadId)
+						k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
+						if !localThread.SubmitionStarted {
+							go thread.SubmitSolution(ctx, am.keeper.Configuration.WorkerAddress, am.keeper.Configuration.RootPath, &am.keeper.DB)
 						}
 					}
+				} else {
+					// penalize solution provider,
 				}
-
 				k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
 			}
 		}

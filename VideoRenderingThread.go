@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"path/filepath"
+	"slices"
 	"time"
 
 	"cosmossdk.io/math"
@@ -232,11 +233,13 @@ func (t VideoRenderingThread) SubmitSolution(ctx context.Context, workerAddress,
 	db.AddLogEntry(t.ThreadId, "Submiting solution to IPFS...", time.Now().Unix(), 0)
 	cid, err := ipfs.UploadSolution(ctx, rootPath, t.ThreadId)
 	if err != nil {
+		db.UpdateThread(t.ThreadId, true, true, true, true, true, false)
 		videoRenderingLogger.Logger.Error(err.Error())
 		return err
 	}
 	err = submitSolution(workerAddress, t.TaskId, t.ThreadId, cid)
 	if err != nil {
+		db.UpdateThread(t.ThreadId, true, true, true, true, true, false)
 		db.AddLogEntry(t.ThreadId, fmt.Sprintf("Error submitting solution. %s", err.Error()), time.Now().Unix(), 2)
 		return err
 	}
@@ -323,6 +326,84 @@ func (t *VideoRenderingThread) RevealSolution(rootPath string, db *db.DB) error 
 	err = db.UpdateThread(t.ThreadId, true, true, true, true, true, false)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+// Evaluates if the verifications sent are valid
+func (t *VideoRenderingThread) EvaluateVerifications() error {
+	for _, frame := range t.Solution.Frames {
+		for _, validation := range t.Validations {
+			idx := slices.IndexFunc(validation.Frames, func(f *VideoRenderingThread_Frame) bool { return f.Filename == frame.Filename })
+
+			if idx < 0 {
+				// This verification doesn't have the frame of the solution, we skip it hoping another validation has it
+				videoRenderingLogger.Logger.Debug("Solution Frame %s, not found at validation of validator %s ", frame.Filename, validation.Validator)
+				continue
+			}
+
+			videoRenderingLogger.Logger.Debug("Verifying frame %s from validator %s", validation.Frames[idx].Filename, validation.Validator)
+			pk, err := videoRenderingCrypto.DecodePublicKeyFromCLI(validation.PublicKey)
+			if err != nil {
+				videoRenderingLogger.Logger.Error("unable to get public key from cli: %s", err.Error())
+				return err
+			}
+
+			message, err := videoRenderingCrypto.GenerateSignableMessage(frame.Cid, validation.Validator)
+			if err != nil {
+				videoRenderingLogger.Logger.Error("unable to recreate original message %sto verify: %s", message, err.Error())
+				return err
+			}
+
+			valid := pk.VerifySignature(message, validation.Frames[idx].Signature)
+
+			videoRenderingLogger.Logger.Debug("Verifying message cid: %s, address: %s with signature %s from pk %s ", frame.Cid, validation.Validator, videoRenderingCrypto.EncodeSignatureForCLI(validation.Frames[idx].Signature), validation.PublicKey)
+			if valid {
+				// verification passed
+				frame.ValidCount++
+			} else {
+				videoRenderingLogger.Logger.Debug("Verification for frame %s from pk %s not passed!", validation.Frames[idx].Filename, validation.Validator)
+				frame.InvalidCount++
+			}
+		}
+
+	}
+	return nil
+}
+
+// for those frames evaluated, if we have at least one that has more
+// invalid counts than valid ones, we rejected. Otherwise is accepted
+func (t *VideoRenderingThread) IsSolutionAccepted() bool {
+
+	for _, frame := range t.Solution.Frames {
+		if frame.ValidCount > 0 || frame.InvalidCount > 0 {
+			if frame.InvalidCount-frame.ValidCount >= 0 {
+				t.Solution.Accepted = false
+				return false
+			}
+
+		}
+	}
+	t.Solution.Accepted = true
+	return true
+}
+
+// validates the IPFS dir contains all files in the solution
+func (t *VideoRenderingThread) VerifySubmittedSolution(dir string) error {
+	files, err := ipfs.ListDirectory(dir)
+	if err != nil {
+		videoRenderingLogger.Logger.Error("VerifySubmittedSolution dir: %s:%s", dir, err.Error())
+		return err
+	}
+	for _, frame := range t.Solution.Frames {
+		if frame.Cid != files[frame.Filename] {
+			err := fmt.Errorf("frame %s [%s] doesn't exists in %s", frame.Filename, frame.Cid, dir)
+			videoRenderingLogger.Logger.Error(err.Error())
+			return err
+		} else {
+			videoRenderingLogger.Logger.Debug("VerifySubmittedSolution file: %s [%s] exists in dir %s", frame.Filename, frame.Cid, dir)
+		}
+
 	}
 	return nil
 }

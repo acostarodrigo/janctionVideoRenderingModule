@@ -13,6 +13,7 @@ import (
 
 	"github.com/janction/videoRendering"
 	videoRenderingCrypto "github.com/janction/videoRendering/crypto"
+	"github.com/janction/videoRendering/ipfs"
 	"github.com/janction/videoRendering/videoRenderingLogger"
 )
 
@@ -430,23 +431,17 @@ func (ms msgServer) SubmitSolution(ctx context.Context, msg *videoRendering.MsgS
 				return nil, error
 			}
 
-			if !thread.Completed {
-				error := sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "thread is not yet completed")
-				videoRenderingLogger.Logger.Error(error.Error())
-				return nil, error
-			}
-
-			// TODO Implement
 			// we make sure ipfs is running
-			// ipfs.EnsureIPFSRunning()
+			ipfs.EnsureIPFSRunning()
 
 			// we verify the solution
-			// err := thread.VerifySubmittedSolution(msg.Cid)
-			// if err != nil {
-			// 	return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "submited solution is incorrect")
-			// }
+			err := thread.VerifySubmittedSolution(msg.Dir)
+			if err != nil {
+				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "submited solution is incorrect")
+			}
 
 			// solution is verified so we pay the winner
+			thread.Completed = true
 			addr, _ := types.AccAddressFromBech32(msg.Creator)
 			payment := task.GetWinnerReward()
 			ms.k.BankKeeper.SendCoinsFromModuleToAccount(ctx, videoRendering.ModuleName, addr, types.NewCoins(payment))

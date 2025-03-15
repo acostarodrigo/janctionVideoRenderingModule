@@ -52,6 +52,8 @@ func getPublicIP() (string, error) {
 }
 
 func (w *Worker) DeclareWinner(payment types.Coin) {
+	w.CurrentTaskId = ""
+	w.CurrentThreadIndex = 0
 	w.Reputation.Points = w.Reputation.Points + 1
 	w.Reputation.Solutions = w.Reputation.Solutions + 1
 	w.Reputation.Winnings = w.Reputation.Winnings.Add(payment)
