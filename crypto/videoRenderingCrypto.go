@@ -107,12 +107,12 @@ func ExtractPublicKey(rootDir, alias string, codec codec.Codec) (types.PubKey, e
 
 // Generate the message to sign
 type SignableMessage struct {
-	Cid           string
-	workerAddress string
+	Cid           string `json:"cid"`
+	WorkerAddress string `json:"worker_address"`
 }
 
 func GenerateSignableMessage(cid, workerAddr string) ([]byte, error) {
-	msg := SignableMessage{workerAddress: workerAddr, Cid: cid}
+	msg := SignableMessage{WorkerAddress: workerAddr, Cid: cid}
 
 	// Serialize the message using Protobuf
 	msgBytes, err := json.Marshal(msg)
@@ -140,13 +140,17 @@ func EncodePublicKeyForCLI(publicKey types.PubKey) string {
 }
 
 func DecodePublicKeyFromCLI(encodedPubKey string) (types.PubKey, error) {
-	decoded, _ := base64.StdEncoding.DecodeString(encodedPubKey)
+	decoded, err := base64.StdEncoding.DecodeString(encodedPubKey)
+	if err != nil {
+		return nil, fmt.Errorf("failed to decode base64 public key: %w", err)
+	}
 	return fromBytes(decoded)
 }
 
 // FromBytes converts a byte slice back to a types.PubKey
 func fromBytes(pubKeyBytes []byte) (types.PubKey, error) {
 	// Create the pubKey from the byte slice (secp256k1 in this case)
+	var _ types.PubKey = (*secp256k1.PubKey)(nil)
 	pubKey := &secp256k1.PubKey{Key: pubKeyBytes}
 	return pubKey, nil
 }
