@@ -58,3 +58,8 @@ func (w *Worker) DeclareWinner(payment types.Coin) {
 	w.Reputation.Solutions = w.Reputation.Solutions + 1
 	w.Reputation.Winnings = w.Reputation.Winnings.Add(payment)
 }
+
+func (w *Worker) ReleaseValidator() {
+	w.CurrentTaskId = ""
+	w.CurrentThreadIndex = 0
+}

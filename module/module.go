@@ -205,6 +205,16 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 				if accepted {
 					// distribute rewards, upload solution, release verifiers
 					// release verifiers
+					for _, validation := range thread.Validations {
+						if validation.Validator != thread.Solution.ProposedBy {
+							worker, err := k.Workers.Get(ctx, validation.Validator)
+							if err != nil {
+								return err
+							}
+							worker.ReleaseValidator()
+							k.Workers.Set(ctx, worker.Address, worker)
+						}
+					}
 
 					// if we are the node that proposed the solution, then we upload it
 					if thread.Solution.ProposedBy == am.keeper.Configuration.WorkerAddress {
