@@ -88,3 +88,19 @@ func TestSerializationSignature(t *testing.T) {
 		t.Log("signature is valid!")
 	}
 }
+
+func TestVerifySignature(t *testing.T) {
+	message, _ := videoRenderingCrypto.GenerateSignableMessage("QmSxV8oPyTQjQ9BuKRJa3Tb3NsxoLSbzNvTGLRjPLjuhYq", "janction13aqlsjwfwfxy0k2kae2qxf62alual7f9r4p0um")
+	signature := "KUN4UfDqSMko6j+f63YBgp9pFQarpK0yVkW0eLP5Xkk9nanxqsLSY2IFZ5TE/sfbW4iOlkez2Bb0uBH4jib9jw=="
+	publicKey := "AqyMQ9z9mnfnKX9E4na1xKl/5QuvmOyzhUyGXDRMMSC0"
+
+	pk, _ := videoRenderingCrypto.DecodePublicKeyFromCLI(publicKey)
+
+	sig, _ := videoRenderingCrypto.DecodeSignatureFromCLI(signature)
+	valid := pk.VerifySignature(message, sig)
+	if !valid {
+		t.Error("Signature Not valid")
+	} else {
+		t.Log("Signature is valid")
+	}
+}

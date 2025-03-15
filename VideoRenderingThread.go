@@ -354,10 +354,14 @@ func (t *VideoRenderingThread) EvaluateVerifications() error {
 				videoRenderingLogger.Logger.Error("unable to recreate original message %sto verify: %s", message, err.Error())
 				return err
 			}
+			sig, err := videoRenderingCrypto.DecodeSignatureFromCLI(validation.Frames[idx].Signature)
+			if err != nil {
+				videoRenderingLogger.Logger.Error("unable to decode signature: %s", err.Error())
+				return err
+			}
+			valid := pk.VerifySignature(message, sig)
 
-			valid := pk.VerifySignature(message, validation.Frames[idx].Signature)
-
-			videoRenderingLogger.Logger.Debug("Verifying message cid: %s, address: %s with signature %s from pk %s ", frame.Cid, validation.Validator, videoRenderingCrypto.EncodeSignatureForCLI(validation.Frames[idx].Signature), validation.PublicKey)
+			videoRenderingLogger.Logger.Debug("Verifying message cid: %s, address: %s with signature %s from pk %s ", frame.Cid, validation.Validator, validation.Frames[idx].Signature, validation.PublicKey)
 			if valid {
 				// verification passed
 				frame.ValidCount++

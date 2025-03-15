@@ -228,14 +228,13 @@ func (ms msgServer) ProposeSolution(ctx context.Context, msg *videoRendering.Msg
 
 			for _, val := range msg.Signatures {
 				parts := strings.SplitN(val, "=", 2)
-				decodedSignature, err := videoRenderingCrypto.DecodeSignatureFromCLI(parts[1])
 
 				if err != nil {
 					videoRenderingLogger.Logger.Error("unable to decode signature from msg %s: %s", parts[1], err.Error())
 					return nil, err
 				}
 
-				frame := videoRendering.VideoRenderingThread_Frame{Filename: parts[0], Signature: decodedSignature}
+				frame := videoRendering.VideoRenderingThread_Frame{Filename: parts[0], Signature: parts[1]}
 				frames = append(frames, &frame)
 			}
 
@@ -398,12 +397,8 @@ func (ms msgServer) SubmitValidation(ctx context.Context, msg *videoRendering.Ms
 	var frames []*videoRendering.VideoRenderingThread_Frame
 	for _, signatures := range msg.Signatures {
 		parts := strings.SplitN(signatures, "=", 2)
-		signature, err := videoRenderingCrypto.DecodeSignatureFromCLI(parts[1])
-		if err != nil {
-			videoRenderingLogger.Logger.Error("unable to decode provided signature %s: %s", parts[1], err.Error())
-			return nil, err
-		}
-		frame := videoRendering.VideoRenderingThread_Frame{Filename: parts[0], Signature: signature}
+
+		frame := videoRendering.VideoRenderingThread_Frame{Filename: parts[0], Signature: parts[1]}
 		frames = append(frames, &frame)
 	}
 

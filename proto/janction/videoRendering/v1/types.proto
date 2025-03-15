@@ -101,7 +101,7 @@ message VideoRenderingTask {
 
     message Frame {
       string filename = 1;
-      bytes signature = 2;
+      string signature = 2;
       string cid = 3;
       int64 validCount = 4;
       int64 invalidCount = 5;

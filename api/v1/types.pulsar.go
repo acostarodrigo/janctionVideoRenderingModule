@@ -6231,8 +6231,8 @@ func (x *fastReflection_VideoRenderingThread_Frame) Range(f func(protoreflect.Fi
 			return
 		}
 	}
-	if len(x.Signature) != 0 {
-		value := protoreflect.ValueOfBytes(x.Signature)
+	if x.Signature != "" {
+		value := protoreflect.ValueOfString(x.Signature)
 		if !f(fd_VideoRenderingThread_Frame_signature, value) {
 			return
 		}
@@ -6273,7 +6273,7 @@ func (x *fastReflection_VideoRenderingThread_Frame) Has(fd protoreflect.FieldDes
 	case "janction.videoRendering.v1.VideoRenderingThread.Frame.filename":
 		return x.Filename != ""
 	case "janction.videoRendering.v1.VideoRenderingThread.Frame.signature":
-		return len(x.Signature) != 0
+		return x.Signature != ""
 	case "janction.videoRendering.v1.VideoRenderingThread.Frame.cid":
 		return x.Cid != ""
 	case "janction.videoRendering.v1.VideoRenderingThread.Frame.validCount":
@@ -6299,7 +6299,7 @@ func (x *fastReflection_VideoRenderingThread_Frame) Clear(fd protoreflect.FieldD
 	case "janction.videoRendering.v1.VideoRenderingThread.Frame.filename":
 		x.Filename = ""
 	case "janction.videoRendering.v1.VideoRenderingThread.Frame.signature":
-		x.Signature = nil
+		x.Signature = ""
 	case "janction.videoRendering.v1.VideoRenderingThread.Frame.cid":
 		x.Cid = ""
 	case "janction.videoRendering.v1.VideoRenderingThread.Frame.validCount":
@@ -6327,7 +6327,7 @@ func (x *fastReflection_VideoRenderingThread_Frame) Get(descriptor protoreflect.
 		return protoreflect.ValueOfString(value)
 	case "janction.videoRendering.v1.VideoRenderingThread.Frame.signature":
 		value := x.Signature
-		return protoreflect.ValueOfBytes(value)
+		return protoreflect.ValueOfString(value)
 	case "janction.videoRendering.v1.VideoRenderingThread.Frame.cid":
 		value := x.Cid
 		return protoreflect.ValueOfString(value)
@@ -6360,7 +6360,7 @@ func (x *fastReflection_VideoRenderingThread_Frame) Set(fd protoreflect.FieldDes
 	case "janction.videoRendering.v1.VideoRenderingThread.Frame.filename":
 		x.Filename = value.Interface().(string)
 	case "janction.videoRendering.v1.VideoRenderingThread.Frame.signature":
-		x.Signature = value.Bytes()
+		x.Signature = value.Interface().(string)
 	case "janction.videoRendering.v1.VideoRenderingThread.Frame.cid":
 		x.Cid = value.Interface().(string)
 	case "janction.videoRendering.v1.VideoRenderingThread.Frame.validCount":
@@ -6413,7 +6413,7 @@ func (x *fastReflection_VideoRenderingThread_Frame) NewField(fd protoreflect.Fie
 	case "janction.videoRendering.v1.VideoRenderingThread.Frame.filename":
 		return protoreflect.ValueOfString("")
 	case "janction.videoRendering.v1.VideoRenderingThread.Frame.signature":
-		return protoreflect.ValueOfBytes(nil)
+		return protoreflect.ValueOfString("")
 	case "janction.videoRendering.v1.VideoRenderingThread.Frame.cid":
 		return protoreflect.ValueOfString("")
 	case "janction.videoRendering.v1.VideoRenderingThread.Frame.validCount":
@@ -6652,7 +6652,7 @@ func (x *fastReflection_VideoRenderingThread_Frame) ProtoMethods() *protoiface.M
 				if wireType != 2 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, fmt.Errorf("proto: wrong wireType = %d for field Signature", wireType)
 				}
-				var byteLen int
+				var stringLen uint64
 				for shift := uint(0); ; shift += 7 {
 					if shift >= 64 {
 						return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrIntOverflow
@@ -6662,25 +6662,23 @@ func (x *fastReflection_VideoRenderingThread_Frame) ProtoMethods() *protoiface.M
 					}
 					b := dAtA[iNdEx]
 					iNdEx++
-					byteLen |= int(b&0x7F) << shift
+					stringLen |= uint64(b&0x7F) << shift
 					if b < 0x80 {
 						break
 					}
 				}
-				if byteLen < 0 {
+				intStringLen := int(stringLen)
+				if intStringLen < 0 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
 				}
-				postIndex := iNdEx + byteLen
+				postIndex := iNdEx + intStringLen
 				if postIndex < 0 {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, runtime.ErrInvalidLength
 				}
 				if postIndex > l {
 					return protoiface.UnmarshalOutput{NoUnkeyedLiterals: input.NoUnkeyedLiterals, Flags: input.Flags}, io.ErrUnexpectedEOF
 				}
-				x.Signature = append(x.Signature[:0], dAtA[iNdEx:postIndex]...)
-				if x.Signature == nil {
-					x.Signature = []byte{}
-				}
+				x.Signature = string(dAtA[iNdEx:postIndex])
 				iNdEx = postIndex
 			case 3:
 				if wireType != 2 {
@@ -9541,7 +9539,7 @@ type VideoRenderingThread_Frame struct {
 	unknownFields protoimpl.UnknownFields
 
 	Filename     string `protobuf:"bytes,1,opt,name=filename,proto3" json:"filename,omitempty"`
-	Signature    []byte `protobuf:"bytes,2,opt,name=signature,proto3" json:"signature,omitempty"`
+	Signature    string `protobuf:"bytes,2,opt,name=signature,proto3" json:"signature,omitempty"`
 	Cid          string `protobuf:"bytes,3,opt,name=cid,proto3" json:"cid,omitempty"`
 	ValidCount   int64  `protobuf:"varint,4,opt,name=validCount,proto3" json:"validCount,omitempty"`
 	InvalidCount int64  `protobuf:"varint,5,opt,name=invalidCount,proto3" json:"invalidCount,omitempty"`
@@ -9574,11 +9572,11 @@ func (x *VideoRenderingThread_Frame) GetFilename() string {
 	return ""
 }
 
-func (x *VideoRenderingThread_Frame) GetSignature() []byte {
+func (x *VideoRenderingThread_Frame) GetSignature() string {
 	if x != nil {
 		return x.Signature
 	}
-	return nil
+	return ""
 }
 
 func (x *VideoRenderingThread_Frame) GetCid() string {
@@ -9811,7 +9809,7 @@ var file_janction_videoRendering_v1_types_proto_rawDesc = []byte{
 	0x97, 0x01, 0x0a, 0x05, 0x46, 0x72, 0x61, 0x6d, 0x65, 0x12, 0x1a, 0x0a, 0x08, 0x66, 0x69, 0x6c,
 	0x65, 0x6e, 0x61, 0x6d, 0x65, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x08, 0x66, 0x69, 0x6c,
 	0x65, 0x6e, 0x61, 0x6d, 0x65, 0x12, 0x1c, 0x0a, 0x09, 0x73, 0x69, 0x67, 0x6e, 0x61, 0x74, 0x75,
-	0x72, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x0c, 0x52, 0x09, 0x73, 0x69, 0x67, 0x6e, 0x61, 0x74,
+	0x72, 0x65, 0x18, 0x02, 0x20, 0x01, 0x28, 0x09, 0x52, 0x09, 0x73, 0x69, 0x67, 0x6e, 0x61, 0x74,
 	0x75, 0x72, 0x65, 0x12, 0x10, 0x0a, 0x03, 0x63, 0x69, 0x64, 0x18, 0x03, 0x20, 0x01, 0x28, 0x09,
 	0x52, 0x03, 0x63, 0x69, 0x64, 0x12, 0x1e, 0x0a, 0x0a, 0x76, 0x61, 0x6c, 0x69, 0x64, 0x43, 0x6f,
 	0x75, 0x6e, 0x74, 0x18, 0x04, 0x20, 0x01, 0x28, 0x03, 0x52, 0x0a, 0x76, 0x61, 0x6c, 0x69, 0x64,
