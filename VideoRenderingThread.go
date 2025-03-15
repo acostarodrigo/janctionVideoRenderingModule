@@ -157,7 +157,7 @@ func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAd
 	return nil
 }
 
-func (t VideoRenderingThread) Verify(codec codec.Codec, alias, workerAddress string, rootPath string, db *db.DB) error {
+func (t VideoRenderingThread) SubmitVerification(codec codec.Codec, alias, workerAddress string, rootPath string, db *db.DB) error {
 	// we will verify any file we already have rendered.
 	db.UpdateThread(t.ThreadId, true, true, true, true, false, false)
 	output := path.Join(rootPath, "renders", t.ThreadId, "output")
@@ -342,7 +342,6 @@ func (t *VideoRenderingThread) EvaluateVerifications() error {
 				continue
 			}
 
-			videoRenderingLogger.Logger.Debug("Verifying frame %s from validator %s", validation.Frames[idx].Filename, validation.Validator)
 			pk, err := videoRenderingCrypto.DecodePublicKeyFromCLI(validation.PublicKey)
 			if err != nil {
 				videoRenderingLogger.Logger.Error("unable to get public key from cli: %s", err.Error())
@@ -359,14 +358,14 @@ func (t *VideoRenderingThread) EvaluateVerifications() error {
 				videoRenderingLogger.Logger.Error("unable to decode signature: %s", err.Error())
 				return err
 			}
+
 			valid := pk.VerifySignature(message, sig)
 
-			videoRenderingLogger.Logger.Debug("Verifying message cid: %s, address: %s with signature %s from pk %s ", frame.Cid, validation.Validator, validation.Frames[idx].Signature, validation.PublicKey)
 			if valid {
 				// verification passed
 				frame.ValidCount++
 			} else {
-				videoRenderingLogger.Logger.Debug("Verification for frame %s from pk %s not passed!", validation.Frames[idx].Filename, validation.Validator)
+				videoRenderingLogger.Logger.Debug("Verification for frame %s from pk %s NOT VALID!\nMessage: CID: %s, address: %s\npublicKey:%s\nsignature:%s", validation.Frames[idx].Filename, validation.Validator, frame.Cid, validation.Validator, validation.PublicKey, validation.Frames[idx].Signature)
 				frame.InvalidCount++
 			}
 		}
