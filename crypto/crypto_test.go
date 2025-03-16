@@ -90,9 +90,9 @@ func TestSerializationSignature(t *testing.T) {
 }
 
 func TestVerifySignature(t *testing.T) {
-	message, _ := videoRenderingCrypto.GenerateSignableMessage("Qma5Keu7JY89US3enHJj2vdhKecNp5NWufU1UBhepyDD4E", "janction1dfr2q9edz0dxd8a5g6p2kwyzaenrk9xgv3zypl")
-	signature := "71hVEuYxAfG4xHr4E7GLHSsExRFHNxlC33mLVjWWuBdTrihC0RJq8yLUUqd/va7BUd6fQyONECYTnjz7kNmjwQ=="
-	publicKey := "A4sXU6+iMgZbrTDdyFVwQQqmro9QdDqDqwPu+4Fva4zU"
+	message, _ := videoRenderingCrypto.GenerateSignableMessage("6d5be21b98ce5e647b5bb031472f4bdc3c70606508dcf0db10f968c699c330a9", "janction1ttu0v9l4mxut8cu97065htdexavn8dswq395uv")
+	signature := "Id5hOW7JqbXV8T0YKWk8vhNzQGRmHWSWGNbdUL3Khq9n5ccDMykgu3a1t5VOmPjWuegOLrl5/Huj7O+UTdLN6w=="
+	publicKey := "AgIg7GgQWR8l4ea7LvUgNuHOWlCIN2fjKUO7ERB/1Sed"
 
 	pk, _ := videoRenderingCrypto.DecodePublicKeyFromCLI(publicKey)
 
