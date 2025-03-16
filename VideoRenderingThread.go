@@ -382,7 +382,7 @@ func (t *VideoRenderingThread) EvaluateVerifications() error {
 				// verification passed
 				frame.ValidCount++
 			} else {
-				videoRenderingLogger.Logger.Debug("Verification for frame %s from pk %s NOT VALID!\nMessage: CID: %s, address: %s\npublicKey:%s\nsignature:%s", validation.Frames[idx].Filename, validation.Validator, frame.Cid, validation.Validator, validation.PublicKey, validation.Frames[idx].Signature)
+				videoRenderingLogger.Logger.Debug("Verification for frame %s from pk %s NOT VALID!\nMessage: Hash: %s, address: %s\npublicKey:%s\nsignature:%s", validation.Frames[idx].Filename, validation.Validator, frame.Hash, validation.Validator, validation.PublicKey, validation.Frames[idx].Signature)
 				frame.InvalidCount++
 			}
 		}
