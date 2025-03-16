@@ -90,9 +90,9 @@ func TestSerializationSignature(t *testing.T) {
 }
 
 func TestVerifySignature(t *testing.T) {
-	message, _ := videoRenderingCrypto.GenerateSignableMessage("QmNbGZSGJNvoWCRrehD6BD44wdk312EEWLPR9aACz75JUu", "janction1rkzs8h4w5dj07fhpcc2x607nj5905vd98qyl2u")
-	signature := "cLH+dcn3znotOO94wy9D3yAWESBH13ItOo0COOYBf7QkNJ9sRiIfw34YDtTH6Gsye6Un5UwdBBtYiH1GKecqng=="
-	publicKey := "ArsP7KscisCMG5KBakg9uCEetFXbj+H1M+OrRa4KafVE"
+	message, _ := videoRenderingCrypto.GenerateSignableMessage("Qma5Keu7JY89US3enHJj2vdhKecNp5NWufU1UBhepyDD4E", "janction1dfr2q9edz0dxd8a5g6p2kwyzaenrk9xgv3zypl")
+	signature := "71hVEuYxAfG4xHr4E7GLHSsExRFHNxlC33mLVjWWuBdTrihC0RJq8yLUUqd/va7BUd6fQyONECYTnjz7kNmjwQ=="
+	publicKey := "A4sXU6+iMgZbrTDdyFVwQQqmro9QdDqDqwPu+4Fva4zU"
 
 	pk, _ := videoRenderingCrypto.DecodePublicKeyFromCLI(publicKey)
 
@@ -112,7 +112,7 @@ func TestPublicKey(t *testing.T) {
 	}
 
 	cdc := moduletestutil.MakeTestEncodingConfig().Codec
-	_, publicKey, _ := videoRenderingCrypto.SignMessage("/Users/rodrigoacosta/.janctiond", "alice", message, cdc)
+	sig, publicKey, _ := videoRenderingCrypto.SignMessage("/Users/rodrigoacosta/.janctiond", "alice", message, cdc)
 	pk, _ := videoRenderingCrypto.GetPublicKey("/Users/rodrigoacosta/.janctiond", "alice", cdc)
 
 	if pk.Address().String() != publicKey.Address().String() {
@@ -125,5 +125,15 @@ func TestPublicKey(t *testing.T) {
 		t.Error("Not the same")
 	} else {
 		t.Logf("%s = %s", videoRenderingCrypto.EncodePublicKeyForCLI(publicKey), videoRenderingCrypto.EncodePublicKeyForCLI(pk))
+	}
+
+	valid := pk.VerifySignature(message, sig)
+	if !valid {
+		t.Error("Not valid")
+	}
+
+	valid = publicKey.VerifySignature(message, sig)
+	if !valid {
+		t.Error("Not valid")
 	}
 }

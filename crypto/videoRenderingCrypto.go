@@ -107,12 +107,12 @@ func ExtractPublicKey(rootDir, alias string, codec codec.Codec) (types.PubKey, e
 
 // Generate the message to sign
 type SignableMessage struct {
-	Cid           string `json:"cid"`
+	Hash          string `json:"hash"`
 	WorkerAddress string `json:"worker_address"`
 }
 
-func GenerateSignableMessage(cid, workerAddr string) ([]byte, error) {
-	msg := SignableMessage{WorkerAddress: workerAddr, Cid: cid}
+func GenerateSignableMessage(hash, workerAddr string) ([]byte, error) {
+	msg := SignableMessage{WorkerAddress: workerAddr, Hash: hash}
 
 	// Serialize the message using Protobuf
 	msgBytes, err := json.Marshal(msg)
@@ -121,8 +121,8 @@ func GenerateSignableMessage(cid, workerAddr string) ([]byte, error) {
 	}
 
 	// Hash the serialized message
-	hash := sha256.Sum256(msgBytes)
-	return hash[:], nil
+	hashed := sha256.Sum256(msgBytes)
+	return hashed[:], nil
 }
 
 // Convert signature bytes to a Base64 string for CLI usage

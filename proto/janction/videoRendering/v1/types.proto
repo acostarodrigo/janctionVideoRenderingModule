@@ -103,8 +103,9 @@ message VideoRenderingTask {
       string filename = 1;
       string signature = 2;
       string cid = 3;
-      int64 validCount = 4;
-      int64 invalidCount = 5;
+      string hash = 4;
+      int64 validCount = 5;
+      int64 invalidCount = 6;
     }
   }
 

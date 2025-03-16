@@ -259,7 +259,7 @@ func (ms msgServer) ProposeSolution(ctx context.Context, msg *videoRendering.Msg
 
 // TODO Implement
 func (ms msgServer) RevealSolution(ctx context.Context, msg *videoRendering.MsgRevealSolution) (*videoRendering.MsgRevealSolutionResponse, error) {
-	videoRenderingLogger.Logger.Info("RevealSolution - creator: %s, taskId: %s, threadId: %s, CIDs: %s", msg.Creator, msg.TaskId, msg.ThreadId, msg.Cids)
+	videoRenderingLogger.Logger.Info("RevealSolution - creator: %s, taskId: %s, threadId: %s, frames: %s", msg.Creator, msg.TaskId, msg.ThreadId, msg.Frames)
 
 	// Solution must be from a worker on the thread
 	task, err := ms.k.VideoRenderingTasks.Get(ctx, msg.TaskId)
@@ -321,26 +321,28 @@ func (ms msgServer) RevealSolution(ctx context.Context, msg *videoRendering.MsgR
 	}
 
 	// cids amount must be equal to the amount of frames
-	if len(msg.Cids) != len(thread.Solution.Frames) {
-		videoRenderingLogger.Logger.Error("invalid amount of cids for the solution")
+	if len(msg.Frames) != len(thread.Solution.Frames) {
+		videoRenderingLogger.Logger.Error("invalid amount of frames for the solution")
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "invalid amount of cids for the solution")
 	}
 
-	for _, cids := range msg.Cids {
-		parts := strings.SplitN(cids, "=", 2)
-		idx := slices.IndexFunc(thread.Solution.Frames, func(f *videoRendering.VideoRenderingThread_Frame) bool { return f.Filename == parts[0] })
+	solution := videoRendering.FromCliToFrames(msg.Frames)
+	for _, frame := range solution {
+		idx := slices.IndexFunc(thread.Solution.Frames, func(f *videoRendering.VideoRenderingThread_Frame) bool { return f.Filename == frame.Filename })
 		if idx < 0 {
-			videoRenderingLogger.Logger.Error("Unable to find frame with filename %s in solution", parts[0])
-			return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "frame %s not found in solution", parts[0])
+			videoRenderingLogger.Logger.Error("Unable to find frame with filename %s in solution", frame.String())
+			return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "frame %s not found in solution", frame)
 		}
-		thread.Solution.Frames[idx].Cid = parts[1]
+		// we reveal the solution
+		thread.Solution.Frames[idx].Cid = frame.Cid
+		thread.Solution.Frames[idx].Hash = frame.Hash
 	}
 
 	// We verify all frames in the solution have a CID revealed
 	for _, frame := range thread.Solution.Frames {
-		if frame.Cid == "" {
-			videoRenderingLogger.Logger.Error("Frame %s doesn't have a CID revelaed", frame.Filename)
-			return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "Frame %s doesn't have a CID revelaed", frame.Filename)
+		if frame.Cid == "" || frame.Hash == "" {
+			videoRenderingLogger.Logger.Error("Frame %s doesn't have a CID or Hash revelaed", frame.Filename)
+			return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "Frame %s doesn't have a CID or Hash revelaed", frame.Filename)
 		}
 	}
 

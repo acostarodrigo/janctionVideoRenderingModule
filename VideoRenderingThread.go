@@ -93,7 +93,7 @@ func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAd
 		return nil
 	}
 
-	cids, err := ipfs.CalculateCIDs(output)
+	hashes, err := GenerateDirectoryFileHashes(output)
 	if err != nil {
 		videoRenderingLogger.Logger.Error("Unable to calculate CIDs: %s", err.Error())
 		db.UpdateThread(t.ThreadId, true, true, false, false, false, false)
@@ -108,11 +108,12 @@ func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAd
 	}
 
 	publicKey := videoRenderingCrypto.EncodePublicKeyForCLI(pkey)
-	for key, cid := range cids {
-		sigMsg, err := videoRenderingCrypto.GenerateSignableMessage(cid, workerAddress)
+
+	for filename, hash := range hashes {
+		sigMsg, err := videoRenderingCrypto.GenerateSignableMessage(hash, workerAddress)
 
 		if err != nil {
-			videoRenderingLogger.Logger.Error("Unable to generate message for worker %s and CID %s: %s", workerAddress, cid, err.Error())
+			videoRenderingLogger.Logger.Error("Unable to generate message for worker %s and hash %s: %s", workerAddress, hash, err.Error())
 			db.UpdateThread(t.ThreadId, true, true, false, false, false, false)
 			return err
 		}
@@ -120,14 +121,15 @@ func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAd
 		signature, _, err := videoRenderingCrypto.SignMessage(rootPath, alias, sigMsg, codec)
 
 		if err != nil {
-			videoRenderingLogger.Logger.Error("Unable to sign message for worker %s and CID %s: %s", workerAddress, cid, err.Error())
+			videoRenderingLogger.Logger.Error("Unable to sign message for worker %s and hash %s: %s", workerAddress, hash, err.Error())
 			db.UpdateThread(t.ThreadId, true, true, false, false, false, false)
 			return err
 		}
-		cids[key] = videoRenderingCrypto.EncodeSignatureForCLI(signature)
+		// We rewrite the hash with the signature
+		hashes[filename] = videoRenderingCrypto.EncodeSignatureForCLI(signature)
 	}
 
-	solution := MapToKeyValueFormat(cids)
+	solution := MapToKeyValueFormat(hashes)
 	if err != nil {
 		videoRenderingLogger.Logger.Error("Unable to get hashes in path %s. %s", rootPath, err.Error())
 		db.UpdateThread(t.ThreadId, true, true, false, false, false, false)
@@ -169,7 +171,7 @@ func (t VideoRenderingThread) SubmitVerification(codec codec.Codec, alias, worke
 	}
 
 	// we do have some work, lets compare it with the solution
-	myWork, err := ipfs.CalculateCIDs(output)
+	myWork, err := GenerateDirectoryFileHashes(output)
 
 	if err != nil {
 		videoRenderingLogger.Logger.Error("error getting hashes. Err: %s", err.Error())
@@ -184,8 +186,8 @@ func (t VideoRenderingThread) SubmitVerification(codec codec.Codec, alias, worke
 		return err
 	}
 
-	for key, cid := range myWork {
-		message, err := videoRenderingCrypto.GenerateSignableMessage(cid, workerAddress)
+	for filename, hash := range myWork {
+		message, err := videoRenderingCrypto.GenerateSignableMessage(hash, workerAddress)
 		if err != nil {
 			videoRenderingLogger.Logger.Error("unable to generate message to sign %s: %s", message, err.Error())
 			db.UpdateThread(t.ThreadId, true, true, true, false, false, false)
@@ -199,7 +201,8 @@ func (t VideoRenderingThread) SubmitVerification(codec codec.Codec, alias, worke
 			db.UpdateThread(t.ThreadId, true, true, true, false, false, false)
 			return err
 		}
-		myWork[key] = videoRenderingCrypto.EncodeSignatureForCLI(signature)
+		// we replace the hash for the signature
+		myWork[filename] = videoRenderingCrypto.EncodeSignatureForCLI(signature)
 	}
 
 	db.AddLogEntry(t.ThreadId, "Starting verification of solution...", time.Now().Unix(), 0)
@@ -300,6 +303,7 @@ func calculateValidatorPayment(filesValidated, totalFilesValidated int, totalVal
 	return totalValidatorReward.Mul(math.NewInt(int64(filesValidated))).Quo(math.NewInt(int64(totalFilesValidated)))
 }
 
+// Once validations are ready, we show blockchain the solution
 func (t *VideoRenderingThread) RevealSolution(rootPath string, db *db.DB) error {
 	output := path.Join(rootPath, "renders", t.ThreadId, "output")
 	cids, err := ipfs.CalculateCIDs(output)
@@ -307,14 +311,27 @@ func (t *VideoRenderingThread) RevealSolution(rootPath string, db *db.DB) error 
 		videoRenderingLogger.Logger.Error(err.Error())
 		return err
 	}
-	solution := MapToKeyValueFormat(cids)
+
+	solution := make(map[string]VideoRenderingThread_Frame)
+	for filename, cid := range cids {
+		path := filepath.Join(output, filename)
+		hash, err := CalculateFileHash(path)
+
+		if err != nil {
+			videoRenderingLogger.Logger.Error(err.Error())
+			return err
+		}
+
+		frame := VideoRenderingThread_Frame{Filename: filename, Cid: cid, Hash: hash}
+		solution[filename] = frame
+	}
 
 	// Base arguments
 	args := []string{
 		"tx", "videoRendering", "reveal-solution",
 		t.TaskId, t.ThreadId,
 	}
-	args = append(args, solution...)
+	args = append(args, FromFramesToCli(solution)...)
 	args = append(args, "--from")
 	args = append(args, t.Solution.ProposedBy)
 	args = append(args, "--yes")
@@ -348,7 +365,7 @@ func (t *VideoRenderingThread) EvaluateVerifications() error {
 				return err
 			}
 
-			message, err := videoRenderingCrypto.GenerateSignableMessage(frame.Cid, validation.Validator)
+			message, err := videoRenderingCrypto.GenerateSignableMessage(frame.Hash, validation.Validator)
 			if err != nil {
 				videoRenderingLogger.Logger.Error("unable to recreate original message %sto verify: %s", message, err.Error())
 				return err

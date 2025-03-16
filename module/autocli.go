@@ -113,7 +113,7 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{ProtoField: "taskId"},
 						{ProtoField: "threadId"},
-						{ProtoField: "cids", Varargs: true},
+						{ProtoField: "frames", Varargs: true},
 					},
 				},
 			},
