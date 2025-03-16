@@ -70,7 +70,7 @@ func renderVideoFrame(ctx context.Context, cid string, frameNumber int64, id str
 	// Construct the bind path and command
 	bindPath := fmt.Sprintf("%s:/workspace", path)
 	command := fmt.Sprintf(
-		"blender -b ../workspace/%s -o ../workspace/output/frame_###### -F PNG -E CYCLES -s %d -e %d -a -P set_seed.py",
+		"blender -b ../workspace/%s -o ../workspace/output/frame_###### -F PNG -E CYCLES -s %d -e %d -a -P set_params.py",
 		cid, frameNumber, frameNumber,
 	)
 
