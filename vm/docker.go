@@ -75,7 +75,7 @@ func renderVideoFrame(ctx context.Context, cid string, frameNumber int64, id str
 	)
 
 	// Create and start the container
-	runCmd := exec.CommandContext(ctx, "docker", "run", "--name", n, "-v", bindPath, "-d", "blender_render", "sh", "-c", command)
+	runCmd := exec.CommandContext(ctx, "docker", "run", "--name", n, "-v", bindPath, "-d", "blender_render", command)
 	videoRenderingLogger.Logger.Info("Starting docker: %s", runCmd.String())
 	err = runCmd.Run()
 	if err != nil {
