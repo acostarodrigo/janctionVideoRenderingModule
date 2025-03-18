@@ -4,7 +4,7 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	fmt "fmt"
-	io "io"
+	"image"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -95,17 +95,45 @@ func FromFramesToCli(frames map[string]VideoRenderingThread_Frame) []string {
 
 // CalculateFileHash calculates the SHA-256 hash of a given file.
 func CalculateFileHash(filePath string) (string, error) {
+	hash, err := calculateImagePixelHash(filePath)
+	if err != nil {
+		return "", err
+	}
+	return hash, nil
+}
+
+// CalculateImagePixelHash computes the SHA-256 hash of an image based only on pixel values.
+func calculateImagePixelHash(filePath string) (string, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
 		return "", err
 	}
 	defer file.Close()
 
-	hasher := sha256.New()
-	if _, err := io.Copy(hasher, file); err != nil {
-		return "", err
+	// Decode the image
+	img, format, err := image.Decode(file)
+	if err != nil {
+		return "", fmt.Errorf("failed to decode image: %w", err)
 	}
 
+	fmt.Println("Image format:", format) // Debugging purpose
+
+	// Convert image pixels to a byte slice
+	bounds := img.Bounds()
+	var pixelData []byte
+
+	// Extract RGB(A) pixel data
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
+			r, g, b, a := img.At(x, y).RGBA()
+			pixelData = append(pixelData,
+				byte(r>>8), byte(g>>8), byte(b>>8), byte(a>>8)) // Convert 16-bit values to 8-bit
+		}
+	}
+
+	// Compute SHA-256 hash
+	hasher := sha256.New()
+	hasher.Write(pixelData)
 	return hex.EncodeToString(hasher.Sum(nil)), nil
 }
 
