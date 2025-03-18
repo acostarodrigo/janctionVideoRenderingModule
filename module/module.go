@@ -182,7 +182,7 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 
 			if thread.Solution == nil && !dbThread.WorkStarted {
 				videoRenderingLogger.Logger.Info("thread %v of task %v started", thread.ThreadId, task.TaskId)
-				go thread.StartWork(worker.Address, task.Cid, workPath, &k.DB)
+				go thread.StartWork(ctx, worker.Address, task.Cid, workPath, &k.DB)
 			}
 
 			// we completed the work, so lets propose a solution

@@ -19,8 +19,8 @@ import (
 	"github.com/janction/videoRendering/vm"
 )
 
-func (t *VideoRenderingThread) StartWork(worker string, cid string, path string, db *db.DB) error {
-	ctx := context.Background()
+func (t *VideoRenderingThread) StartWork(ctx context.Context, worker string, cid string, path string, db *db.DB) error {
+	// ctx := context.Background()
 
 	if err := db.UpdateThread(t.ThreadId, true, false, false, false, false, false); err != nil {
 		videoRenderingLogger.Logger.Error("Unable to update thread status, err: %s", err.Error())
