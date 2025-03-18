@@ -70,12 +70,12 @@ func renderVideoFrame(ctx context.Context, cid string, frameNumber int64, id str
 	// Construct the bind path and command
 	bindPath := fmt.Sprintf("%s:/workspace", path)
 	command := fmt.Sprintf(
-		"blender -P set_params.py -b ../workspace/%s -o ../workspace/output/frame_###### -F PNG -E CYCLES -s %d -e %d -a ",
+		"/usr/bin/blender -b --python /script/set_params.py /workspace/%s -o /workspace/output/frame_######  -F PNG -E CYCLES -s %d -e %d -a",
 		cid, frameNumber, frameNumber,
 	)
 
 	// Create and start the container
-	runCmd := exec.CommandContext(ctx, "docker", "run", "--name", n, "-v", bindPath, "-d", "blender_render", command)
+	runCmd := exec.CommandContext(ctx, "docker", "run", "--name", n, "-v", bindPath, "-d", "blender_render", "/bin/sh", "-c", command)
 	videoRenderingLogger.Logger.Info("Starting docker: %s", runCmd.String())
 	err = runCmd.Run()
 	if err != nil {
