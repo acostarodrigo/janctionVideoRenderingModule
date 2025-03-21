@@ -69,13 +69,30 @@ func renderVideoFrame(ctx context.Context, cid string, frameNumber int64, id str
 
 	// Construct the bind path and command
 	bindPath := fmt.Sprintf("%s:/workspace", path)
-	command := fmt.Sprintf(
-		"/usr/bin/blender -b --python /script/set_params.py /workspace/%s -o /workspace/output/frame_######  -F PNG -E CYCLES -s %d -e %d -a",
-		cid, frameNumber, frameNumber,
-	)
 
+	var blenderArgs []string
+	blenderArgs = append(blenderArgs, "--background")
+	blenderArgs = append(blenderArgs, fmt.Sprintf("/workspace/%s", cid))
+	blenderArgs = append(blenderArgs, "--engine CYCLES")
+	blenderArgs = append(blenderArgs, "--render-output /workspace/output/frame_######")
+	blenderArgs = append(blenderArgs, "--render-format PNG")
+	blenderArgs = append(blenderArgs, fmt.Sprintf("--render-frame %v", frameNumber))
+	// command := fmt.Sprintf(
+	// 	"--background /workspace/%s --engine CYCLES --render-output /workspace/output/frame_######  --render-format PNG --render-frame %v",
+	// 	cid, frameNumber,
+	// )
+	var dockerArgs []string
+	dockerArgs = append(dockerArgs, "run")
+	dockerArgs = append(dockerArgs, "--name")
+	dockerArgs = append(dockerArgs, n)
+	dockerArgs = append(dockerArgs, "-v")
+	dockerArgs = append(dockerArgs, bindPath)
+	dockerArgs = append(dockerArgs, "-d")
+	dockerArgs = append(dockerArgs, "blendergrid/blender")
+	dockerArgs = append(dockerArgs, blenderArgs...)
 	// Create and start the container
-	runCmd := exec.CommandContext(ctx, "docker", "run", "--name", n, "-v", bindPath, "-d", "blender_render", "/bin/sh", "-c", command)
+	// runCmd := exec.CommandContext(ctx, "docker", "run", "--name", n, "-v", bindPath, "-d", "blendergrid/blender", blenderArgs)
+	runCmd := exec.CommandContext(ctx, "docker", dockerArgs...)
 	videoRenderingLogger.Logger.Info("Starting docker: %s", runCmd.String())
 	err = runCmd.Run()
 	if err != nil {
