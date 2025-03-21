@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"time"
 
@@ -73,10 +74,14 @@ func renderVideoFrame(ctx context.Context, cid string, frameNumber int64, id str
 	var blenderArgs []string
 	blenderArgs = append(blenderArgs, "--background")
 	blenderArgs = append(blenderArgs, fmt.Sprintf("/workspace/%s", cid))
-	blenderArgs = append(blenderArgs, "--engine CYCLES")
-	blenderArgs = append(blenderArgs, "--render-output /workspace/output/frame_######")
-	blenderArgs = append(blenderArgs, "--render-format PNG")
-	blenderArgs = append(blenderArgs, fmt.Sprintf("--render-frame %v", frameNumber))
+	blenderArgs = append(blenderArgs, "--engine")
+	blenderArgs = append(blenderArgs, "CYCLES")
+	blenderArgs = append(blenderArgs, "--render-output")
+	blenderArgs = append(blenderArgs, "/workspace/output/frame_######")
+	blenderArgs = append(blenderArgs, "--render-format")
+	blenderArgs = append(blenderArgs, "PNG")
+	blenderArgs = append(blenderArgs, "--render-frame")
+	blenderArgs = append(blenderArgs, strconv.FormatInt(frameNumber, 10))
 	// command := fmt.Sprintf(
 	// 	"--background /workspace/%s --engine CYCLES --render-output /workspace/output/frame_######  --render-format PNG --render-frame %v",
 	// 	cid, frameNumber,
