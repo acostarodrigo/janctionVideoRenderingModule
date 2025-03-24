@@ -7,6 +7,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -72,31 +73,40 @@ func renderVideoFrame(ctx context.Context, cid string, frameNumber int64, id str
 	bindPath := fmt.Sprintf("%s:/workspace", path)
 
 	var blenderArgs []string
+	if isARM64() {
+		blenderArgs = append(blenderArgs, "blender")
+	}
 	blenderArgs = append(blenderArgs, "--background")
 	blenderArgs = append(blenderArgs, fmt.Sprintf("/workspace/%s", cid))
 	blenderArgs = append(blenderArgs, "--engine")
 	blenderArgs = append(blenderArgs, "CYCLES")
+
 	blenderArgs = append(blenderArgs, "--render-output")
 	blenderArgs = append(blenderArgs, "/workspace/output/frame_######")
 	blenderArgs = append(blenderArgs, "--render-format")
 	blenderArgs = append(blenderArgs, "PNG")
 	blenderArgs = append(blenderArgs, "--render-frame")
 	blenderArgs = append(blenderArgs, strconv.FormatInt(frameNumber, 10))
-	// command := fmt.Sprintf(
-	// 	"--background /workspace/%s --engine CYCLES --render-output /workspace/output/frame_######  --render-format PNG --render-frame %v",
-	// 	cid, frameNumber,
-	// )
+
 	var dockerArgs []string
 	dockerArgs = append(dockerArgs, "run")
+
 	dockerArgs = append(dockerArgs, "--name")
 	dockerArgs = append(dockerArgs, n)
 	dockerArgs = append(dockerArgs, "-v")
 	dockerArgs = append(dockerArgs, bindPath)
 	dockerArgs = append(dockerArgs, "-d")
-	dockerArgs = append(dockerArgs, "blendergrid/blender")
+
+	// TODO if on Mac, we use another image that is non deterministic
+	if isARM64() {
+		dockerArgs = append(dockerArgs, "blender_render")
+	} else {
+		// if non Mac, this image generates deterministics results
+		dockerArgs = append(dockerArgs, "blendergrid/blender")
+	}
 	dockerArgs = append(dockerArgs, blenderArgs...)
+
 	// Create and start the container
-	// runCmd := exec.CommandContext(ctx, "docker", "run", "--name", n, "-v", bindPath, "-d", "blendergrid/blender", blenderArgs)
 	runCmd := exec.CommandContext(ctx, "docker", dockerArgs...)
 	videoRenderingLogger.Logger.Info("Starting docker: %s", runCmd.String())
 	err = runCmd.Run()
@@ -171,4 +181,9 @@ func CountFilesInDirectory(directoryPath string) int {
 // FormatFrameFilename returns the correct filename for a given frame number.
 func FormatFrameFilename(frameNumber int) string {
 	return fmt.Sprintf("frame_%06d.png", frameNumber)
+}
+
+func isARM64() bool {
+	videoRenderingLogger.Logger.Debug("isARM64: %s", runtime.GOARCH)
+	return runtime.GOARCH == "arm64"
 }
