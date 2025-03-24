@@ -12,7 +12,13 @@ import (
 	_ "github.com/mattn/go-sqlite3" // SQLite driver
 )
 
-// thread represents a video rendering task.
+// Task represents a video rendering task.
+type Task struct {
+	ID             string
+	WorkSubscribed bool
+}
+
+// thread represents a video rendering thread.
 type Thread struct {
 	ID                  string
 	WorkStarted         bool
@@ -59,6 +65,10 @@ func Init(databasePath string) (*DB, error) {
 	}
 
 	createTables := `
+    CREATE TABLE IF NOT EXISTS tasks (
+        id TEXT PRIMARY KEY,
+		worker_subscribed BOOLEAN
+	);
     CREATE TABLE IF NOT EXISTS threads (
         id TEXT PRIMARY KEY,
 		work_started BOOLEAN,
@@ -94,6 +104,45 @@ func Init(databasePath string) (*DB, error) {
 // Close closes the database connection.
 func (db *DB) Close() error {
 	return db.conn.Close()
+}
+
+// Createthread inserts a new thread into the database.
+func (db *DB) AddTask(id string) error {
+	insertQuery := `INSERT INTO tasks (id, worker_subscribed) VALUES (?, false)`
+	_, err := db.conn.Exec(insertQuery, id)
+	if err != nil {
+		return fmt.Errorf("failed to insert task: %w", err)
+	}
+
+	return nil
+}
+
+// Readthread retrieves a thread by ID.
+func (db *DB) ReadTask(id string) (*Task, error) {
+	query := `SELECT id, worker_subscribed  FROM tasks WHERE id = ?`
+	row := db.conn.QueryRow(query, id)
+
+	var task Task
+	if err := row.Scan(&task.ID, &task.WorkSubscribed); err != nil {
+		if err == sql.ErrNoRows {
+			// thead doesn't exists, so we insert it
+			db.AddTask(id)
+			return &Task{ID: id, WorkSubscribed: false}, nil
+		}
+		return nil, fmt.Errorf("failed to read thread: %w", err)
+	}
+
+	return &task, nil
+}
+
+// Updatethread updates a task's information.
+func (db *DB) UpdateTask(id string, workerSubscribed bool) error {
+	updateQuery := `UPDATE tasks SET worker_subscribed = ? WHERE id = ?`
+	_, err := db.conn.Exec(updateQuery, workerSubscribed, id)
+	if err != nil {
+		return fmt.Errorf("failed to update task: %w", err)
+	}
+	return nil
 }
 
 // Createthread inserts a new thread into the database.

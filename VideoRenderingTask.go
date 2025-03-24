@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/cosmos/cosmos-sdk/types"
+	"github.com/janction/videoRendering/db"
 )
 
 func (VideoRenderingTask) Validate() error {
@@ -59,7 +60,8 @@ func splitFrames(startFrame, endFrame, threads int) []frameRange {
 	return result
 }
 
-func (t *VideoRenderingTask) SubscribeWorkerToTask(ctx context.Context, workerAddress string) error {
+func (t *VideoRenderingTask) SubscribeWorkerToTask(ctx context.Context, workerAddress, taskId string, db *db.DB) error {
+	db.UpdateTask(taskId, true)
 	// TODO call cmd with message subscribeWorkerToTask
 	args := []string{
 		"tx", "videoRendering", "subscribe-worker-to-task",
@@ -67,6 +69,7 @@ func (t *VideoRenderingTask) SubscribeWorkerToTask(ctx context.Context, workerAd
 	}
 	err := ExecuteCli(args)
 	if err != nil {
+		db.UpdateTask(taskId, false)
 		return err
 	}
 	return nil

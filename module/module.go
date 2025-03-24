@@ -262,9 +262,11 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 			videoRenderingLogger.Logger.Info(" worker %v is idle ", worker.Address)
 			found, task := am.getPendingVideoRenderingTask(ctx)
 			if found {
-				videoRenderingLogger.Logger.Info(" registering worker %v in task %v ", worker.Address, task.TaskId)
-				go task.SubscribeWorkerToTask(ctx, worker.Address)
-
+				dbTask, _ := k.DB.ReadTask(task.TaskId)
+				if !dbTask.WorkSubscribed {
+					videoRenderingLogger.Logger.Info(" registering worker %v in task %v ", worker.Address, task.TaskId)
+					go task.SubscribeWorkerToTask(ctx, worker.Address, task.TaskId, &k.DB)
+				}
 			}
 		}
 	}
