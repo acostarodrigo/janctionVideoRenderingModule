@@ -159,7 +159,14 @@ func (ms msgServer) SubscribeWorkerToTask(ctx context.Context, msg *videoRenderi
 	// we get the params to get the MaxWorkersPerThread value
 	params, _ := ms.k.Params.Get(ctx)
 	for i, v := range task.Threads {
+
 		if len(v.Workers) < int(params.MaxWorkersPerThread) && !v.Completed {
+
+			if slices.Contains(v.Workers, worker.Address) {
+				videoRenderingLogger.Logger.Info("worker %s is already working at thread %s, skipping...", worker.Address, v.ThreadId)
+				return nil, nil
+			}
+
 			v.Workers = append(v.Workers, msg.Address)
 
 			ms.k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
