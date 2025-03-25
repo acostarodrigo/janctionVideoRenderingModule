@@ -197,42 +197,41 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 				videoRenderingLogger.Logger.Info("Started verification for thread %s", thread.ThreadId)
 				go thread.SubmitVerification(am.cdc, k.Configuration.WorkerName, k.Configuration.WorkerAddress, k.Configuration.RootPath, &k.DB)
 			}
-
-			// we check if we have a revealed solution waiting to be accepted
-			if len(thread.Validations) >= int(params.MinValidators) && !thread.Completed && thread.Solution.Frames[0].Cid != "" && !thread.Solution.Accepted {
-				videoRenderingLogger.Logger.Info("Solution revealed, we verify it for thread %s ", thread.ThreadId)
-
-				thread.EvaluateVerifications()
-				accepted := thread.IsSolutionAccepted()
-				if accepted {
-					// distribute rewards, upload solution, release verifiers
-					// release verifiers
-					for _, validation := range thread.Validations {
-						if validation.Validator != thread.Solution.ProposedBy {
-							worker, err := k.Workers.Get(ctx, validation.Validator)
-							if err != nil {
-								return err
-							}
-							worker.ReleaseValidator()
-							k.Workers.Set(ctx, worker.Address, worker)
-						}
-					}
-
-					// if we are the node that proposed the solution, then we upload it
-					if thread.Solution.ProposedBy == am.keeper.Configuration.WorkerAddress {
-						localThread, _ := am.keeper.DB.ReadThread(thread.ThreadId)
-						k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
-						if !localThread.SubmitionStarted {
-							go thread.SubmitSolution(ctx, am.keeper.Configuration.WorkerAddress, am.keeper.Configuration.RootPath, &am.keeper.DB)
-						}
-					}
-				} else {
-					// penalize solution provider,
-				}
-				k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
-			}
 		}
 	}
+
+	// Thread work validation can be executed by any node, being worker or not
+	// we iterate for each video rendering task, looking for pending validations
+	am.keeper.VideoRenderingTasks.Walk(ctx, nil, func(key string, task videoRendering.VideoRenderingTask) (bool, error) {
+		if !task.Completed {
+			for _, thread := range task.Threads {
+				if (len(thread.Validations) > 1 || len(thread.Validations) == len(thread.Workers)) && !thread.Completed && thread.Solution != nil && !thread.Solution.Accepted && len(thread.Solution.Frames) > 0 && thread.Solution.Frames[0].Hash != "" {
+					videoRenderingLogger.Logger.Info("Solution revealed, we verify it for thread %s ", thread.ThreadId)
+
+					thread.EvaluateVerifications()
+					accepted := thread.IsSolutionAccepted()
+					if accepted {
+						thread.Solution.Accepted = true
+						k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
+
+						// if we are the node that proposed the solution, then we upload it
+						if thread.Solution.ProposedBy == am.keeper.Configuration.WorkerAddress {
+							localThread, _ := am.keeper.DB.ReadThread(thread.ThreadId)
+							k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
+							if !localThread.SubmitionStarted {
+								go thread.SubmitSolution(ctx, am.keeper.Configuration.WorkerAddress, am.keeper.Configuration.RootPath, &am.keeper.DB)
+							}
+						}
+					} else {
+						// we might not have enought validations or solution is not valid
+						// TODO implekent
+					}
+
+				}
+			}
+		}
+		return false, nil // keep walking
+	})
 
 	return nil
 }
