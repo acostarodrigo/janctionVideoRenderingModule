@@ -178,6 +178,10 @@ func (ms msgServer) SubscribeWorkerToTask(ctx context.Context, msg *videoRenderi
 			if err != nil {
 				videoRenderingLogger.Logger.Error("error trying to update thread %s to in progress", v.ThreadId)
 			}
+			
+			// we are already subscribed, so we remove the flag
+			ms.k.DB.UpdateTask(task.TaskId, false)
+
 			return &videoRendering.MsgSubscribeWorkerToTaskResponse{ThreadId: v.ThreadId}, nil
 		}
 	}

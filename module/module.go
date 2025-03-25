@@ -270,15 +270,6 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 				}
 			}
 		}
-		// if the worker is already working on a task, we mark the subscription as false
-		// to allow it to register again on a different thread once is finished.
-		if worker.Enabled && worker.CurrentTaskId != "" {
-			dbTask, err := k.DB.ReadTask(worker.CurrentTaskId)
-			if dbTask.WorkerSubscribed || err != nil {
-				k.DB.UpdateTask(worker.CurrentTaskId, false)
-			}
-		}
-
 	}
 
 	params, _ := am.keeper.Params.Get(ctx)
