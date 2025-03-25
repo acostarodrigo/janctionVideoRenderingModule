@@ -260,8 +260,10 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 			// we find any task in progress that has enought reward
 			videoRenderingLogger.Logger.Info(" worker %v is idle ", worker.Address)
 			found, task := am.getPendingVideoRenderingTask(ctx)
+			videoRenderingLogger.Logger.Debug("Found task: %v, taskId: %s", found, task.TaskId)
 			if found {
 				dbTask, _ := k.DB.ReadTask(task.TaskId)
+				videoRenderingLogger.Logger.Debug("dbTask subscribed: %v, taskId: %s", dbTask.WorkSubscribed, task.TaskId)
 				if !dbTask.WorkSubscribed {
 					videoRenderingLogger.Logger.Info(" registering worker %v in task %v ", worker.Address, task.TaskId)
 					go task.SubscribeWorkerToTask(ctx, worker.Address, task.TaskId, &k.DB)
@@ -269,7 +271,7 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 			}
 		}
 		// if the worker is already working on a task, we mark the subscription as false
-		// to allow it to register again once is finished.
+		// to allow it to register again on a different thread once is finished.
 		if worker.Enabled && worker.CurrentTaskId != "" {
 			dbTask, _ := k.DB.ReadTask(worker.CurrentTaskId)
 			if dbTask.WorkSubscribed {
