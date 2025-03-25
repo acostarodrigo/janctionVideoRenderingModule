@@ -415,6 +415,12 @@ func (ms msgServer) SubmitValidation(ctx context.Context, msg *videoRendering.Ms
 	task.Threads[worker.CurrentThreadIndex].Validations = append(thread.Validations, &validation)
 	ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
 
+	// we release the worker since there is nothing else for him to do on this thread
+	if worker.Address != thread.Solution.ProposedBy {
+		worker.ReleaseValidator()
+		ms.k.Workers.Set(ctx, worker.Address, worker)
+	}
+
 	return &videoRendering.MsgSubmitValidationResponse{}, nil
 }
 
@@ -451,6 +457,9 @@ func (ms msgServer) SubmitSolution(ctx context.Context, msg *videoRendering.MsgS
 			ms.k.BankKeeper.SendCoinsFromModuleToAccount(ctx, videoRendering.ModuleName, addr, types.NewCoins(payment))
 			task.Threads[i].Solution.Dir = msg.Dir
 			ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
+
+			// should we pay here the validators?
+			// TODO Implement
 
 			// we increase the reputation of the winner
 			worker, _ := ms.k.Workers.Get(ctx, msg.Creator)
