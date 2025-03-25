@@ -394,18 +394,27 @@ func (t *VideoRenderingThread) EvaluateVerifications() error {
 // for those frames evaluated, if we have at least one that has more
 // invalid counts than valid ones, we rejected. Otherwise is accepted
 func (t *VideoRenderingThread) IsSolutionAccepted() bool {
+	validFrameCount := 0
 
-	for _, frame := range t.Solution.Frames {
-		if frame.ValidCount > 0 || frame.InvalidCount > 0 {
-			if frame.InvalidCount-frame.ValidCount >= 0 {
-				t.Solution.Accepted = false
-				return false
-			}
+	// we require only 2 valid validations (or only 1 if we only have 1 worker)
+	minValidValidations := 2
+	if len(t.Workers) == 1 {
+		minValidValidations = 1
+	}
 
+	frames := t.Solution.Frames
+	for _, frame := range frames {
+		if int(frame.ValidCount) >= minValidValidations {
+			validFrameCount++
 		}
 	}
-	t.Solution.Accepted = true
-	return true
+	required := len(frames) / 2
+	// If odd number of frames, round up (i.e. 3 of 5 required)
+	if len(frames)%2 != 0 {
+		required++
+	}
+
+	return validFrameCount >= required
 }
 
 // validates the IPFS dir contains all files in the solution
