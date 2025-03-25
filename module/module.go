@@ -264,7 +264,7 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 			if found {
 				dbTask, _ := k.DB.ReadTask(task.TaskId)
 				videoRenderingLogger.Logger.Debug("dbTask subscribed: %v, taskId: %s", dbTask.WorkSubscribed, task.TaskId)
-				if !dbTask.WorkSubscribed {
+				if !dbTask.WorkerSubscribed {
 					videoRenderingLogger.Logger.Info(" registering worker %v in task %v ", worker.Address, task.TaskId)
 					go task.SubscribeWorkerToTask(ctx, worker.Address, task.TaskId, &k.DB)
 				}
@@ -273,9 +273,9 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 		// if the worker is already working on a task, we mark the subscription as false
 		// to allow it to register again on a different thread once is finished.
 		if worker.Enabled && worker.CurrentTaskId != "" {
-			dbTask, _ := k.DB.ReadTask(worker.CurrentTaskId)
-			if dbTask.WorkSubscribed {
-				k.DB.UpdateTask(dbTask.ID, false)
+			dbTask, err := k.DB.ReadTask(worker.CurrentTaskId)
+			if dbTask.WorkerSubscribed || err != nil {
+				k.DB.UpdateTask(worker.CurrentTaskId, false)
 			}
 		}
 
@@ -296,19 +296,6 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 						videoRenderingLogger.Logger.Info("Time to reveal solution!!!!!!")
 						go thread.RevealSolution(am.keeper.Configuration.RootPath, &k.DB)
 					}
-
-					// log.Println("we are ready to validate", thread.ThreadId)
-					// am.EvaluateCompletedThread(ctx, &task, k)
-
-					// // PAY to validators
-
-					// // if we are the node that proposed the solution, then we upload it
-					// if thread.Solution.ProposedBy == am.keeper.Configuration.WorkerAddress {
-					// 	localThread, _ := am.keeper.DB.ReadThread(thread.ThreadId)
-					// 	if !localThread.SubmitionStarted {
-					// 		go thread.SubmitSolution(ctx, am.keeper.Configuration.WorkerAddress, am.keeper.Configuration.RootPath, &am.keeper.DB)
-					// 	}
-					// }
 				}
 			}
 		}

@@ -14,8 +14,8 @@ import (
 
 // Task represents a video rendering task.
 type Task struct {
-	ID             string
-	WorkSubscribed bool
+	ID               string
+	WorkerSubscribed bool
 }
 
 // thread represents a video rendering thread.
@@ -123,11 +123,11 @@ func (db *DB) ReadTask(id string) (*Task, error) {
 	row := db.conn.QueryRow(query, id)
 
 	var task Task
-	if err := row.Scan(&task.ID, &task.WorkSubscribed); err != nil {
+	if err := row.Scan(&task.ID, &task.WorkerSubscribed); err != nil {
 		if err == sql.ErrNoRows {
 			// thead doesn't exists, so we insert it
 			db.AddTask(id)
-			return &Task{ID: id, WorkSubscribed: false}, nil
+			return &Task{ID: id, WorkerSubscribed: false}, nil
 		}
 		return nil, fmt.Errorf("failed to read thread: %w", err)
 	}
