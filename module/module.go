@@ -263,7 +263,7 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 			videoRenderingLogger.Logger.Debug("Found task: %v, taskId: %s", found, task.TaskId)
 			if found {
 				dbTask, _ := k.DB.ReadTask(task.TaskId)
-				videoRenderingLogger.Logger.Debug("dbTask subscribed: %v, taskId: %s", dbTask.WorkSubscribed, task.TaskId)
+				videoRenderingLogger.Logger.Debug("dbTask subscribed: %v, taskId: %s", dbTask.WorkerSubscribed, task.TaskId)
 				if !dbTask.WorkerSubscribed {
 					videoRenderingLogger.Logger.Info(" registering worker %v in task %v ", worker.Address, task.TaskId)
 					go task.SubscribeWorkerToTask(ctx, worker.Address, task.TaskId, &k.DB)
