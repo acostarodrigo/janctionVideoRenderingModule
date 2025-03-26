@@ -121,7 +121,6 @@ func (am AppModule) ExportGenesis(ctx sdk.Context, cdc codec.JSONCodec) json.Raw
 }
 
 func (am AppModule) getPendingVideoRenderingTask(ctx context.Context) (bool, videoRendering.VideoRenderingTask) {
-	// TODO move this to global parameters
 	params, _ := am.keeper.Params.Get(ctx)
 	ti, err := am.keeper.VideoRenderingTaskInfo.Get(ctx)
 
@@ -262,11 +261,17 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 			found, task := am.getPendingVideoRenderingTask(ctx)
 			videoRenderingLogger.Logger.Debug("Found task: %v, taskId: %s", found, task.TaskId)
 			if found {
-				dbTask, _ := k.DB.ReadTask(task.TaskId)
-				videoRenderingLogger.Logger.Debug("dbTask subscribed: %v, taskId: %s", dbTask.WorkerSubscribed, task.TaskId)
-				if !dbTask.WorkerSubscribed {
-					videoRenderingLogger.Logger.Info(" registering worker %v in task %v ", worker.Address, task.TaskId)
-					go task.SubscribeWorkerToTask(ctx, worker.Address, task.TaskId, &k.DB)
+				params, _ := am.keeper.Params.Get(ctx)
+				for _, value := range task.Threads {
+					if !value.Completed && len(value.Workers) < int(params.MaxWorkersPerThread) {
+						//we found our next thread
+						dbTask, _ := k.DB.ReadTask(task.TaskId, value.ThreadId)
+						if !dbTask.WorkerSubscribed {
+							videoRenderingLogger.Logger.Info(" registering worker %v in task %s thread %s ", worker.Address, task.TaskId, value.ThreadId)
+							go task.SubscribeWorkerToTask(ctx, worker.Address, task.TaskId, value.ThreadId, &k.DB)
+							break
+						}
+					}
 				}
 			}
 		}

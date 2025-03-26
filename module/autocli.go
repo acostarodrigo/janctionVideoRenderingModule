@@ -57,13 +57,14 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "SubscribeWorkerToTask",
-					Use:       "subscribe-worker-to-task [address] [taskId] --from [workerAddress]",
+					Use:       "subscribe-worker-to-task [address] [taskId] [threadId] --from [workerAddress]",
 					Short:     "Subscribes an existing enabled worker to perform work in the specified task",
 					Long:      "", // TODO Add long
 					Example:   "", // TODO add exampe
 					PositionalArgs: []*autocliv1.PositionalArgDescriptor{
 						{ProtoField: "address"},
 						{ProtoField: "taskId"},
+						{ProtoField: "threadId"},
 					},
 				},
 				{

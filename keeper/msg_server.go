@@ -133,8 +133,7 @@ func (ms msgServer) AddWorker(ctx context.Context, msg *videoRendering.MsgAddWor
 }
 
 func (ms msgServer) SubscribeWorkerToTask(ctx context.Context, msg *videoRendering.MsgSubscribeWorkerToTask) (*videoRendering.MsgSubscribeWorkerToTaskResponse, error) {
-
-	videoRenderingLogger.Logger.Info("SubscribeWorkerToTask - address: %s, taskId: %s", msg.Address, msg.TaskId)
+	videoRenderingLogger.Logger.Info("SubscribeWorkerToTask - address: %s, taskId: %s, threadId: %s", msg.Address, msg.TaskId, msg.ThreadId)
 
 	worker, err := ms.k.Workers.Get(ctx, msg.Address)
 	if err != nil {
@@ -159,30 +158,28 @@ func (ms msgServer) SubscribeWorkerToTask(ctx context.Context, msg *videoRenderi
 	// we get the params to get the MaxWorkersPerThread value
 	params, _ := ms.k.Params.Get(ctx)
 	for i, v := range task.Threads {
+		if v.ThreadId == msg.ThreadId {
+			if len(v.Workers) < int(params.MaxWorkersPerThread) && !v.Completed {
 
-		if len(v.Workers) < int(params.MaxWorkersPerThread) && !v.Completed {
+				if slices.Contains(v.Workers, worker.Address) {
+					videoRenderingLogger.Logger.Info("worker %s is already working at thread %s, skipping...", worker.Address, v.ThreadId)
+					return nil, nil
+				}
 
-			if slices.Contains(v.Workers, worker.Address) {
-				videoRenderingLogger.Logger.Info("worker %s is already working at thread %s, skipping...", worker.Address, v.ThreadId)
-				return nil, nil
+				v.Workers = append(v.Workers, msg.Address)
+
+				ms.k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
+				worker.CurrentTaskId = task.TaskId
+				worker.CurrentThreadIndex = int32(i)
+				ms.k.Workers.Set(ctx, msg.Address, worker)
+
+				err := ms.k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
+				if err != nil {
+					videoRenderingLogger.Logger.Error("error trying to update thread %s to in progress", v.ThreadId)
+				}
+
+				return &videoRendering.MsgSubscribeWorkerToTaskResponse{ThreadId: v.ThreadId}, nil
 			}
-
-			v.Workers = append(v.Workers, msg.Address)
-
-			ms.k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
-			worker.CurrentTaskId = task.TaskId
-			worker.CurrentThreadIndex = int32(i)
-			ms.k.Workers.Set(ctx, msg.Address, worker)
-
-			err := ms.k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
-			if err != nil {
-				videoRenderingLogger.Logger.Error("error trying to update thread %s to in progress", v.ThreadId)
-			}
-			
-			// we are already subscribed, so we remove the flag
-			ms.k.DB.UpdateTask(task.TaskId, false)
-
-			return &videoRendering.MsgSubscribeWorkerToTaskResponse{ThreadId: v.ThreadId}, nil
 		}
 	}
 	return nil, nil

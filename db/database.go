@@ -14,7 +14,8 @@ import (
 
 // Task represents a video rendering task.
 type Task struct {
-	ID               string
+	TaskId           string
+	ThreadId         string
 	WorkerSubscribed bool
 }
 
@@ -66,7 +67,8 @@ func Init(databasePath string) (*DB, error) {
 
 	createTables := `
     CREATE TABLE IF NOT EXISTS tasks (
-        id TEXT PRIMARY KEY,
+        taskId TEXT PRIMARY KEY,
+        threadId TEXT,
 		worker_subscribed BOOLEAN
 	);
     CREATE TABLE IF NOT EXISTS threads (
@@ -107,9 +109,9 @@ func (db *DB) Close() error {
 }
 
 // Createthread inserts a new thread into the database.
-func (db *DB) AddTask(id string) error {
-	insertQuery := `INSERT INTO tasks (id, worker_subscribed) VALUES (?, false)`
-	_, err := db.conn.Exec(insertQuery, id)
+func (db *DB) AddTask(taskId, threadId string) error {
+	insertQuery := `INSERT INTO tasks (taskId, threadId, worker_subscribed) VALUES (?,?,false)`
+	_, err := db.conn.Exec(insertQuery, taskId, threadId)
 	if err != nil {
 		return fmt.Errorf("failed to insert task: %w", err)
 	}
@@ -118,16 +120,16 @@ func (db *DB) AddTask(id string) error {
 }
 
 // Readthread retrieves a thread by ID.
-func (db *DB) ReadTask(id string) (*Task, error) {
-	query := `SELECT id, worker_subscribed  FROM tasks WHERE id = ?`
-	row := db.conn.QueryRow(query, id)
+func (db *DB) ReadTask(taskId, threadId string) (*Task, error) {
+	query := `SELECT taskId, threadId, worker_subscribed  FROM tasks WHERE taskId = ? AND threadId = ? `
+	row := db.conn.QueryRow(query, taskId, threadId)
 
 	var task Task
-	if err := row.Scan(&task.ID, &task.WorkerSubscribed); err != nil {
+	if err := row.Scan(&task.TaskId, &task.ThreadId, &task.WorkerSubscribed); err != nil {
 		if err == sql.ErrNoRows {
 			// thead doesn't exists, so we insert it
-			db.AddTask(id)
-			return &Task{ID: id, WorkerSubscribed: false}, nil
+			db.AddTask(taskId, threadId)
+			return &Task{TaskId: taskId, ThreadId: threadId, WorkerSubscribed: false}, nil
 		}
 		return nil, fmt.Errorf("failed to read thread: %w", err)
 	}
@@ -136,9 +138,9 @@ func (db *DB) ReadTask(id string) (*Task, error) {
 }
 
 // Updatethread updates a task's information.
-func (db *DB) UpdateTask(id string, workerSubscribed bool) error {
-	updateQuery := `UPDATE tasks SET worker_subscribed = ? WHERE id = ?`
-	_, err := db.conn.Exec(updateQuery, workerSubscribed, id)
+func (db *DB) UpdateTask(taskId, threadId string, workerSubscribed bool) error {
+	updateQuery := `UPDATE tasks SET worker_subscribed = ? WHERE taskId = ? AND threadId = ? `
+	_, err := db.conn.Exec(updateQuery, workerSubscribed, taskId, threadId)
 	if err != nil {
 		return fmt.Errorf("failed to update task: %w", err)
 	}
