@@ -73,6 +73,7 @@ message MsgSubscribeWorkerToTask {
   option (cosmos.msg.v1.signer) = "address";
   string address = 1;
   string taskId = 2;
+  string threadId = 3;
 }
 
 message MsgSubscribeWorkerToTaskResponse {
