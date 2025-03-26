@@ -419,7 +419,7 @@ func (ms msgServer) SubmitValidation(ctx context.Context, msg *videoRendering.Ms
 	// we release the worker since there is nothing else for him to do on this thread
 	if worker.Address != thread.Solution.ProposedBy {
 		worker.ReleaseValidator()
-		ms.k.Workers.Set(ctx, worker.Address, worker)
+		ms.k.Workers.Set(ctx, msg.Creator, worker)
 	}
 
 	return &videoRendering.MsgSubmitValidationResponse{}, nil

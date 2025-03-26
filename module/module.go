@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"path/filepath"
+	"slices"
 	"strconv"
 
 	"cosmossdk.io/core/appmodule"
@@ -263,11 +264,13 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 			if found {
 				params, _ := am.keeper.Params.Get(ctx)
 				for _, value := range task.Threads {
-					if !value.Completed && len(value.Workers) < int(params.MaxWorkersPerThread) {
+
+					if !value.Completed && len(value.Workers) < int(params.MaxWorkersPerThread) && !slices.Contains(value.Workers, worker.Address) {
 						//we found our next thread
 						dbTask, _ := k.DB.ReadTask(task.TaskId, value.ThreadId)
 						if !dbTask.WorkerSubscribed {
 							videoRenderingLogger.Logger.Info(" registering worker %v in task %s thread %s ", worker.Address, task.TaskId, value.ThreadId)
+							k.DB.UpdateTask(task.TaskId, value.ThreadId, true)
 							go task.SubscribeWorkerToTask(ctx, worker.Address, task.TaskId, value.ThreadId, &k.DB)
 							break
 						}
