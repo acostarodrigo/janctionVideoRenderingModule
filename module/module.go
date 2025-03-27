@@ -200,7 +200,7 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 		}
 	}
 
-	// Thread work validation can be executed by any node, being worker or not
+	// Thread validationwork  can be executed by any node, being worker or not
 	// we iterate for each video rendering task, looking for pending validations
 	am.keeper.VideoRenderingTasks.Walk(ctx, nil, func(key string, task videoRendering.VideoRenderingTask) (bool, error) {
 		if !task.Completed {
@@ -217,14 +217,13 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 						// if we are the node that proposed the solution, then we upload it
 						if thread.Solution.ProposedBy == am.keeper.Configuration.WorkerAddress {
 							localThread, _ := am.keeper.DB.ReadThread(thread.ThreadId)
-							k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
 							if !localThread.SubmitionStarted {
 								go thread.SubmitSolution(ctx, am.keeper.Configuration.WorkerAddress, am.keeper.Configuration.RootPath, &am.keeper.DB)
 							}
 						}
 					} else {
 						// we might not have enought validations or solution is not valid
-						// TODO implekent
+						// TODO implement
 					}
 
 				}
@@ -276,6 +275,8 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 						}
 					}
 				}
+			} else {
+				videoRenderingLogger.Logger.Info("No video rendering tasks available for me to work on")
 			}
 		}
 	}
