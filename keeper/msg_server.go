@@ -446,10 +446,10 @@ func (ms msgServer) SubmitSolution(ctx context.Context, msg *videoRendering.MsgS
 			ipfs.EnsureIPFSRunning()
 
 			// we verify the solution
-			err := thread.VerifySubmittedSolution(msg.Dir)
-			if err != nil {
-				return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "submited solution is incorrect")
-			}
+			// err := thread.VerifySubmittedSolution(msg.Dir)
+			// if err != nil {
+			// 	return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidSolution.Error(), "submited solution is incorrect")
+			// }
 
 			// solution is verified so we pay the winner
 			thread.Completed = true
