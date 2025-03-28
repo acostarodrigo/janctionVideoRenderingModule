@@ -281,7 +281,6 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 		}
 	}
 
-	params, _ := am.keeper.Params.Get(ctx)
 	maxId, _ := k.VideoRenderingTaskInfo.Get(ctx)
 	for i := 0; i < int(maxId.NextId); i++ {
 		task, _ := k.VideoRenderingTasks.Get(ctx, strconv.Itoa(i))
