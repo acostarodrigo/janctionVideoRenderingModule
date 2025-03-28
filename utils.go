@@ -46,6 +46,10 @@ func MapToKeyValueFormat(inputMap map[string]string) []string {
 // Executes a cli command with their arguments
 func ExecuteCli(args []string) error {
 	executableName := "janctiond"
+	args = append(args, "--gas")
+	args = append(args, "auto")
+	args = append(args, "--gas-adjustment")
+	args = append(args, "1.3")
 	cmd := exec.Command(executableName, args...)
 	videoRenderingLogger.Logger.Info("Executing %s", cmd.String())
 
