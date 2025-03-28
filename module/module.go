@@ -288,7 +288,7 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 		if !task.Completed {
 			for _, thread := range task.Threads {
 				// we check if we have enought validations to reveal the solution
-				if len(thread.Validations) >= int(params.MinValidators) && !thread.Completed && thread.Solution.ProposedBy == am.keeper.Configuration.WorkerAddress {
+				if (len(thread.Validations) > 1 || len(thread.Validations) == len(thread.Workers)) && !thread.Completed && thread.Solution.ProposedBy == am.keeper.Configuration.WorkerAddress {
 
 					db, _ := k.DB.ReadThread(thread.ThreadId)
 					if !db.SolutionRevealed {
