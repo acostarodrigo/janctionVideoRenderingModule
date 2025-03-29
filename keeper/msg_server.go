@@ -168,7 +168,6 @@ func (ms msgServer) SubscribeWorkerToTask(ctx context.Context, msg *videoRenderi
 
 				v.Workers = append(v.Workers, msg.Address)
 
-				ms.k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
 				worker.CurrentTaskId = task.TaskId
 				worker.CurrentThreadIndex = int32(i)
 				ms.k.Workers.Set(ctx, msg.Address, worker)

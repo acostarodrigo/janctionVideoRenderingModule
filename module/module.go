@@ -286,14 +286,15 @@ func (am AppModule) EndBlock(ctx context.Context) error {
 		task, _ := k.VideoRenderingTasks.Get(ctx, strconv.Itoa(i))
 		if !task.Completed {
 			for _, thread := range task.Threads {
-				// we check if we have enought validations to reveal the solution
-				if (len(thread.Validations) > 1 || len(thread.Validations) == len(thread.Workers)) && !thread.Completed && thread.Solution.ProposedBy == am.keeper.Configuration.WorkerAddress {
-
-					db, _ := k.DB.ReadThread(thread.ThreadId)
-					if !db.SolutionRevealed {
-						// We have reached enought validations, if we are the winning node, is time to reveal the solution
-						videoRenderingLogger.Logger.Info("Time to reveal solution!!!!!!")
-						go thread.RevealSolution(am.keeper.Configuration.RootPath, &k.DB)
+				if len(thread.Validations) > 0 && len(thread.Workers) > 0 {
+					// we check if we have enought validations to reveal the solution
+					if (len(thread.Validations) > 1 || len(thread.Validations) == len(thread.Workers)) && !thread.Completed && thread.Solution.ProposedBy == am.keeper.Configuration.WorkerAddress {
+						db, _ := k.DB.ReadThread(thread.ThreadId)
+						if !db.SolutionRevealed {
+							// We have reached enought validations, if we are the winning node, is time to reveal the solution
+							videoRenderingLogger.Logger.Info("Time to reveal solution!!!!!!")
+							go thread.RevealSolution(am.keeper.Configuration.RootPath, &k.DB)
+						}
 					}
 				}
 			}
