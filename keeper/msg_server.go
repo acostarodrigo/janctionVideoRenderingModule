@@ -316,17 +316,6 @@ func (ms msgServer) RevealSolution(ctx context.Context, msg *videoRendering.MsgR
 		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "worker is not working on thread")
 	}
 
-	// we make sure we have enought validations
-	params, err := ms.k.Params.Get(ctx)
-	if err != nil {
-		videoRenderingLogger.Logger.Error("Getting Params: %s", err.Error())
-		return nil, err
-	}
-	if len(thread.Validations) < int(params.MinValidators) {
-		videoRenderingLogger.Logger.Error("not enought validators to perform verification")
-		return nil, sdkerrors.ErrAppConfig.Wrapf(videoRendering.ErrInvalidVerification.Error(), "not enought validators to perform verification")
-	}
-
 	// cids amount must be equal to the amount of frames
 	if len(msg.Frames) != len(thread.Solution.Frames) {
 		videoRenderingLogger.Logger.Error("invalid amount of frames for the solution")
