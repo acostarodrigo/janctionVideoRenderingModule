@@ -12,8 +12,10 @@ import (
 	"strings"
 	"time"
 
+	"github.com/docker/docker/api/types"
 	"github.com/janction/videoRendering/db"
 	"github.com/janction/videoRendering/videoRenderingLogger"
+	"github.com/moby/moby/client"
 )
 
 func IsContainerRunning(ctx context.Context, threadId string) bool {
@@ -187,4 +189,33 @@ func FormatFrameFilename(frameNumber int) string {
 func isARM64() bool {
 	videoRenderingLogger.Logger.Debug("isARM64: %s", runtime.GOARCH)
 	return runtime.GOARCH == "arm64"
+}
+
+func IsContainerExited(threadId string) (bool, error) {
+	containerName := "myBlender" + threadId
+	ctx := context.Background()
+	cli, err := client.NewClientWithOpts(client.FromEnv)
+	if err != nil {
+		return false, err
+	}
+
+	containers, err := cli.ContainerList(ctx, types.ContainerListOptions{
+		All: true, // includes exited containers
+	})
+	if err != nil {
+		return false, err
+	}
+
+	for _, container := range containers {
+		for _, name := range container.Names {
+			if name == "/"+containerName {
+				if container.State == "exited" {
+					return true, nil
+				}
+				return false, nil // exists but not exited
+			}
+		}
+	}
+
+	return false, nil // container not found
 }

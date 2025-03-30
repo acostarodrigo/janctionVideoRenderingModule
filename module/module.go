@@ -22,6 +22,7 @@ import (
 	"github.com/janction/videoRendering/ipfs"
 	"github.com/janction/videoRendering/keeper"
 	"github.com/janction/videoRendering/videoRenderingLogger"
+	"github.com/janction/videoRendering/vm"
 )
 
 var (
@@ -183,6 +184,14 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 			if thread.Solution == nil && !dbThread.WorkStarted {
 				videoRenderingLogger.Logger.Info("thread %v of task %v started", thread.ThreadId, task.TaskId)
 				go thread.StartWork(ctx, worker.Address, task.Cid, workPath, &k.DB)
+			} else {
+				if dbThread.WorkStarted {
+					// if we are already working but the container is exited, it means there was an error, so we trigger it again
+					isExited, _ := vm.IsContainerExited(thread.ThreadId)
+					if isExited {
+						go thread.StartWork(ctx, worker.Address, task.Cid, workPath, &k.DB)
+					}
+				}
 			}
 
 			// we completed the work, so lets propose a solution
