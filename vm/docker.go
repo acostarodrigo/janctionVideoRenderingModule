@@ -1,6 +1,7 @@
 package vm
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"fmt"
@@ -12,10 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/docker/docker/api/types"
 	"github.com/janction/videoRendering/db"
 	"github.com/janction/videoRendering/videoRenderingLogger"
-	"github.com/moby/moby/client"
 )
 
 func IsContainerRunning(ctx context.Context, threadId string) bool {
@@ -193,29 +192,21 @@ func isARM64() bool {
 
 func IsContainerExited(threadId string) (bool, error) {
 	containerName := "myBlender" + threadId
-	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv)
-	if err != nil {
+	cmd := exec.Command(
+		"docker", "ps", "-a",
+		"--filter", "name="+containerName,
+		"--filter", "status=exited",
+		"--format", "{{.Names}}",
+	)
+
+	var out bytes.Buffer
+	cmd.Stdout = &out
+
+	if err := cmd.Run(); err != nil {
 		return false, err
 	}
 
-	containers, err := cli.ContainerList(ctx, types.ContainerListOptions{
-		All: true, // includes exited containers
-	})
-	if err != nil {
-		return false, err
-	}
-
-	for _, container := range containers {
-		for _, name := range container.Names {
-			if name == "/"+containerName {
-				if container.State == "exited" {
-					return true, nil
-				}
-				return false, nil // exists but not exited
-			}
-		}
-	}
-
-	return false, nil // container not found
+	// Trim and check if the container name appears in output
+	result := strings.TrimSpace(out.String())
+	return result == containerName, nil
 }
