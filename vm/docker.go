@@ -143,6 +143,7 @@ func renderVideoFrame(ctx context.Context, cid string, frameNumber int64, id str
 	difference := time.Unix(finish, 0).Sub(time.Unix(started, 0))
 	if _, err := os.Stat(framePath); errors.Is(err, os.ErrNotExist) {
 		db.AddLogEntry(id, fmt.Sprintf("Error while rendering frame %v. %s file is not there", frameNumber, framePath), started, 2)
+		renderVideoFrame(ctx, cid, frameNumber, id, path, db)
 	} else {
 		db.AddLogEntry(id, fmt.Sprintf("Successfully rendered frame %v in %v seconds.", frameNumber, int(difference.Seconds())), finish, 1)
 	}
