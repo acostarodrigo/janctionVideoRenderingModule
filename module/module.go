@@ -187,8 +187,12 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 			} else {
 				if dbThread.WorkStarted {
 					// if we are already working but the container is exited, it means there was an error, so we trigger it again
-					isExited, _ := vm.IsContainerExited(thread.ThreadId)
+					isExited, err := vm.IsContainerExited(thread.ThreadId)
+					if err != nil {
+						videoRenderingLogger.Logger.Error("unable to determine if container myBlender%s is running: %s", thread.ThreadId, err.Error())
+					}
 					if isExited {
+						videoRenderingLogger.Logger.Info("container myBlender%s is existed. We restarted", thread.ThreadId)
 						go thread.StartWork(ctx, worker.Address, task.Cid, workPath, &k.DB)
 					}
 				}
