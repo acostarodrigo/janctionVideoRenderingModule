@@ -450,6 +450,18 @@ func (ms msgServer) SubmitSolution(ctx context.Context, msg *videoRendering.MsgS
 			// should we pay here the validators?
 			// TODO Implement
 
+			// a worker which didn't submit a validation might still be working on this task
+			// we release them
+			for _, val := range thread.Workers {
+				worker, _ := ms.k.Workers.Get(ctx, val)
+				if task.TaskId == worker.CurrentTaskId && thread.ThreadId == task.Threads[worker.CurrentThreadIndex].ThreadId {
+					// this worker is still active but work is completed. we release him
+					worker.CurrentTaskId = ""
+					worker.CurrentThreadIndex = 0
+					ms.k.Workers.Set(ctx, worker.Address, worker)
+				}
+			}
+
 			// we increase the reputation of the winner
 			worker, _ := ms.k.Workers.Get(ctx, msg.Creator)
 			worker.DeclareWinner(payment)
