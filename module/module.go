@@ -213,19 +213,20 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 					if accepted {
 						thread.Solution.Accepted = true
 						k.VideoRenderingTasks.Set(ctx, task.TaskId, task)
-
-						// if we are the node that proposed the solution, then we upload it
-						if thread.Solution.ProposedBy == am.keeper.Configuration.WorkerAddress {
-							localThread, _ := am.keeper.DB.ReadThread(thread.ThreadId)
-							if !localThread.SubmitionStarted {
-								go thread.SubmitSolution(ctx, am.keeper.Configuration.WorkerAddress, am.keeper.Configuration.RootPath, &am.keeper.DB)
-							}
-						}
 					} else {
 						// we might not have enought validations or solution is not valid
 						// TODO implement
 					}
 
+				}
+
+				// if we are the node that needs to submit the solution of an accepted thread
+				// then we so it here
+				if thread.Solution.Accepted && thread.Solution.Dir == "" && thread.Solution.ProposedBy == am.keeper.Configuration.WorkerAddress {
+					localThread, _ := am.keeper.DB.ReadThread(thread.ThreadId)
+					if !localThread.SubmitionStarted {
+						go thread.SubmitSolution(ctx, am.keeper.Configuration.WorkerAddress, am.keeper.Configuration.RootPath, &am.keeper.DB)
+					}
 				}
 			}
 		}
