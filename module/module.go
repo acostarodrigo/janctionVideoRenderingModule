@@ -222,7 +222,7 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 
 				// if we are the node that needs to submit the solution of an accepted thread
 				// then we so it here
-				if thread.Solution.Accepted && thread.Solution.Dir == "" && thread.Solution.ProposedBy == am.keeper.Configuration.WorkerAddress {
+				if thread.Solution != nil && thread.Solution.Accepted && thread.Solution.Dir == "" && thread.Solution.ProposedBy == am.keeper.Configuration.WorkerAddress {
 					localThread, _ := am.keeper.DB.ReadThread(thread.ThreadId)
 					if !localThread.SubmitionStarted {
 						go thread.SubmitSolution(ctx, am.keeper.Configuration.WorkerAddress, am.keeper.Configuration.RootPath, &am.keeper.DB)
