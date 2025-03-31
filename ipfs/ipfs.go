@@ -260,3 +260,15 @@ func GetIPFSPeerID() (string, error) {
 func GenerateSwarmConnectURL(ip, peerID string) (string, error) {
 	return fmt.Sprintf("/ip4/%s/tcp/4001/p2p/%s", ip, peerID), nil
 }
+
+// Checks at the specified path if a file exists. This path will be tipically
+// .janctiond/renders/[threadId]. If IPFS started downloading a file, a temp file will exists
+// if it is empty, it is safe to assume download hasn't started and probably won't
+func IsDownloadStarted(dir string) bool {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return false // directory doesn't exist or isn't readable
+	}
+
+	return len(entries) > 0 // true if there's at least one file or subdir
+}

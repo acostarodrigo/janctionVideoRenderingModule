@@ -22,7 +22,7 @@ import (
 func (t *VideoRenderingThread) StartWork(ctx context.Context, worker string, cid string, path string, db *db.DB) error {
 	// ctx := context.Background()
 
-	if err := db.UpdateThread(t.ThreadId, true, false, false, false, false, false); err != nil {
+	if err := db.UpdateThread(t.ThreadId, false, false, true, false, false, false, false, false); err != nil {
 		videoRenderingLogger.Logger.Error("Unable to update thread status, err: %s", err.Error())
 	}
 
@@ -38,11 +38,21 @@ func (t *VideoRenderingThread) StartWork(ctx context.Context, worker string, cid
 		started := time.Now().Unix()
 		ipfs.EnsureIPFSRunning()
 		db.AddLogEntry(t.ThreadId, fmt.Sprintf("Started downloading IPFS file %s...", cid), started, 0)
+		if err := db.UpdateThread(t.ThreadId, true, false, true, false, false, false, false, false); err != nil {
+			videoRenderingLogger.Logger.Error("Unable to update thread status, err: %s", err.Error())
+		}
 		err := ipfs.IPFSGet(cid, path)
 		if err != nil {
+			if err := db.UpdateThread(t.ThreadId, true, false, true, false, false, false, false, false); err != nil {
+				videoRenderingLogger.Logger.Error("Unable to update thread status, err: %s", err.Error())
+			}
 			db.AddLogEntry(t.ThreadId, fmt.Sprintf("Error getting IPFS file %s. %s", cid, err.Error()), started, 2)
 			videoRenderingLogger.Logger.Error("Error getting cid %s", cid)
 			return err
+		}
+		// download completed successfuly
+		if err := db.UpdateThread(t.ThreadId, true, true, true, false, false, false, false, false); err != nil {
+			videoRenderingLogger.Logger.Error("Unable to update thread status, err: %s", err.Error())
 		}
 
 		finish := time.Now().Unix()
@@ -60,16 +70,16 @@ func (t *VideoRenderingThread) StartWork(ctx context.Context, worker string, cid
 			// output path was not created so no rendering happened. we will start over
 			videoRenderingLogger.Logger.Error("Unable to complete rendering of task, retrying. No files at %s", rendersPath)
 
-			db.UpdateThread(t.ThreadId, false, false, false, false, false, false)
+			db.UpdateThread(t.ThreadId, true, true, false, false, false, false, false, false)
 			return nil
 		}
 		files, _ := os.ReadDir(rendersPath)
 		if len(files) != int(t.EndFrame)-int(t.StartFrame)+1 {
-			db.UpdateThread(t.ThreadId, false, false, false, false, false, false)
+			db.UpdateThread(t.ThreadId, true, true, false, false, false, false, false, false)
 			videoRenderingLogger.Logger.Error("Not the amount we expected. retrying. Amount of files %v", len(files))
 			return nil
 		}
-		db.UpdateThread(t.ThreadId, true, true, false, false, false, false)
+		db.UpdateThread(t.ThreadId, true, true, true, true, false, false, false, false)
 		db.AddLogEntry(t.ThreadId, fmt.Sprintf("Thread %s completed succesfully in %v seconds.", t.ThreadId, int(difference.Seconds())), finish, 1)
 	} else {
 		// Container is running, so we update worker status
@@ -82,28 +92,28 @@ func (t *VideoRenderingThread) StartWork(ctx context.Context, worker string, cid
 }
 
 func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAddress string, rootPath string, db *db.DB) error {
-	db.UpdateThread(t.ThreadId, true, true, true, false, false, false)
+	db.UpdateThread(t.ThreadId, true, true, true, true, true, false, false, false)
 
 	output := path.Join(rootPath, "renders", t.ThreadId, "output")
 	count := vm.CountFilesInDirectory(output)
 
 	if count != (int(t.EndFrame)-int(t.StartFrame))+1 {
 		videoRenderingLogger.Logger.Error("not enought local frames to propose solution: %v", count)
-		db.UpdateThread(t.ThreadId, true, true, false, false, false, false)
+		db.UpdateThread(t.ThreadId, true, true, true, true, false, false, false, false)
 		return nil
 	}
 
 	hashes, err := GenerateDirectoryFileHashes(output)
 	if err != nil {
 		videoRenderingLogger.Logger.Error("Unable to calculate CIDs: %s", err.Error())
-		db.UpdateThread(t.ThreadId, true, true, false, false, false, false)
+		db.UpdateThread(t.ThreadId, true, true, true, true, false, false, false, false)
 		return err
 	}
 
 	pkey, err := videoRenderingCrypto.ExtractPublicKey(rootPath, alias, codec)
 	if err != nil {
 		videoRenderingLogger.Logger.Error("Unable to extract public key for alias %s at path %s: %s", alias, rootPath, err.Error())
-		db.UpdateThread(t.ThreadId, true, true, false, false, false, false)
+		db.UpdateThread(t.ThreadId, true, true, true, true, false, false, false, false)
 		return err
 	}
 
@@ -114,7 +124,7 @@ func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAd
 
 		if err != nil {
 			videoRenderingLogger.Logger.Error("Unable to generate message for worker %s and hash %s: %s", workerAddress, hash, err.Error())
-			db.UpdateThread(t.ThreadId, true, true, false, false, false, false)
+			db.UpdateThread(t.ThreadId, true, true, true, true, false, false, false, false)
 			return err
 		}
 
@@ -122,7 +132,7 @@ func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAd
 
 		if err != nil {
 			videoRenderingLogger.Logger.Error("Unable to sign message for worker %s and hash %s: %s", workerAddress, hash, err.Error())
-			db.UpdateThread(t.ThreadId, true, true, false, false, false, false)
+			db.UpdateThread(t.ThreadId, true, true, true, true, false, false, false, false)
 			return err
 		}
 		// We rewrite the hash with the signature
@@ -132,7 +142,7 @@ func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAd
 	solution := MapToKeyValueFormat(hashes)
 	if err != nil {
 		videoRenderingLogger.Logger.Error("Unable to get hashes in path %s. %s", rootPath, err.Error())
-		db.UpdateThread(t.ThreadId, true, true, false, false, false, false)
+		db.UpdateThread(t.ThreadId, true, true, true, true, false, false, false, false)
 		return err
 	}
 
@@ -161,12 +171,12 @@ func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAd
 
 func (t VideoRenderingThread) SubmitVerification(codec codec.Codec, alias, workerAddress string, rootPath string, db *db.DB) error {
 	// we will verify any file we already have rendered.
-	db.UpdateThread(t.ThreadId, true, true, true, true, false, false)
+	db.UpdateThread(t.ThreadId, true, true, true, true, true, true, false, false)
 	output := path.Join(rootPath, "renders", t.ThreadId, "output")
 	files := vm.CountFilesInDirectory(rootPath)
 	if files == 0 {
 		videoRenderingLogger.Logger.Error("found %v files in path %s", files, rootPath)
-		db.UpdateThread(t.ThreadId, true, true, true, false, false, false)
+		db.UpdateThread(t.ThreadId, true, true, true, true, true, false, false, false)
 		return nil
 	}
 
@@ -175,14 +185,14 @@ func (t VideoRenderingThread) SubmitVerification(codec codec.Codec, alias, worke
 
 	if err != nil {
 		videoRenderingLogger.Logger.Error("error getting hashes. Err: %s", err.Error())
-		db.UpdateThread(t.ThreadId, true, true, true, false, false, false)
+		db.UpdateThread(t.ThreadId, true, true, true, true, true, false, false, false)
 		return err
 	}
 
 	publicKey, err := videoRenderingCrypto.GetPublicKey(rootPath, alias, codec)
 	if err != nil {
 		videoRenderingLogger.Logger.Error("Error getting public key for alias %s at path %s: %s", alias, rootPath, err.Error())
-		db.UpdateThread(t.ThreadId, true, true, true, false, false, false)
+		db.UpdateThread(t.ThreadId, true, true, true, true, true, false, false, false)
 		return err
 	}
 
@@ -190,7 +200,7 @@ func (t VideoRenderingThread) SubmitVerification(codec codec.Codec, alias, worke
 		message, err := videoRenderingCrypto.GenerateSignableMessage(hash, workerAddress)
 		if err != nil {
 			videoRenderingLogger.Logger.Error("unable to generate message to sign %s: %s", message, err.Error())
-			db.UpdateThread(t.ThreadId, true, true, true, false, false, false)
+			db.UpdateThread(t.ThreadId, true, true, true, true, true, false, false, false)
 			return err
 		}
 
@@ -198,7 +208,7 @@ func (t VideoRenderingThread) SubmitVerification(codec codec.Codec, alias, worke
 
 		if err != nil {
 			videoRenderingLogger.Logger.Error("unable to sign message %s: %s", message, err.Error())
-			db.UpdateThread(t.ThreadId, true, true, true, false, false, false)
+			db.UpdateThread(t.ThreadId, true, true, true, true, true, false, false, false)
 			return err
 		}
 		// we replace the hash for the signature
@@ -231,18 +241,18 @@ func submitValidation(validator string, taskId, threadId, publicKey string, sign
 }
 
 func (t VideoRenderingThread) SubmitSolution(ctx context.Context, workerAddress, rootPath string, db *db.DB) error {
-	db.UpdateThread(t.ThreadId, true, true, true, true, true, true)
+	db.UpdateThread(t.ThreadId, true, true, true, true, true, true, true, true)
 
 	db.AddLogEntry(t.ThreadId, "Submiting solution to IPFS...", time.Now().Unix(), 0)
 	cid, err := ipfs.UploadSolution(ctx, rootPath, t.ThreadId)
 	if err != nil {
-		db.UpdateThread(t.ThreadId, true, true, true, true, true, false)
+		db.UpdateThread(t.ThreadId, true, true, true, true, true, true, true, false)
 		videoRenderingLogger.Logger.Error(err.Error())
 		return err
 	}
 	err = submitSolution(workerAddress, t.TaskId, t.ThreadId, cid)
 	if err != nil {
-		db.UpdateThread(t.ThreadId, true, true, true, true, true, false)
+		db.UpdateThread(t.ThreadId, true, true, true, true, true, true, true, false)
 		db.AddLogEntry(t.ThreadId, fmt.Sprintf("Error submitting solution. %s", err.Error()), time.Now().Unix(), 2)
 		return err
 	}
@@ -340,7 +350,7 @@ func (t *VideoRenderingThread) RevealSolution(rootPath string, db *db.DB) error 
 	if err != nil {
 		return err
 	}
-	err = db.UpdateThread(t.ThreadId, true, true, true, true, true, false)
+	err = db.UpdateThread(t.ThreadId, true, true, true, true, true, true, true, false)
 	if err != nil {
 		return err
 	}

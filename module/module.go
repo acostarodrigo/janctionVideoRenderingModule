@@ -177,11 +177,11 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 			}
 			thread := *task.Threads[worker.CurrentThreadIndex]
 			dbThread, _ := k.DB.ReadThread(thread.ThreadId)
-			videoRenderingLogger.Logger.Info("local thread %s is: workStarted: %s, workCompleted: %s, solutionProposed: %s, verificationStarted: %s, solutionRevealed: %s, submitionStarted: %s", dbThread.ID, strconv.FormatBool(dbThread.WorkStarted), strconv.FormatBool(dbThread.WorkCompleted), strconv.FormatBool(dbThread.SolutionProposed), strconv.FormatBool(dbThread.VerificationStarted), strconv.FormatBool(dbThread.SolutionRevealed), strconv.FormatBool(dbThread.SubmitionStarted))
+			videoRenderingLogger.Logger.Info("local thread %s is: downloadStarted: %s, downloadCompleted: %s, workStarted: %s, workCompleted: %s, solutionProposed: %s, verificationStarted: %s, solutionRevealed: %s, submitionStarted: %s", dbThread.ID, strconv.FormatBool(dbThread.DownloadStarted), strconv.FormatBool(dbThread.DownloadCompleted), strconv.FormatBool(dbThread.WorkStarted), strconv.FormatBool(dbThread.WorkCompleted), strconv.FormatBool(dbThread.SolutionProposed), strconv.FormatBool(dbThread.VerificationStarted), strconv.FormatBool(dbThread.SolutionRevealed), strconv.FormatBool(dbThread.SubmitionStarted))
 
 			workPath := filepath.Join(k.Configuration.RootPath, "renders", thread.ThreadId)
 
-			if thread.Solution == nil && !dbThread.WorkStarted {
+			if thread.Solution == nil && !dbThread.DownloadStarted {
 				videoRenderingLogger.Logger.Info("thread %v of task %v started", thread.ThreadId, task.TaskId)
 				go thread.StartWork(ctx, worker.Address, task.Cid, workPath, &k.DB)
 			} else {
@@ -194,6 +194,17 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 					if isExited {
 						videoRenderingLogger.Logger.Info("container myBlender%s is existed. We restarted", thread.ThreadId)
 						go thread.StartWork(ctx, worker.Address, task.Cid, workPath, &k.DB)
+					}
+
+				}
+
+				// if ipfs didn't download yet, then we make sure we are still downloading a file at least
+				if !dbThread.DownloadCompleted {
+					if !ipfs.IsDownloadStarted(workPath) {
+						videoRenderingLogger.Logger.Info("IPFS hasn't downloaded any file. Resetting work...")
+						k.DB.UpdateThread(thread.ThreadId, false, false, false, false, false, false, false, false)
+					} else {
+						videoRenderingLogger.Logger.Debug("ipfs download in progress...")
 					}
 				}
 			}

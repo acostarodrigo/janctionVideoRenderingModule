@@ -22,6 +22,8 @@ type Task struct {
 // thread represents a video rendering thread.
 type Thread struct {
 	ID                  string
+	DownloadStarted     bool
+	DownloadCompleted   bool
 	WorkStarted         bool
 	WorkCompleted       bool
 	SolutionProposed    bool
@@ -73,6 +75,8 @@ func Init(databasePath string) (*DB, error) {
 	);
     CREATE TABLE IF NOT EXISTS threads (
         id TEXT PRIMARY KEY,
+		download_started BOOLEAN,
+		download_completed BOOLEAN,
 		work_started BOOLEAN,
 		work_completed BOOLEAN,
 		solution_proposed BOOLEAN,
@@ -149,7 +153,7 @@ func (db *DB) UpdateTask(taskId, threadId string, workerSubscribed bool) error {
 
 // Createthread inserts a new thread into the database.
 func (db *DB) AddThread(id string) error {
-	insertQuery := `INSERT INTO threads (id, work_started, work_completed, solution_proposed,verification_started, solution_revealed, submition_started) VALUES (?, false, false, false, false, false, false)`
+	insertQuery := `INSERT INTO threads (id, download_started, download_completed, work_started, work_completed, solution_proposed,verification_started, solution_revealed, submition_started) VALUES (?, false, false, false, false, false, false, false, false)`
 	_, err := db.conn.Exec(insertQuery, id)
 	if err != nil {
 		return fmt.Errorf("failed to insert thread: %w", err)
@@ -160,15 +164,15 @@ func (db *DB) AddThread(id string) error {
 
 // Readthread retrieves a thread by ID.
 func (db *DB) ReadThread(id string) (*Thread, error) {
-	query := `SELECT id, work_started, work_completed, solution_proposed, verification_started, solution_revealed, submition_started  FROM threads WHERE id = ?`
+	query := `SELECT id, download_started, download_completed, work_started, work_completed, solution_proposed, verification_started, solution_revealed, submition_started  FROM threads WHERE id = ?`
 	row := db.conn.QueryRow(query, id)
 
 	var thread Thread
-	if err := row.Scan(&thread.ID, &thread.WorkStarted, &thread.WorkCompleted, &thread.SolutionProposed, &thread.VerificationStarted, &thread.SolutionRevealed, &thread.SubmitionStarted); err != nil {
+	if err := row.Scan(&thread.ID, &thread.DownloadStarted, &thread.DownloadCompleted, &thread.WorkStarted, &thread.WorkCompleted, &thread.SolutionProposed, &thread.VerificationStarted, &thread.SolutionRevealed, &thread.SubmitionStarted); err != nil {
 		if err == sql.ErrNoRows {
 			// thead doesn't exists, so we insert it
 			db.AddThread(id)
-			return &Thread{ID: id, WorkStarted: false, WorkCompleted: false, SolutionProposed: false, VerificationStarted: false, SubmitionStarted: false}, nil
+			return &Thread{ID: id, DownloadStarted: false, DownloadCompleted: false, WorkStarted: false, WorkCompleted: false, SolutionProposed: false, VerificationStarted: false, SubmitionStarted: false}, nil
 		}
 		return nil, fmt.Errorf("failed to read thread: %w", err)
 	}
@@ -177,9 +181,9 @@ func (db *DB) ReadThread(id string) (*Thread, error) {
 }
 
 // Updatethread updates a task's information.
-func (db *DB) UpdateThread(id string, workStarted, workCompleted, solProposed, verificationStarted, solutionRevealed bool, submitionStarted bool) error {
-	updateQuery := `UPDATE threads SET work_started = ?, work_completed = ?, solution_proposed = ?, verification_started = ? , solution_revealed = ?, submition_started = ? WHERE id = ?`
-	_, err := db.conn.Exec(updateQuery, workStarted, workCompleted, solProposed, verificationStarted, solutionRevealed, submitionStarted, id)
+func (db *DB) UpdateThread(id string, downloadStarted, downloadCompleted, workStarted, workCompleted, solProposed, verificationStarted, solutionRevealed bool, submitionStarted bool) error {
+	updateQuery := `UPDATE threads SET download_started = ?, download_completed = ?, work_started = ?, work_completed = ?, solution_proposed = ?, verification_started = ? , solution_revealed = ?, submition_started = ? WHERE id = ?`
+	_, err := db.conn.Exec(updateQuery, downloadStarted, downloadCompleted, workStarted, workCompleted, solProposed, verificationStarted, solutionRevealed, submitionStarted, id)
 	if err != nil {
 		return fmt.Errorf("failed to update thread: %w", err)
 	}
