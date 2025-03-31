@@ -223,7 +223,13 @@ func (t VideoRenderingThread) SubmitVerification(codec codec.Codec, alias, worke
 
 	db.AddLogEntry(t.ThreadId, "Starting verification of solution...", time.Now().Unix(), 0)
 
-	submitValidation(workerAddress, t.TaskId, t.ThreadId, videoRenderingCrypto.EncodePublicKeyForCLI(publicKey), MapToKeyValueFormat(myWork))
+	err = submitValidation(workerAddress, t.TaskId, t.ThreadId, videoRenderingCrypto.EncodePublicKeyForCLI(publicKey), MapToKeyValueFormat(myWork))
+
+	if err != nil {
+		videoRenderingLogger.Logger.Error("error sending verification: %s", err.Error())
+		db.UpdateThread(t.ThreadId, true, true, true, true, true, false, false, false)
+		return err
+	}
 	db.AddLogEntry(t.ThreadId, "Solution verified", time.Now().Unix(), 0)
 	return nil
 }
