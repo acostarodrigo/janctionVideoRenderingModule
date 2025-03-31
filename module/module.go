@@ -181,7 +181,7 @@ func (am AppModule) BeginBlock(ctx context.Context) error {
 
 			workPath := filepath.Join(k.Configuration.RootPath, "renders", thread.ThreadId)
 
-			if thread.Solution == nil && !dbThread.DownloadStarted {
+			if !thread.Completed && !dbThread.DownloadStarted {
 				videoRenderingLogger.Logger.Info("thread %v of task %v started", thread.ThreadId, task.TaskId)
 				go thread.StartWork(ctx, worker.Address, task.Cid, workPath, &k.DB)
 			} else {
