@@ -173,9 +173,9 @@ func (t VideoRenderingThread) SubmitVerification(codec codec.Codec, alias, worke
 	// we will verify any file we already have rendered.
 	db.UpdateThread(t.ThreadId, true, true, true, true, true, true, false, false)
 	output := path.Join(rootPath, "renders", t.ThreadId, "output")
-	files := vm.CountFilesInDirectory(rootPath)
+	files := vm.CountFilesInDirectory(output)
 	if files == 0 {
-		videoRenderingLogger.Logger.Error("found %v files in path %s", files, rootPath)
+		videoRenderingLogger.Logger.Error("found %v files in path %s", files, output)
 		db.UpdateThread(t.ThreadId, true, true, true, true, true, false, false, false)
 		return nil
 	}
