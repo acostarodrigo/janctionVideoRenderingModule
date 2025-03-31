@@ -180,6 +180,17 @@ func (t VideoRenderingThread) SubmitVerification(codec codec.Codec, alias, worke
 		return nil
 	}
 
+	// Before we calculate verification, we need to make sure we have enought rendered files to submit one.
+	totalFiles := t.EndFrame - t.StartFrame
+	threshold := float64(totalFiles) * 0.2 // TODO this percentage should be in params
+
+	if float64(files) > threshold {
+		videoRenderingLogger.Logger.Info("rendered files %v is enought to generate verification", files)
+	} else {
+		videoRenderingLogger.Logger.Error("not enought files %v to generate validation. Rendering should continue", files)
+		db.UpdateThread(t.ThreadId, true, true, true, true, true, false, false, false)
+		return nil
+	}
 	// we do have some work, lets compare it with the solution
 	myWork, err := GenerateDirectoryFileHashes(output)
 
@@ -430,7 +441,6 @@ func (t *VideoRenderingThread) IsSolutionAccepted() bool {
 
 	return validFrameCount >= required
 }
-
 
 // validates the IPFS dir contains all files in the solution
 func (t *VideoRenderingThread) VerifySubmittedSolution(dir string) error {
