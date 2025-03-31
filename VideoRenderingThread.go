@@ -140,11 +140,6 @@ func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAd
 	}
 
 	solution := MapToKeyValueFormat(hashes)
-	if err != nil {
-		videoRenderingLogger.Logger.Error("Unable to get hashes in path %s. %s", rootPath, err.Error())
-		db.UpdateThread(t.ThreadId, true, true, true, true, false, false, false, false)
-		return err
-	}
 
 	// Base arguments
 	args := []string{
@@ -185,9 +180,9 @@ func (t VideoRenderingThread) SubmitVerification(codec codec.Codec, alias, worke
 	threshold := float64(totalFiles) * 0.2 // TODO this percentage should be in params
 
 	if float64(files) > threshold {
-		videoRenderingLogger.Logger.Info("rendered files %v is enought to generate verification", files)
+		videoRenderingLogger.Logger.Info("rendered files %v at %sis enought to generate verification", files, output)
 	} else {
-		videoRenderingLogger.Logger.Error("not enought files %v to generate validation. Rendering should continue", files)
+		videoRenderingLogger.Logger.Error("not enought files %v at %s to generate validation. Rendering should continue", files, output)
 		db.UpdateThread(t.ThreadId, true, true, true, true, true, false, false, false)
 		return nil
 	}
