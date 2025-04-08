@@ -29,6 +29,7 @@ require (
 )
 
 require (
+	bou.ke/monkey v1.0.2 // indirect
 	cosmossdk.io/log v1.4.1 // indirect
 	cosmossdk.io/store v1.1.1 // indirect
 	cosmossdk.io/x/tx v0.13.7 // indirect
