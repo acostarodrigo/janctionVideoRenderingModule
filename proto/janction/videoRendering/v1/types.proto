@@ -82,6 +82,7 @@ message VideoRenderingTask {
     repeated string workers = 6;
     Solution solution = 7;
     repeated Validation validations = 8;
+    int64 average_render_seconds = 9;
     
 
     message Solution {

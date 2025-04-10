@@ -134,6 +134,7 @@ message MsgSubmitSolution {
   string taskId = 2;
   string threadId = 3;
   string dir = 4;
+  int64 average_render_seconds = 5;
 }
 message MsgSubmitSolutionResponse {
   
