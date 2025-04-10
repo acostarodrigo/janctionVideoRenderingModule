@@ -466,6 +466,8 @@ func (ms msgServer) SubmitSolution(ctx context.Context, msg *videoRendering.MsgS
 			// we increase the reputation of the winner
 			worker, _ := ms.k.Workers.Get(ctx, msg.Creator)
 			worker.DeclareWinner(payment)
+			// we added this duration to the slice of average durations.
+			worker.Reputation.RenderDurations = append(worker.Reputation.RenderDurations, msg.AverageRenderSeconds)
 			ms.k.Workers.Set(ctx, msg.Creator, worker)
 			break
 		}
