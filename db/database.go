@@ -98,6 +98,11 @@ func Init(databasePath string) (*DB, error) {
 		address TEXT PRIMARY KEY,
 		added BOOLEAN
 	);
+	CREATE TABLE IF NOT EXISTS render_times (
+		thread_id TEXT ,
+		frame_number NUMBER,
+		render_duration NUMBER
+	);
     `
 
 	if _, err := db.Exec(createTables); err != nil {
@@ -289,4 +294,29 @@ func (db *DB) IsIPFSWorkerAdded(address string) (bool, error) {
 
 	// If the value is NULL, treat it as "not added" (false)
 	return added.Valid && added.Bool, nil
+}
+
+func (db *DB) AddRenderDuration(threadId string, threadNumber, durationInSeconds int) error {
+	insertQuery := `INSERT INTO render_times (thread_id, frame_number, render_duration) VALUES (?,?,?)`
+	_, err := db.conn.Exec(insertQuery, threadId, threadNumber, durationInSeconds)
+	if err != nil {
+		videoRenderingLogger.Logger.Error("failed to insert render duration entry: %s", err.Error())
+		return fmt.Errorf("failed to insert render duration entry: %w", err)
+	}
+
+	return nil
+}
+
+// inserts a new log entry
+func (db *DB) GetAverageRenderTime(threadId string) (int, error) {
+	query := `SELECT CAST(AVG(render_duration) AS INT)  FROM render_times WHERE thread_id = ?`
+	row := db.conn.QueryRow(query, threadId)
+
+	var avg int
+	if err := row.Scan(&avg); err != nil {
+		videoRenderingLogger.Logger.Error("failed to read render_times: %s", err.Error())
+		return 0, fmt.Errorf("failed to read thread: %w", err)
+	}
+
+	return avg, nil
 }
