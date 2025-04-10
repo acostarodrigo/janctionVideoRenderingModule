@@ -7,6 +7,7 @@ import (
 	"path"
 	"path/filepath"
 	"slices"
+	"strconv"
 	"time"
 
 	"cosmossdk.io/math"
@@ -262,7 +263,14 @@ func (t VideoRenderingThread) SubmitSolution(ctx context.Context, workerAddress,
 		videoRenderingLogger.Logger.Error(err.Error())
 		return err
 	}
-	err = submitSolution(workerAddress, t.TaskId, t.ThreadId, cid)
+
+	// we get the average duration of rendering the frames
+	duration, err := db.GetAverageRenderTime(t.ThreadId)
+	if err != nil {
+		duration = 0
+	}
+	
+	err = submitSolution(workerAddress, t.TaskId, t.ThreadId, cid, int64(duration))
 	if err != nil {
 		db.UpdateThread(t.ThreadId, true, true, true, true, true, true, true, false)
 		db.AddLogEntry(t.ThreadId, fmt.Sprintf("Error submitting solution. %s", err.Error()), time.Now().Unix(), 2)
@@ -273,7 +281,7 @@ func (t VideoRenderingThread) SubmitSolution(ctx context.Context, workerAddress,
 	return nil
 }
 
-func submitSolution(address, taskId, threadId string, cid string) error {
+func submitSolution(address, taskId, threadId string, cid string, duration int64) error {
 	args := []string{
 		"tx", "videoRendering", "submit-solution",
 		taskId, threadId,
@@ -281,6 +289,7 @@ func submitSolution(address, taskId, threadId string, cid string) error {
 
 	// Append solution arguments
 	args = append(args, cid)
+	args = append(args, strconv.FormatInt(duration, 10))
 
 	// Append flags
 	args = append(args, "--yes", "--from", address)

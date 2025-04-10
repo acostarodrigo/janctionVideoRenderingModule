@@ -414,7 +414,7 @@ func (ms msgServer) SubmitValidation(ctx context.Context, msg *videoRendering.Ms
 }
 
 func (ms msgServer) SubmitSolution(ctx context.Context, msg *videoRendering.MsgSubmitSolution) (*videoRendering.MsgSubmitSolutionResponse, error) {
-	videoRenderingLogger.Logger.Info("SubmitSolution - creator: %s, taskId: %s, threadId: %s, Dir: %s", msg.Creator, msg.TaskId, msg.ThreadId, msg.Dir)
+	videoRenderingLogger.Logger.Info("SubmitSolution - creator: %s, taskId: %s, threadId: %s, Dir: %s, AverageRenderSeconds: %v", msg.Creator, msg.TaskId, msg.ThreadId, msg.Dir, msg.AverageRenderSeconds)
 
 	task, err := ms.k.VideoRenderingTasks.Get(ctx, msg.TaskId)
 	if err != nil {
@@ -440,11 +440,12 @@ func (ms msgServer) SubmitSolution(ctx context.Context, msg *videoRendering.MsgS
 			// }
 
 			// solution is verified so we pay the winner
-			thread.Completed = true
 			addr, _ := types.AccAddressFromBech32(msg.Creator)
 			payment := task.GetWinnerReward()
 			ms.k.BankKeeper.SendCoinsFromModuleToAccount(ctx, videoRendering.ModuleName, addr, types.NewCoins(payment))
 			task.Threads[i].Solution.Dir = msg.Dir
+			task.Threads[i].AverageRenderSeconds = msg.AverageRenderSeconds
+			task.Threads[i].Completed = true
 			ms.k.VideoRenderingTasks.Set(ctx, msg.TaskId, task)
 
 			// should we pay here the validators?

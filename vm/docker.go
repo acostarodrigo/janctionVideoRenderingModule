@@ -146,7 +146,13 @@ func renderVideoFrame(ctx context.Context, cid string, frameNumber int64, id str
 		db.AddLogEntry(id, fmt.Sprintf("Error while rendering frame %v. %s file is not there", frameNumber, framePath), started, 2)
 		renderVideoFrame(ctx, cid, frameNumber, id, path, db)
 	} else {
-		db.AddLogEntry(id, fmt.Sprintf("Successfully rendered frame %v in %v seconds.", frameNumber, int(difference.Seconds())), finish, 1)
+		// we capture the duration of the rendering
+		duration := int(difference.Seconds())
+		// we add the log
+		db.AddLogEntry(id, fmt.Sprintf("Successfully rendered frame %v in %v seconds.", frameNumber, duration), finish, 1)
+		// and record the duration for the frame
+		videoRenderingLogger.Logger.Info("Recorded duration for frame %v: %v seconds", int(frameNumber), duration)
+		db.AddRenderDuration(id, int(frameNumber), duration)
 	}
 	return nil
 }

@@ -82,7 +82,7 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 				},
 				{
 					RpcMethod: "SubmitSolution",
-					Use:       "submit-solution [taskId] [threadId] [cid] --from [workerAddress]",
+					Use:       "submit-solution [taskId] [threadId] [cid] [average_render_seconds] --from [workerAddress]",
 					Short:     "Submits the cid of the directory with all the uploaded frames.",
 					Long:      "", // TODO Add long
 					Example:   "", // TODO add exampe
@@ -90,6 +90,7 @@ func (am AppModule) AutoCLIOptions() *autocliv1.ModuleOptions {
 						{ProtoField: "taskId"},
 						{ProtoField: "threadId"},
 						{ProtoField: "dir", Varargs: false},
+						{ProtoField: "average_render_seconds"},
 					},
 				},
 				{
