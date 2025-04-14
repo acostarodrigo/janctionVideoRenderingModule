@@ -54,6 +54,12 @@ type DB struct {
 	conn *sql.DB
 }
 
+type Database interface {
+	UpdateTask(taskId, threadId string, completed bool) error
+	UpdateThread(id string, downloadStarted, downloadCompleted, workStarted, workCompleted, solProposed, verificationStarted, solutionRevealed bool, submitionStarted bool) error
+	AddLogEntry(threadId, log string, timestamp, severity int64) error
+}
+
 // Init initializes the SQLite database and creates the threads table.
 func Init(databasePath string) (*DB, error) {
 	// if the path doesn't exists, it might be that client wasn't yet initialized, so we don't create it

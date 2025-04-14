@@ -9,7 +9,8 @@ import (
 	"bou.ke/monkey"
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/types"
-	"github.com/janction/videoRendering/db"
+	"github.com/janction/videoRendering/mocks"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -47,7 +48,7 @@ func TestGenerateThreads(t *testing.T) {
 }
 
 func TestSubscribeWorkerToTask(t *testing.T) {
-	mockDB := new(db.MockDB)
+	mockDB := new(mocks.DB)
 	mockDB.On("UpdateTask", "task123", "thread456", false).Return(nil)
 
 	patch := monkey.Patch(ExecuteCli, func(args []string) error {

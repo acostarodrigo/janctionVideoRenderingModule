@@ -18,7 +18,7 @@ import (
 
 func TestStartWork_ContainerRunning(t *testing.T) {
 	// 1. Setup
-	mockDB := new(db.MockDB)
+	mockDB := new(mocks.DB)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
@@ -51,7 +51,7 @@ func TestStartWork_ContainerRunning(t *testing.T) {
 
 func TestStartWork_ContainerNotRunning_IPFSRunning_IPFSGetKo(t *testing.T) {
 	// 1. Setup
-	mockDB := new(db.MockDB)
+	mockDB := new(mocks.DB)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
@@ -105,7 +105,7 @@ func TestStartWork_ContainerNotRunning_IPFSRunning_IPFSGetKo(t *testing.T) {
 
 func TestStartWork_ContainerNotRunning_IPFSRunning_IPFSGetOk_RenderVideoKo(t *testing.T) {
 	// 1. Setup
-	mockDB := new(db.MockDB)
+	mockDB := new(mocks.DB)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
@@ -187,7 +187,7 @@ func TestStartWork_ContainerNotRunning_IPFSRunning_IPFSGetOk_RenderVideoKo(t *te
 
 func TestStartWork_ContainerNotRunning_IPFSRunning_IPFSGetOk_RenderVideoOk_FilesKo(t *testing.T) {
 	// 1. Setup
-	mockDB := new(db.MockDB)
+	mockDB := new(mocks.DB)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
@@ -284,7 +284,7 @@ func TestStartWork_ContainerNotRunning_IPFSRunning_IPFSGetOk_RenderVideoOk_Files
 
 func TestStartWork_ContainerNotRunning_IPFSRunning_IPFSGetOk_RenderVideoOk_FilesOk(t *testing.T) {
 	// 1. Setup
-	mockDB := new(db.MockDB)
+	mockDB := new(mocks.DB)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
