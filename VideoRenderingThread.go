@@ -19,7 +19,7 @@ import (
 	"github.com/janction/videoRendering/vm"
 )
 
-func (t *VideoRenderingThread) StartWork(ctx context.Context, worker string, cid string, path string, db *db.DB) error {
+func (t *VideoRenderingThread) StartWork(ctx context.Context, worker string, cid string, path string, db db.Database) error {
 	// ctx := context.Background()
 
 	if err := db.UpdateThread(t.ThreadId, false, false, true, false, false, false, false, false); err != nil {
