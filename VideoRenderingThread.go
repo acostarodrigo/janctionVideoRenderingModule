@@ -91,7 +91,7 @@ func (t *VideoRenderingThread) StartWork(ctx context.Context, worker string, cid
 	return nil
 }
 
-func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAddress string, rootPath string, db *db.DB) error {
+func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAddress string, rootPath string, db db.Database) error {
 	db.UpdateThread(t.ThreadId, true, true, true, true, true, false, false, false)
 
 	output := path.Join(rootPath, "renders", t.ThreadId, "output")

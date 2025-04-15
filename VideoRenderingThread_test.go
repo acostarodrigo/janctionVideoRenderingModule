@@ -8,14 +8,21 @@ import (
 	"time"
 
 	"bou.ke/monkey"
+	"github.com/cosmos/cosmos-sdk/codec"
+	types "github.com/cosmos/cosmos-sdk/codec/types"
+	secp256k1 "github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
+	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
+	videoRenderingCrypto "github.com/janction/videoRendering/crypto"
 	"github.com/janction/videoRendering/db"
 	"github.com/janction/videoRendering/ipfs"
 	"github.com/janction/videoRendering/mocks"
 	"github.com/janction/videoRendering/vm"
 	"github.com/stretchr/testify/mock"
+
 	"github.com/stretchr/testify/require"
 )
 
+// --- Test for StartWork ---
 func TestStartWork_ContainerRunning(t *testing.T) {
 	// 1. Setup
 	mockDB := new(mocks.DB)
@@ -375,6 +382,368 @@ func TestStartWork_ContainerNotRunning_IPFSRunning_IPFSGetOk_RenderVideoOk_Files
 	// 6. Verify that we got the expected thread status (video rendering error)
 	require.NoError(t, err)
 	require.True(t, expected, "Expected thread status (no error)")
+
+	// 7. Verify mock expectations
+	mockDB.AssertExpectations(t)
+}
+
+// --- Test for ProposeSolution ---
+func TestProposeSolution_FrameAmountKo(t *testing.T) {
+	// 1. Setup
+	mockDB := new(mocks.DB)
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+	}
+	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
+	expected := false
+
+	// 2. Mock DB methods
+	mockDB.
+		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
+			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		Run(func(args mock.Arguments) {
+			// thread expected status validation
+			if args.Bool(1) == true &&
+				args.Bool(2) == true &&
+				args.Bool(3) == true &&
+				args.Bool(4) == true &&
+				args.Bool(5) == false &&
+				args.Bool(6) == false &&
+				args.Bool(7) == false &&
+				args.Bool(8) == false {
+				expected = true
+			}
+		}).
+		Return(nil).
+		Twice()
+
+	// 3. Monkey patching
+	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
+		return 1
+	})
+	defer patch1.Unpatch()
+
+	err := thread.ProposeSolution(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+
+	// 6. Verify that we got the expected thread status (frame amount error)
+	require.NoError(t, err)
+	require.True(t, expected, "Expected thread status (frame amount error)")
+
+	// 7. Verify mock expectations
+	mockDB.AssertExpectations(t)
+}
+
+func TestProposeSolution_FrameAmountOk_GenerateHashesKo(t *testing.T) {
+	// 1. Setup
+	mockDB := new(mocks.DB)
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+	}
+	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
+
+	// 2. Mock DB methods
+	mockDB.
+		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
+			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		Return(nil).
+		Twice()
+
+	// 3. Monkey patching
+	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
+		return 2
+	})
+	defer patch1.Unpatch()
+
+	patch2 := monkey.Patch(GenerateDirectoryFileHashes, func(directoryPath string) (map[string]string, error) {
+		return nil, fmt.Errorf("Generating hash error")
+	})
+	defer patch2.Unpatch()
+
+	err := thread.ProposeSolution(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+
+	// 6. Verify that we got the expected error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "Generating hash error")
+
+	// 7. Verify mock expectations
+	mockDB.AssertExpectations(t)
+}
+
+func TestProposeSolution_FrameAmountOk_GenerateHashesOk_ExtractPublicKeyKo(t *testing.T) {
+	// 1. Setup
+	mockDB := new(mocks.DB)
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+	}
+	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
+
+	// 2. Mock DB methods
+	mockDB.
+		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
+			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		Return(nil).
+		Twice()
+
+	// 3. Monkey patching
+	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
+		return 2
+	})
+	defer patch1.Unpatch()
+
+	patch2 := monkey.Patch(GenerateDirectoryFileHashes, func(directoryPath string) (map[string]string, error) {
+		return map[string]string{
+			"video1.mp4": "a1b2c3d4e5f6g7h8i9j0",
+			"video2.mp4": "1234567890abcdef1234",
+		}, nil
+	})
+	defer patch2.Unpatch()
+
+	patch3 := monkey.Patch(videoRenderingCrypto.ExtractPublicKey, func(rootDir, alias string, codec codec.Codec) (cryptotypes.PubKey, error) {
+		return secp256k1.GenPrivKey().PubKey(), fmt.Errorf("Extracting public key error")
+	})
+	defer patch3.Unpatch()
+
+	err := thread.ProposeSolution(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+
+	// 6. Verify that we got the expected error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "Extracting public key error")
+
+	// 7. Verify mock expectations
+	mockDB.AssertExpectations(t)
+}
+
+func TestProposeSolution_FrameAmountOk_GenerateHashesOk_ExtractPublicKeyOk_GenerateMessageKo(t *testing.T) {
+	// 1. Setup
+	mockDB := new(mocks.DB)
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+	}
+	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
+
+	// 2. Mock DB methods
+	mockDB.
+		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
+			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		Return(nil).
+		Twice()
+
+	// 3. Monkey patching
+	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
+		return 2
+	})
+	defer patch1.Unpatch()
+
+	patch2 := monkey.Patch(GenerateDirectoryFileHashes, func(directoryPath string) (map[string]string, error) {
+		return map[string]string{
+			"video1.mp4": "a1b2c3d4e5f6g7h8i9j0",
+			"video2.mp4": "1234567890abcdef1234",
+		}, nil
+	})
+	defer patch2.Unpatch()
+
+	patch3 := monkey.Patch(videoRenderingCrypto.ExtractPublicKey, func(rootDir, alias string, codec codec.Codec) (cryptotypes.PubKey, error) {
+		return secp256k1.GenPrivKey().PubKey(), nil
+	})
+	defer patch3.Unpatch()
+
+	patch4 := monkey.Patch(videoRenderingCrypto.GenerateSignableMessage, func(hash, workerAddr string) ([]byte, error) {
+		return []byte("fake-signable-message"), fmt.Errorf("Generating message error")
+	})
+	defer patch4.Unpatch()
+
+	err := thread.ProposeSolution(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+
+	// 6. Verify that we got the expected error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "Generating message error")
+
+	// 7. Verify mock expectations
+	mockDB.AssertExpectations(t)
+}
+
+func TestProposeSolution_FrameAmountOk_GenerateHashesOk_ExtractPublicKeyOk_GenerateMessageOk_SignMessageKo(t *testing.T) {
+	// 1. Setup
+	mockDB := new(mocks.DB)
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+	}
+	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
+
+	// 2. Mock DB methods
+	mockDB.
+		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
+			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		Return(nil).
+		Twice()
+
+	// 3. Monkey patching
+	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
+		return 2
+	})
+	defer patch1.Unpatch()
+
+	patch2 := monkey.Patch(GenerateDirectoryFileHashes, func(directoryPath string) (map[string]string, error) {
+		return map[string]string{
+			"video1.mp4": "a1b2c3d4e5f6g7h8i9j0",
+			"video2.mp4": "1234567890abcdef1234",
+		}, nil
+	})
+	defer patch2.Unpatch()
+
+	patch3 := monkey.Patch(videoRenderingCrypto.ExtractPublicKey, func(rootDir, alias string, codec codec.Codec) (cryptotypes.PubKey, error) {
+		return secp256k1.GenPrivKey().PubKey(), nil
+	})
+	defer patch3.Unpatch()
+
+	patch4 := monkey.Patch(videoRenderingCrypto.GenerateSignableMessage, func(hash, workerAddr string) ([]byte, error) {
+		return []byte("fake-signable-message"), nil
+	})
+	defer patch4.Unpatch()
+
+	patch5 := monkey.Patch(videoRenderingCrypto.SignMessage, func(rootDir, alias string, message []byte, codec codec.Codec) ([]byte, cryptotypes.PubKey, error) {
+		return []byte("fake-signable-message"), secp256k1.GenPrivKey().PubKey(), fmt.Errorf("Signing message error")
+	})
+	defer patch5.Unpatch()
+
+	err := thread.ProposeSolution(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+
+	// 6. Verify that we got the expected error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "Signing message error")
+
+	// 7. Verify mock expectations
+	mockDB.AssertExpectations(t)
+}
+
+func TestProposeSolution_FrameAmountOk_GenerateHashesOk_ExtractPublicKeyOk_GenerateMessageOk_SignMessageOk_SolutionKo(t *testing.T) {
+	// 1. Setup
+	mockDB := new(mocks.DB)
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+	}
+	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
+
+	// 2. Mock DB methods
+	mockDB.
+		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
+			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		Return(nil).
+		Once()
+
+	// 3. Monkey patching
+	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
+		return 2
+	})
+	defer patch1.Unpatch()
+
+	patch2 := monkey.Patch(GenerateDirectoryFileHashes, func(directoryPath string) (map[string]string, error) {
+		return map[string]string{
+			"video1.mp4": "a1b2c3d4e5f6g7h8i9j0",
+			"video2.mp4": "1234567890abcdef1234",
+		}, nil
+	})
+	defer patch2.Unpatch()
+
+	patch3 := monkey.Patch(videoRenderingCrypto.ExtractPublicKey, func(rootDir, alias string, codec codec.Codec) (cryptotypes.PubKey, error) {
+		return secp256k1.GenPrivKey().PubKey(), nil
+	})
+	defer patch3.Unpatch()
+
+	patch4 := monkey.Patch(videoRenderingCrypto.GenerateSignableMessage, func(hash, workerAddr string) ([]byte, error) {
+		return []byte("fake-signable-message"), nil
+	})
+	defer patch4.Unpatch()
+
+	patch5 := monkey.Patch(videoRenderingCrypto.SignMessage, func(rootDir, alias string, message []byte, codec codec.Codec) ([]byte, cryptotypes.PubKey, error) {
+		return []byte("fake-signable-message"), secp256k1.GenPrivKey().PubKey(), nil
+	})
+	defer patch5.Unpatch()
+
+	patch6 := monkey.Patch(ExecuteCli, func(args []string) error {
+		return fmt.Errorf("Solution error")
+	})
+	defer patch6.Unpatch()
+
+	err := thread.ProposeSolution(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+
+	// 6. Verify that we got the expected error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "Solution error")
+
+	// 7. Verify mock expectations
+	mockDB.AssertExpectations(t)
+}
+
+func TestProposeSolution_FrameAmountOk_GenerateHashesOk_ExtractPublicKeyOk_GenerateMessageOk_SignMessageOk_SolutionOk(t *testing.T) {
+	// 1. Setup
+	mockDB := new(mocks.DB)
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+	}
+	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
+
+	// 2. Mock DB methods
+	mockDB.
+		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
+			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		Return(nil).
+		Once()
+
+	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
+
+	// 3. Monkey patching
+	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
+		return 2
+	})
+	defer patch1.Unpatch()
+
+	patch2 := monkey.Patch(GenerateDirectoryFileHashes, func(directoryPath string) (map[string]string, error) {
+		return map[string]string{
+			"video1.mp4": "a1b2c3d4e5f6g7h8i9j0",
+			"video2.mp4": "1234567890abcdef1234",
+		}, nil
+	})
+	defer patch2.Unpatch()
+
+	patch3 := monkey.Patch(videoRenderingCrypto.ExtractPublicKey, func(rootDir, alias string, codec codec.Codec) (cryptotypes.PubKey, error) {
+		return secp256k1.GenPrivKey().PubKey(), nil
+	})
+	defer patch3.Unpatch()
+
+	patch4 := monkey.Patch(videoRenderingCrypto.GenerateSignableMessage, func(hash, workerAddr string) ([]byte, error) {
+		return []byte("fake-signable-message"), nil
+	})
+	defer patch4.Unpatch()
+
+	patch5 := monkey.Patch(videoRenderingCrypto.SignMessage, func(rootDir, alias string, message []byte, codec codec.Codec) ([]byte, cryptotypes.PubKey, error) {
+		return []byte("fake-signable-message"), secp256k1.GenPrivKey().PubKey(), nil
+	})
+	defer patch5.Unpatch()
+
+	patch6 := monkey.Patch(ExecuteCli, func(args []string) error {
+		return nil
+	})
+	defer patch6.Unpatch()
+
+	err := thread.ProposeSolution(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+
+	// 6. Verify that we got no error
+	require.NoError(t, err)
 
 	// 7. Verify mock expectations
 	mockDB.AssertExpectations(t)
