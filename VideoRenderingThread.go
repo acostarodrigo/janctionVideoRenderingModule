@@ -164,7 +164,7 @@ func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAd
 	return nil
 }
 
-func (t VideoRenderingThread) SubmitVerification(codec codec.Codec, alias, workerAddress string, rootPath string, db *db.DB) error {
+func (t VideoRenderingThread) SubmitVerification(codec codec.Codec, alias, workerAddress string, rootPath string, db db.Database) error {
 	// we will verify any file we already have rendered.
 	db.UpdateThread(t.ThreadId, true, true, true, true, true, true, false, false)
 	output := path.Join(rootPath, "renders", t.ThreadId, "output")
