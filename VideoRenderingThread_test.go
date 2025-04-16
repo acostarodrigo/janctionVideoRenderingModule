@@ -1268,3 +1268,24 @@ func TestSubmitSolution_IpfsOk_SubmitSolutionOk(t *testing.T) {
 	// Verify mock expectations
 	mockDB.AssertExpectations(t)
 }
+
+// --- Test for IsReverse ---
+func TestIsReverse(t *testing.T) {
+	thread := VideoRenderingThread{
+		Workers: []string{"alice", "bob", "carol", "dave"},
+	}
+
+	t.Run("worker in odd position returns true", func(t *testing.T) {
+		require.True(t, thread.IsReverse("bob"))  // index 1
+		require.True(t, thread.IsReverse("dave")) // index 3
+	})
+
+	t.Run("worker in even position returns false", func(t *testing.T) {
+		require.False(t, thread.IsReverse("alice")) // index 0
+		require.False(t, thread.IsReverse("carol")) // index 2
+	})
+
+	t.Run("worker not in list returns false", func(t *testing.T) {
+		require.False(t, thread.IsReverse("eve"))
+	})
+}
