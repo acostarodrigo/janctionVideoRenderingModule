@@ -8,10 +8,12 @@ import (
 	"time"
 
 	"bou.ke/monkey"
+	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/codec"
 	types "github.com/cosmos/cosmos-sdk/codec/types"
 	secp256k1 "github.com/cosmos/cosmos-sdk/crypto/keys/secp256k1"
 	cryptotypes "github.com/cosmos/cosmos-sdk/crypto/types"
+	c_types "github.com/cosmos/cosmos-sdk/types"
 	videoRenderingCrypto "github.com/janction/videoRendering/crypto"
 	"github.com/janction/videoRendering/db"
 	"github.com/janction/videoRendering/ipfs"
@@ -1287,5 +1289,42 @@ func TestIsReverse(t *testing.T) {
 
 	t.Run("worker not in list returns false", func(t *testing.T) {
 		require.False(t, thread.IsReverse("eve"))
+	})
+}
+
+// --- Test for GetValidatorReward ---
+func TestGetValidatorReward(t *testing.T) {
+	thread := &VideoRenderingThread{
+		Validations: []*VideoRenderingThread_Validation{
+			{
+				Validator: "alice",
+				Frames: []*VideoRenderingThread_Frame{
+					{Filename: "frame_1.png", Signature: "sig_1", Cid: "cid_1", Hash: "hash_1", ValidCount: 1, InvalidCount: 0},
+					{Filename: "frame_2.png", Signature: "sig_2", Cid: "cid_2", Hash: "hash_2", ValidCount: 1, InvalidCount: 0},
+				},
+			},
+			{
+				Validator: "bob",
+				Frames: []*VideoRenderingThread_Frame{
+					{Filename: "frame_3.png", Signature: "sig_3", Cid: "cid_3", Hash: "hash_3", ValidCount: 1, InvalidCount: 0},
+					{Filename: "frame_4.png", Signature: "sig_4", Cid: "cid_4", Hash: "hash_4", ValidCount: 1, InvalidCount: 0},
+					{Filename: "frame_5.png", Signature: "sig_5", Cid: "cid_5", Hash: "hash_5", ValidCount: 1, InvalidCount: 0},
+					{Filename: "frame_6.png", Signature: "sig_6", Cid: "cid_6", Hash: "hash_6", ValidCount: 1, InvalidCount: 0},
+				},
+			},
+		},
+	}
+
+	totalReward := c_types.NewCoin("token", sdkmath.NewInt(60)) // total reward to distribute
+
+	t.Run("validator receives proportional reward", func(t *testing.T) {
+		reward := thread.GetValidatorReward("bob", totalReward)
+		require.Equal(t, "jct", reward.Denom)
+		require.Equal(t, int64(40), reward.Amount.Int64()) // 4 of 6 frames => 4/6 of 60 = 40
+	})
+
+	t.Run("non-validator receives zero", func(t *testing.T) {
+		reward := thread.GetValidatorReward("carol", totalReward)
+		require.Equal(t, int64(0), reward.Amount.Int64())
 	})
 }
