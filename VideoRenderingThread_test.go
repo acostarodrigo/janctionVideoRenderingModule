@@ -1328,3 +1328,50 @@ func TestGetValidatorReward(t *testing.T) {
 		require.Equal(t, int64(0), reward.Amount.Int64())
 	})
 }
+
+// --- Test for calculateValidatorPayment ---
+func TestCalculateValidatorPayment(t *testing.T) {
+	tests := []struct {
+		name                 string
+		filesValidated       int
+		totalFilesValidated  int
+		totalValidatorReward sdkmath.Int
+		expected             sdkmath.Int
+	}{
+		{
+			name:                 "normal calculation",
+			filesValidated:       3,
+			totalFilesValidated:  6,
+			totalValidatorReward: sdkmath.NewInt(60),
+			expected:             sdkmath.NewInt(30),
+		},
+		{
+			name:                 "zero total files",
+			filesValidated:       3,
+			totalFilesValidated:  0,
+			totalValidatorReward: sdkmath.NewInt(60),
+			expected:             sdkmath.NewInt(0),
+		},
+		{
+			name:                 "zero validated files",
+			filesValidated:       0,
+			totalFilesValidated:  6,
+			totalValidatorReward: sdkmath.NewInt(60),
+			expected:             sdkmath.NewInt(0),
+		},
+		{
+			name:                 "equal files validated and total",
+			filesValidated:       6,
+			totalFilesValidated:  6,
+			totalValidatorReward: sdkmath.NewInt(60),
+			expected:             sdkmath.NewInt(60),
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := calculateValidatorPayment(tt.filesValidated, tt.totalFilesValidated, tt.totalValidatorReward)
+			require.True(t, result.Equal(tt.expected), "Expected %s, got %s", tt.expected.String(), result.String())
+		})
+	}
+}
