@@ -252,7 +252,7 @@ func submitValidation(validator string, taskId, threadId, publicKey string, sign
 	return nil
 }
 
-func (t VideoRenderingThread) SubmitSolution(ctx context.Context, workerAddress, rootPath string, db *db.DB) error {
+func (t VideoRenderingThread) SubmitSolution(ctx context.Context, workerAddress, rootPath string, db db.Database) error {
 	db.UpdateThread(t.ThreadId, true, true, true, true, true, true, true, true)
 
 	db.AddLogEntry(t.ThreadId, "Submiting solution to IPFS...", time.Now().Unix(), 0)
