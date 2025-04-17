@@ -551,7 +551,7 @@ func TestProposeSolution_FrameAmountOk_GenerateHashesOk_ExtractPublicKeyOk_Gener
 	defer patch3.Unpatch()
 
 	patch4 := monkey.Patch(videoRenderingCrypto.GenerateSignableMessage, func(hash, workerAddr string) ([]byte, error) {
-		return []byte("fake-signable-message"), fmt.Errorf("Generating message error")
+		return []byte("fake-signable-message"), fmt.Errorf("GenerateSignableMessage error")
 	})
 	defer patch4.Unpatch()
 
@@ -559,7 +559,7 @@ func TestProposeSolution_FrameAmountOk_GenerateHashesOk_ExtractPublicKeyOk_Gener
 
 	// Verify that we got the expected error
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "Generating message error")
+	require.Contains(t, err.Error(), "GenerateSignableMessage error")
 
 	// Verify mock expectations
 	mockDB.AssertExpectations(t)
@@ -958,7 +958,7 @@ func TestSubmitVerification_FileCountOk_FileThresholdOk_GenerateFileHashesOk_Get
 	defer patch3.Unpatch()
 
 	patch4 := monkey.Patch(videoRenderingCrypto.GenerateSignableMessage, func(hash, workerAddr string) ([]byte, error) {
-		return []byte("fake-signable-message"), fmt.Errorf("Generating message error")
+		return []byte("fake-signable-message"), fmt.Errorf("GenerateSignableMessage error")
 	})
 	defer patch4.Unpatch()
 
@@ -966,7 +966,7 @@ func TestSubmitVerification_FileCountOk_FileThresholdOk_GenerateFileHashesOk_Get
 
 	// Verify that we got the expected error
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "Generating message error")
+	require.Contains(t, err.Error(), "GenerateSignableMessage error")
 
 	// Verify mock expectations
 	mockDB.AssertExpectations(t)
@@ -1624,5 +1624,606 @@ func TestRevealSolution_CalculateCIDsOk_CalculateFileHashOk_ExecuteCliOk_UpdateT
 }
 
 // --- Test for EvaluateVerifications ---
+func TestEvaluateVerifications_DecodePublicKeyFromCLIKo(t *testing.T) {
+	// Setup
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+		Solution: &VideoRenderingThread_Solution{
+			ProposedBy: "alice",
+			PublicKey:  "alicePublicKey123",
+			Dir:        "/tmp/rendered_frames/solution1",
+			Accepted:   true,
+			Frames: []*VideoRenderingThread_Frame{
+				{
+					Filename:     "frame1.png",
+					Signature:    "sig1",
+					Cid:          "cid1",
+					Hash:         "hash1",
+					ValidCount:   1,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame2.png",
+					Signature:    "sig2",
+					Cid:          "cid2",
+					Hash:         "hash2",
+					ValidCount:   2,
+					InvalidCount: 0,
+				},
+			},
+		},
+		Validations: []*VideoRenderingThread_Validation{
+			{
+				Validator: "alice",
+				Frames: []*VideoRenderingThread_Frame{
+					{
+						Filename:     "frame1.png",
+						Signature:    "sig1",
+						Cid:          "cid1",
+						Hash:         "hash1",
+						ValidCount:   1,
+						InvalidCount: 0,
+					},
+					{
+						Filename:     "frame2.png",
+						Signature:    "sig2",
+						Cid:          "cid2",
+						Hash:         "hash2",
+						ValidCount:   2,
+						InvalidCount: 0,
+					},
+				},
+				PublicKey: "pubkey-alice",
+				IsReverse: false,
+			},
+			{
+				Validator: "bob",
+				Frames: []*VideoRenderingThread_Frame{
+					{
+						Filename:     "frame1.png",
+						Signature:    "sig1",
+						Cid:          "cid1",
+						Hash:         "hash1",
+						ValidCount:   0,
+						InvalidCount: 1,
+					},
+					{
+						Filename:     "frame2.png",
+						Signature:    "sig2",
+						Cid:          "cid2",
+						Hash:         "hash2",
+						ValidCount:   3,
+						InvalidCount: 0,
+					},
+				},
+				PublicKey: "pubkey-bob",
+				IsReverse: true,
+			},
+		},
+	}
+
+	// Monkey patching
+	patch1 := monkey.Patch(videoRenderingCrypto.DecodePublicKeyFromCLI, func(encodedPubKey string) (cryptotypes.PubKey, error) {
+		return secp256k1.GenPrivKey().PubKey(), fmt.Errorf("DecodePublicKeyFromCLI error")
+	})
+	defer patch1.Unpatch()
+
+	err := thread.EvaluateVerifications()
+
+	// Verify that we got the expected error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "DecodePublicKeyFromCLI error")
+}
+func TestEvaluateVerifications_DecodePublicKeyFromCLIOk_GenerateSignableMessageKo(t *testing.T) {
+	// Setup
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+		Solution: &VideoRenderingThread_Solution{
+			ProposedBy: "alice",
+			PublicKey:  "alicePublicKey123",
+			Dir:        "/tmp/rendered_frames/solution1",
+			Accepted:   true,
+			Frames: []*VideoRenderingThread_Frame{
+				{
+					Filename:     "frame1.png",
+					Signature:    "sig1",
+					Cid:          "cid1",
+					Hash:         "hash1",
+					ValidCount:   1,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame2.png",
+					Signature:    "sig2",
+					Cid:          "cid2",
+					Hash:         "hash2",
+					ValidCount:   2,
+					InvalidCount: 0,
+				},
+			},
+		},
+		Validations: []*VideoRenderingThread_Validation{
+			{
+				Validator: "alice",
+				Frames: []*VideoRenderingThread_Frame{
+					{
+						Filename:     "frame1.png",
+						Signature:    "sig1",
+						Cid:          "cid1",
+						Hash:         "hash1",
+						ValidCount:   1,
+						InvalidCount: 0,
+					},
+					{
+						Filename:     "frame2.png",
+						Signature:    "sig2",
+						Cid:          "cid2",
+						Hash:         "hash2",
+						ValidCount:   2,
+						InvalidCount: 0,
+					},
+				},
+				PublicKey: "pubkey-alice",
+				IsReverse: false,
+			},
+			{
+				Validator: "bob",
+				Frames: []*VideoRenderingThread_Frame{
+					{
+						Filename:     "frame1.png",
+						Signature:    "sig1",
+						Cid:          "cid1",
+						Hash:         "hash1",
+						ValidCount:   0,
+						InvalidCount: 1,
+					},
+					{
+						Filename:     "frame2.png",
+						Signature:    "sig2",
+						Cid:          "cid2",
+						Hash:         "hash2",
+						ValidCount:   3,
+						InvalidCount: 0,
+					},
+				},
+				PublicKey: "pubkey-bob",
+				IsReverse: true,
+			},
+		},
+	}
+
+	// Monkey patching
+	patch1 := monkey.Patch(videoRenderingCrypto.DecodePublicKeyFromCLI, func(encodedPubKey string) (cryptotypes.PubKey, error) {
+		return secp256k1.GenPrivKey().PubKey(), nil
+	})
+	defer patch1.Unpatch()
+
+	patch2 := monkey.Patch(videoRenderingCrypto.GenerateSignableMessage, func(hash, workerAddr string) ([]byte, error) {
+		return nil, fmt.Errorf("GenerateSignableMessage error")
+	})
+	defer patch2.Unpatch()
+
+	err := thread.EvaluateVerifications()
+
+	// Verify that we got the expected error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "GenerateSignableMessage error")
+}
+func TestEvaluateVerifications_DecodePublicKeyFromCLIOk_GenerateSignableMessageOk_DecodeSignatureFromCLIKo(t *testing.T) {
+	// Setup
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+		Solution: &VideoRenderingThread_Solution{
+			ProposedBy: "alice",
+			PublicKey:  "alicePublicKey123",
+			Dir:        "/tmp/rendered_frames/solution1",
+			Accepted:   true,
+			Frames: []*VideoRenderingThread_Frame{
+				{
+					Filename:     "frame1.png",
+					Signature:    "sig1",
+					Cid:          "cid1",
+					Hash:         "hash1",
+					ValidCount:   1,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame2.png",
+					Signature:    "sig2",
+					Cid:          "cid2",
+					Hash:         "hash2",
+					ValidCount:   2,
+					InvalidCount: 0,
+				},
+			},
+		},
+		Validations: []*VideoRenderingThread_Validation{
+			{
+				Validator: "alice",
+				Frames: []*VideoRenderingThread_Frame{
+					{
+						Filename:     "frame1.png",
+						Signature:    "sig1",
+						Cid:          "cid1",
+						Hash:         "hash1",
+						ValidCount:   1,
+						InvalidCount: 0,
+					},
+					{
+						Filename:     "frame2.png",
+						Signature:    "sig2",
+						Cid:          "cid2",
+						Hash:         "hash2",
+						ValidCount:   2,
+						InvalidCount: 0,
+					},
+				},
+				PublicKey: "pubkey-alice",
+				IsReverse: false,
+			},
+			{
+				Validator: "bob",
+				Frames: []*VideoRenderingThread_Frame{
+					{
+						Filename:     "frame1.png",
+						Signature:    "sig1",
+						Cid:          "cid1",
+						Hash:         "hash1",
+						ValidCount:   0,
+						InvalidCount: 1,
+					},
+					{
+						Filename:     "frame2.png",
+						Signature:    "sig2",
+						Cid:          "cid2",
+						Hash:         "hash2",
+						ValidCount:   3,
+						InvalidCount: 0,
+					},
+				},
+				PublicKey: "pubkey-bob",
+				IsReverse: true,
+			},
+		},
+	}
+
+	// Monkey patching
+	patch1 := monkey.Patch(videoRenderingCrypto.DecodePublicKeyFromCLI, func(encodedPubKey string) (cryptotypes.PubKey, error) {
+		return secp256k1.GenPrivKey().PubKey(), nil
+	})
+	defer patch1.Unpatch()
+
+	patch2 := monkey.Patch(videoRenderingCrypto.GenerateSignableMessage, func(hash, workerAddr string) ([]byte, error) {
+		return []byte("fake-signable-message"), nil
+	})
+	defer patch2.Unpatch()
+
+	patch3 := monkey.Patch(videoRenderingCrypto.DecodeSignatureFromCLI, func(encodedSig string) ([]byte, error) {
+		return nil, fmt.Errorf("DecodeSignatureFromCLI error")
+	})
+	defer patch3.Unpatch()
+
+	err := thread.EvaluateVerifications()
+
+	// Verify that we got the expected error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "DecodeSignatureFromCLI error")
+}
+func TestEvaluateVerifications_DecodePublicKeyFromCLIOk_GenerateSignableMessageOk_DecodeSignatureFromCLIOk_VerifySignatureFalse(t *testing.T) {
+	// Setup
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+		Solution: &VideoRenderingThread_Solution{
+			ProposedBy: "alice",
+			PublicKey:  "alicePublicKey123",
+			Dir:        "/tmp/rendered_frames/solution1",
+			Accepted:   true,
+			Frames: []*VideoRenderingThread_Frame{
+				{
+					Filename:     "frame1.png",
+					Signature:    "sig1",
+					Cid:          "cid1",
+					Hash:         "hash1",
+					ValidCount:   1,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame2.png",
+					Signature:    "sig2",
+					Cid:          "cid2",
+					Hash:         "hash2",
+					ValidCount:   2,
+					InvalidCount: 0,
+				},
+			},
+		},
+		Validations: []*VideoRenderingThread_Validation{
+			{
+				Validator: "alice",
+				Frames: []*VideoRenderingThread_Frame{
+					{
+						Filename:     "frame1.png",
+						Signature:    "sig1",
+						Cid:          "cid1",
+						Hash:         "hash1",
+						ValidCount:   1,
+						InvalidCount: 0,
+					},
+					{
+						Filename:     "frame2.png",
+						Signature:    "sig2",
+						Cid:          "cid2",
+						Hash:         "hash2",
+						ValidCount:   2,
+						InvalidCount: 0,
+					},
+				},
+				PublicKey: "pubkey-alice",
+				IsReverse: false,
+			},
+			{
+				Validator: "bob",
+				Frames: []*VideoRenderingThread_Frame{
+					{
+						Filename:     "frame1.png",
+						Signature:    "sig1",
+						Cid:          "cid1",
+						Hash:         "hash1",
+						ValidCount:   0,
+						InvalidCount: 1,
+					},
+					{
+						Filename:     "frame2.png",
+						Signature:    "sig2",
+						Cid:          "cid2",
+						Hash:         "hash2",
+						ValidCount:   3,
+						InvalidCount: 0,
+					},
+				},
+				PublicKey: "pubkey-bob",
+				IsReverse: true,
+			},
+		},
+	}
+	mockPublicKey := new(mocks.MockPubKey)
+
+	// Mock public key methods
+	mockPublicKey.On("VerifySignature", mock.Anything, mock.Anything).Return(false).Times(4) // Called 4 times as there is 4 frames in total
+
+	// Monkey patching
+	patch1 := monkey.Patch(videoRenderingCrypto.DecodePublicKeyFromCLI, func(encodedPubKey string) (cryptotypes.PubKey, error) {
+		return mockPublicKey, nil
+	})
+	defer patch1.Unpatch()
+
+	patch2 := monkey.Patch(videoRenderingCrypto.GenerateSignableMessage, func(hash, workerAddr string) ([]byte, error) {
+		return []byte("fake-signable-message"), nil
+	})
+	defer patch2.Unpatch()
+
+	patch3 := monkey.Patch(videoRenderingCrypto.DecodeSignatureFromCLI, func(encodedSig string) ([]byte, error) {
+		return []byte{0x12, 0x34, 0xab, 0xcd, 0xef}, nil
+	})
+	defer patch3.Unpatch()
+
+	err := thread.EvaluateVerifications()
+
+	// Verify that we got no error
+	require.NoError(t, err)
+}
+func TestEvaluateVerifications_DecodePublicKeyFromCLIOk_GenerateSignableMessageOk_DecodeSignatureFromCLIOk_VerifySignatureTrue(t *testing.T) {
+	// Setup
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+		Solution: &VideoRenderingThread_Solution{
+			ProposedBy: "alice",
+			PublicKey:  "alicePublicKey123",
+			Dir:        "/tmp/rendered_frames/solution1",
+			Accepted:   true,
+			Frames: []*VideoRenderingThread_Frame{
+				{
+					Filename:     "frame1.png",
+					Signature:    "sig1",
+					Cid:          "cid1",
+					Hash:         "hash1",
+					ValidCount:   1,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame2.png",
+					Signature:    "sig2",
+					Cid:          "cid2",
+					Hash:         "hash2",
+					ValidCount:   2,
+					InvalidCount: 0,
+				},
+			},
+		},
+		Validations: []*VideoRenderingThread_Validation{
+			{
+				Validator: "alice",
+				Frames: []*VideoRenderingThread_Frame{
+					{
+						Filename:     "frame1.png",
+						Signature:    "sig1",
+						Cid:          "cid1",
+						Hash:         "hash1",
+						ValidCount:   1,
+						InvalidCount: 0,
+					},
+					{
+						Filename:     "frame2.png",
+						Signature:    "sig2",
+						Cid:          "cid2",
+						Hash:         "hash2",
+						ValidCount:   2,
+						InvalidCount: 0,
+					},
+				},
+				PublicKey: "pubkey-alice",
+				IsReverse: false,
+			},
+			{
+				Validator: "bob",
+				Frames: []*VideoRenderingThread_Frame{
+					{
+						Filename:     "frame1.png",
+						Signature:    "sig1",
+						Cid:          "cid1",
+						Hash:         "hash1",
+						ValidCount:   0,
+						InvalidCount: 1,
+					},
+					{
+						Filename:     "frame2.png",
+						Signature:    "sig2",
+						Cid:          "cid2",
+						Hash:         "hash2",
+						ValidCount:   3,
+						InvalidCount: 0,
+					},
+				},
+				PublicKey: "pubkey-bob",
+				IsReverse: true,
+			},
+		},
+	}
+	mockPublicKey := new(mocks.MockPubKey)
+
+	// Mock public key methods
+	mockPublicKey.On("VerifySignature", mock.Anything, mock.Anything).Return(true).Times(4) // Called 4 times as there is 4 frames in total
+
+	// Monkey patching
+	patch1 := monkey.Patch(videoRenderingCrypto.DecodePublicKeyFromCLI, func(encodedPubKey string) (cryptotypes.PubKey, error) {
+		return mockPublicKey, nil
+	})
+	defer patch1.Unpatch()
+
+	patch2 := monkey.Patch(videoRenderingCrypto.GenerateSignableMessage, func(hash, workerAddr string) ([]byte, error) {
+		return []byte("fake-signable-message"), nil
+	})
+	defer patch2.Unpatch()
+
+	patch3 := monkey.Patch(videoRenderingCrypto.DecodeSignatureFromCLI, func(encodedSig string) ([]byte, error) {
+		return []byte{0x12, 0x34, 0xab, 0xcd, 0xef}, nil
+	})
+	defer patch3.Unpatch()
+
+	err := thread.EvaluateVerifications()
+
+	// Verify that we got no error
+	require.NoError(t, err)
+}
+
+func TestEvaluateVerifications_DecodePublicKeyFromCLIOk_GenerateSignableMessageOk_DecodeSignatureFromCLIOk_VerifySignatureTrue_FrameNotFound(t *testing.T) {
+	// Setup
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+		Solution: &VideoRenderingThread_Solution{
+			ProposedBy: "alice",
+			PublicKey:  "alicePublicKey123",
+			Dir:        "/tmp/rendered_frames/solution1",
+			Accepted:   true,
+			Frames: []*VideoRenderingThread_Frame{
+				{
+					Filename:     "frame1.png",
+					Signature:    "sig1",
+					Cid:          "cid1",
+					Hash:         "hash1",
+					ValidCount:   1,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame2.png",
+					Signature:    "sig2",
+					Cid:          "cid2",
+					Hash:         "hash2",
+					ValidCount:   2,
+					InvalidCount: 0,
+				},
+			},
+		},
+		Validations: []*VideoRenderingThread_Validation{
+			{
+				Validator: "alice",
+				Frames: []*VideoRenderingThread_Frame{
+					{
+						Filename:     "frame1.png",
+						Signature:    "sig1",
+						Cid:          "cid1",
+						Hash:         "hash1",
+						ValidCount:   1,
+						InvalidCount: 0,
+					},
+					{
+						Filename:     "frame2.png",
+						Signature:    "sig2",
+						Cid:          "cid2",
+						Hash:         "hash2",
+						ValidCount:   2,
+						InvalidCount: 0,
+					},
+				},
+				PublicKey: "pubkey-alice",
+				IsReverse: false,
+			},
+			{
+				Validator: "bob",
+				Frames: []*VideoRenderingThread_Frame{
+					{
+						Filename:     "frame1.png",
+						Signature:    "sig1",
+						Cid:          "cid1",
+						Hash:         "hash1",
+						ValidCount:   0,
+						InvalidCount: 1,
+					},
+					// "frame2.png" eliminated
+				},
+				PublicKey: "pubkey-bob",
+				IsReverse: true,
+			},
+		},
+	}
+	mockPublicKey := new(mocks.MockPubKey)
+
+	// Mock public key methods
+	mockPublicKey.On("VerifySignature", mock.Anything, mock.Anything).Return(true).Times(4) // Called 4 times as there is 4 frames in total
+
+	// Monkey patching
+	patch1 := monkey.Patch(videoRenderingCrypto.DecodePublicKeyFromCLI, func(encodedPubKey string) (cryptotypes.PubKey, error) {
+		return mockPublicKey, nil
+	})
+	defer patch1.Unpatch()
+
+	patch2 := monkey.Patch(videoRenderingCrypto.GenerateSignableMessage, func(hash, workerAddr string) ([]byte, error) {
+		return []byte("fake-signable-message"), nil
+	})
+	defer patch2.Unpatch()
+
+	patch3 := monkey.Patch(videoRenderingCrypto.DecodeSignatureFromCLI, func(encodedSig string) ([]byte, error) {
+		return []byte{0x12, 0x34, 0xab, 0xcd, 0xef}, nil
+	})
+	defer patch3.Unpatch()
+
+	err := thread.EvaluateVerifications()
+
+	// Verify that we got no error
+	require.NoError(t, err)
+}
+
 // --- Test for IsSolutionAccepted ---
 // --- Test for VerifySubmittedSolution ---
