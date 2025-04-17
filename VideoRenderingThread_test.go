@@ -2226,4 +2226,268 @@ func TestEvaluateVerifications_DecodePublicKeyFromCLIOk_GenerateSignableMessageO
 }
 
 // --- Test for IsSolutionAccepted ---
+func TestIsSolutionAccepted_NoFrames(t *testing.T) {
+	// Setup
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+		Solution: &VideoRenderingThread_Solution{
+			ProposedBy: "alice",
+			PublicKey:  "alicePublicKey123",
+			Dir:        "/tmp/rendered_frames/solution1",
+			Accepted:   true,
+			Frames:     []*VideoRenderingThread_Frame{},
+		},
+	}
+
+	valid := thread.IsSolutionAccepted()
+
+	require.False(t, valid)
+}
+
+func TestIsSolutionAccepted_OneWorker_FrameAmountValidKo(t *testing.T) {
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+		Workers:    []string{"alice"},
+		Solution: &VideoRenderingThread_Solution{
+			ProposedBy: "alice",
+			PublicKey:  "alicePublicKey123",
+			Dir:        "/tmp/rendered_frames/solution1",
+			Accepted:   true,
+			Frames: []*VideoRenderingThread_Frame{
+				{
+					Filename:     "frame1.png",
+					Signature:    "sig1",
+					Cid:          "cid1",
+					Hash:         "hash1",
+					ValidCount:   0,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame2.png",
+					Signature:    "sig2",
+					Cid:          "cid2",
+					Hash:         "hash2",
+					ValidCount:   0,
+					InvalidCount: 0,
+				},
+			},
+		},
+	}
+
+	valid := thread.IsSolutionAccepted()
+
+	require.False(t, valid)
+}
+
+func TestIsSolutionAccepted_OneWorker_FrameAmountValidOk(t *testing.T) {
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+		Workers:    []string{"alice"},
+		Solution: &VideoRenderingThread_Solution{
+			ProposedBy: "alice",
+			PublicKey:  "alicePublicKey123",
+			Dir:        "/tmp/rendered_frames/solution1",
+			Accepted:   true,
+			Frames: []*VideoRenderingThread_Frame{
+				{
+					Filename:     "frame1.png",
+					Signature:    "sig1",
+					Cid:          "cid1",
+					Hash:         "hash1",
+					ValidCount:   0,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame2.png",
+					Signature:    "sig2",
+					Cid:          "cid2",
+					Hash:         "hash2",
+					ValidCount:   1,
+					InvalidCount: 0,
+				},
+			},
+		},
+	}
+
+	valid := thread.IsSolutionAccepted()
+
+	require.True(t, valid)
+}
+
+func TestIsSolutionAccepted_MultipleWorkers_FrameAmountValidKo(t *testing.T) {
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+		Workers:    []string{"alice", "bob"},
+		Solution: &VideoRenderingThread_Solution{
+			ProposedBy: "alice",
+			PublicKey:  "alicePublicKey123",
+			Dir:        "/tmp/rendered_frames/solution1",
+			Accepted:   true,
+			Frames: []*VideoRenderingThread_Frame{
+				{
+					Filename:     "frame1.png",
+					Signature:    "sig1",
+					Cid:          "cid1",
+					Hash:         "hash1",
+					ValidCount:   1,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame2.png",
+					Signature:    "sig2",
+					Cid:          "cid2",
+					Hash:         "hash2",
+					ValidCount:   2,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame3.png",
+					Signature:    "sig3",
+					Cid:          "cid3",
+					Hash:         "hash3",
+					ValidCount:   0,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame4.png",
+					Signature:    "sig4",
+					Cid:          "cid4",
+					Hash:         "hash4",
+					ValidCount:   0,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame5.png",
+					Signature:    "sig5",
+					Cid:          "cid5",
+					Hash:         "hash5",
+					ValidCount:   0,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame6.png",
+					Signature:    "sig6",
+					Cid:          "cid6",
+					Hash:         "hash6",
+					ValidCount:   0,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame7.png",
+					Signature:    "sig7",
+					Cid:          "cid7",
+					Hash:         "hash7",
+					ValidCount:   0,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame8.png",
+					Signature:    "sig8",
+					Cid:          "cid8",
+					Hash:         "hash8",
+					ValidCount:   0,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame9.png",
+					Signature:    "sig9",
+					Cid:          "cid9",
+					Hash:         "hash9",
+					ValidCount:   0,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame10.png",
+					Signature:    "sig10",
+					Cid:          "cid10",
+					Hash:         "hash10",
+					ValidCount:   0,
+					InvalidCount: 0,
+				},
+			},
+		},
+	}
+
+	valid := thread.IsSolutionAccepted()
+
+	require.False(t, valid)
+}
+
+func TestIsSolutionAccepted_MultipleWorkers_FrameAmountValidOk(t *testing.T) {
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+		Workers:    []string{"alice", "bob"},
+		Solution: &VideoRenderingThread_Solution{
+			ProposedBy: "alice",
+			PublicKey:  "alicePublicKey123",
+			Dir:        "/tmp/rendered_frames/solution1",
+			Accepted:   true,
+			Frames: []*VideoRenderingThread_Frame{
+				{
+					Filename:     "frame1.png",
+					Signature:    "sig1",
+					Cid:          "cid1",
+					Hash:         "hash1",
+					ValidCount:   1,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame2.png",
+					Signature:    "sig2",
+					Cid:          "cid2",
+					Hash:         "hash2",
+					ValidCount:   2,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame3.png",
+					Signature:    "sig3",
+					Cid:          "cid3",
+					Hash:         "hash3",
+					ValidCount:   3,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame4.png",
+					Signature:    "sig4",
+					Cid:          "cid4",
+					Hash:         "hash4",
+					ValidCount:   4,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame5.png",
+					Signature:    "sig5",
+					Cid:          "cid5",
+					Hash:         "hash5",
+					ValidCount:   5,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame6.png",
+					Signature:    "sig6",
+					Cid:          "cid6",
+					Hash:         "hash6",
+					ValidCount:   6,
+					InvalidCount: 0,
+				},
+			},
+		},
+	}
+
+	valid := thread.IsSolutionAccepted()
+
+	require.True(t, valid)
+}
+
 // --- Test for VerifySubmittedSolution ---
