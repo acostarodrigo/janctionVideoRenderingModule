@@ -1150,6 +1150,8 @@ func TestSubmitVerification_FileCountOk_FileThresholdOk_GenerateFileHashesOk_Get
 	mockDB.AssertExpectations(t)
 }
 
+// --- Test for submitValidation ---
+
 // --- Test for SubmitSolution ---
 func TestSubmitSolution_IpfsKo(t *testing.T) {
 	// Setup
@@ -1271,6 +1273,8 @@ func TestSubmitSolution_IpfsOk_SubmitSolutionOk(t *testing.T) {
 	mockDB.AssertExpectations(t)
 }
 
+// --- Test for submitSolution ---
+
 // --- Test for IsReverse ---
 func TestIsReverse(t *testing.T) {
 	thread := VideoRenderingThread{
@@ -1375,3 +1379,250 @@ func TestCalculateValidatorPayment(t *testing.T) {
 		})
 	}
 }
+
+// --- Test for RevealSolution ---
+func TestRevealSolution_CalculateCIDsKo(t *testing.T) {
+	// Setup
+	mockDB := new(mocks.DB)
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+	}
+	rootPath := "/tmp/rendering/thread123"
+
+	// Monkey patching
+	patch1 := monkey.Patch(ipfs.CalculateCIDs, func(dirPath string) (map[string]string, error) {
+		return nil, fmt.Errorf("Calculate CIDs error")
+	})
+	defer patch1.Unpatch()
+
+	err := thread.RevealSolution(rootPath, mockDB)
+
+	// Verify that we got the expected error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "Calculate CIDs error")
+}
+
+func TestRevealSolution_CalculateCIDsOk_CalculateFileHashKo(t *testing.T) {
+	// Setup
+	mockDB := new(mocks.DB)
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+	}
+	rootPath := "/tmp/rendering/thread123"
+
+	// Monkey patching
+	patch1 := monkey.Patch(ipfs.CalculateCIDs, func(dirPath string) (map[string]string, error) {
+		return map[string]string{
+			"frame1.png": "bafybeibwzifkxwq6oyp3dp3ewr2lsccfveq5r7oe3jq2l6efzdr4hw2kdi",
+			"frame2.png": "bafybeia6zjsa6uhjqmtn4azj3k74sjn3wsb2elxek6nnvysxug4vqwhwqe",
+		}, nil
+	})
+	defer patch1.Unpatch()
+
+	patch2 := monkey.Patch(CalculateFileHash, func(filePath string) (string, error) {
+		return "", fmt.Errorf("Calculate file hash error")
+	})
+	defer patch2.Unpatch()
+
+	err := thread.RevealSolution(rootPath, mockDB)
+
+	// Verify that we got the expected error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "Calculate file hash error")
+}
+
+func TestRevealSolution_CalculateCIDsOk_CalculateFileHashOk_ExecuteCliKo(t *testing.T) {
+	// Setup
+	mockDB := new(mocks.DB)
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+		Solution: &VideoRenderingThread_Solution{
+			ProposedBy: "alice",
+			PublicKey:  "alicePublicKey123",
+			Dir:        "/tmp/rendered_frames/solution1",
+			Accepted:   true,
+			Frames: []*VideoRenderingThread_Frame{
+				{
+					Filename:     "frame_001.png",
+					Signature:    "sig1",
+					Cid:          "bafyframe001",
+					Hash:         "abc123hash001",
+					ValidCount:   3,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame_002.png",
+					Signature:    "sig2",
+					Cid:          "bafyframe002",
+					Hash:         "abc123hash002",
+					ValidCount:   2,
+					InvalidCount: 1,
+				},
+			},
+		}}
+	rootPath := "/tmp/rendering/thread123"
+
+	// Monkey patching
+	patch1 := monkey.Patch(ipfs.CalculateCIDs, func(dirPath string) (map[string]string, error) {
+		return map[string]string{
+			"frame1.png": "bafybeibwzifkxwq6oyp3dp3ewr2lsccfveq5r7oe3jq2l6efzdr4hw2kdi",
+			"frame2.png": "bafybeia6zjsa6uhjqmtn4azj3k74sjn3wsb2elxek6nnvysxug4vqwhwqe",
+		}, nil
+	})
+	defer patch1.Unpatch()
+
+	patch2 := monkey.Patch(CalculateFileHash, func(filePath string) (string, error) {
+		return "6b1b36cbb04b41490bfc0ab2bfa26f86", nil
+	})
+	defer patch2.Unpatch()
+
+	patch4 := monkey.Patch(ExecuteCli, func(args []string) error {
+		return fmt.Errorf("FromFramesToCli error")
+	})
+	defer patch4.Unpatch()
+
+	err := thread.RevealSolution(rootPath, mockDB)
+
+	// Verify that we got the expected error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "FromFramesToCli error")
+}
+
+func TestRevealSolution_CalculateCIDsOk_CalculateFileHashOk_ExecuteCliOk_UpdateThreadKo(t *testing.T) {
+	// Setup
+	mockDB := new(mocks.DB)
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+		Solution: &VideoRenderingThread_Solution{
+			ProposedBy: "alice",
+			PublicKey:  "alicePublicKey123",
+			Dir:        "/tmp/rendered_frames/solution1",
+			Accepted:   true,
+			Frames: []*VideoRenderingThread_Frame{
+				{
+					Filename:     "frame_001.png",
+					Signature:    "sig1",
+					Cid:          "bafyframe001",
+					Hash:         "abc123hash001",
+					ValidCount:   3,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame_002.png",
+					Signature:    "sig2",
+					Cid:          "bafyframe002",
+					Hash:         "abc123hash002",
+					ValidCount:   2,
+					InvalidCount: 1,
+				},
+			},
+		}}
+	rootPath := "/tmp/rendering/thread123"
+
+	// Mock DB methods
+	mockDB.On("UpdateThread", "thread123", true, true, true, true, true, true, true, false).Return(fmt.Errorf("UpdateThread error")).Once()
+
+	// Monkey patching
+	patch1 := monkey.Patch(ipfs.CalculateCIDs, func(dirPath string) (map[string]string, error) {
+		return map[string]string{
+			"frame1.png": "bafybeibwzifkxwq6oyp3dp3ewr2lsccfveq5r7oe3jq2l6efzdr4hw2kdi",
+			"frame2.png": "bafybeia6zjsa6uhjqmtn4azj3k74sjn3wsb2elxek6nnvysxug4vqwhwqe",
+		}, nil
+	})
+	defer patch1.Unpatch()
+
+	patch2 := monkey.Patch(CalculateFileHash, func(filePath string) (string, error) {
+		return "6b1b36cbb04b41490bfc0ab2bfa26f86", nil
+	})
+	defer patch2.Unpatch()
+
+	patch4 := monkey.Patch(ExecuteCli, func(args []string) error {
+		return nil
+	})
+	defer patch4.Unpatch()
+
+	err := thread.RevealSolution(rootPath, mockDB)
+
+	// Verify that we got the expected error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "UpdateThread error")
+
+	// Verify mock expectations
+	mockDB.AssertExpectations(t)
+}
+
+func TestRevealSolution_CalculateCIDsOk_CalculateFileHashOk_ExecuteCliOk_UpdateThreadOk(t *testing.T) {
+	// Setup
+	mockDB := new(mocks.DB)
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+		Solution: &VideoRenderingThread_Solution{
+			ProposedBy: "alice",
+			PublicKey:  "alicePublicKey123",
+			Dir:        "/tmp/rendered_frames/solution1",
+			Accepted:   true,
+			Frames: []*VideoRenderingThread_Frame{
+				{
+					Filename:     "frame_001.png",
+					Signature:    "sig1",
+					Cid:          "bafyframe001",
+					Hash:         "abc123hash001",
+					ValidCount:   3,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame_002.png",
+					Signature:    "sig2",
+					Cid:          "bafyframe002",
+					Hash:         "abc123hash002",
+					ValidCount:   2,
+					InvalidCount: 1,
+				},
+			},
+		}}
+	rootPath := "/tmp/rendering/thread123"
+
+	// Mock DB methods
+	mockDB.On("UpdateThread", "thread123", true, true, true, true, true, true, true, false).Return(nil).Once()
+
+	// Monkey patching
+	patch1 := monkey.Patch(ipfs.CalculateCIDs, func(dirPath string) (map[string]string, error) {
+		return map[string]string{
+			"frame1.png": "bafybeibwzifkxwq6oyp3dp3ewr2lsccfveq5r7oe3jq2l6efzdr4hw2kdi",
+			"frame2.png": "bafybeia6zjsa6uhjqmtn4azj3k74sjn3wsb2elxek6nnvysxug4vqwhwqe",
+		}, nil
+	})
+	defer patch1.Unpatch()
+
+	patch2 := monkey.Patch(CalculateFileHash, func(filePath string) (string, error) {
+		return "6b1b36cbb04b41490bfc0ab2bfa26f86", nil
+	})
+	defer patch2.Unpatch()
+
+	patch4 := monkey.Patch(ExecuteCli, func(args []string) error {
+		return nil
+	})
+	defer patch4.Unpatch()
+
+	err := thread.RevealSolution(rootPath, mockDB)
+
+	// Verify that we got no error
+	require.NoError(t, err)
+
+	// Verify mock expectations
+	mockDB.AssertExpectations(t)
+}
+
+// --- Test for EvaluateVerifications ---
+// --- Test for IsSolutionAccepted ---
+// --- Test for VerifySubmittedSolution ---
