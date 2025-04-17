@@ -2491,3 +2491,145 @@ func TestIsSolutionAccepted_MultipleWorkers_FrameAmountValidOk(t *testing.T) {
 }
 
 // --- Test for VerifySubmittedSolution ---
+func TestVerifySubmittedSolution_ListDirectoryKo(t *testing.T) {
+	// Setup
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+		Workers:    []string{"alice"},
+		Solution: &VideoRenderingThread_Solution{
+			ProposedBy: "alice",
+			PublicKey:  "alicePublicKey123",
+			Dir:        "/tmp/rendered_frames/solution1",
+			Accepted:   true,
+			Frames: []*VideoRenderingThread_Frame{
+				{
+					Filename:     "frame1.png",
+					Signature:    "sig1",
+					Cid:          "cid1",
+					Hash:         "hash1",
+					ValidCount:   1,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame2.png",
+					Signature:    "sig2",
+					Cid:          "cid2",
+					Hash:         "hash2",
+					ValidCount:   2,
+					InvalidCount: 0,
+				},
+			},
+		},
+	}
+
+	// Monkey patching
+	patch1 := monkey.Patch(ipfs.ListDirectory, func(cid string) (map[string]string, error) {
+		return nil, fmt.Errorf("ListDirectory error")
+	})
+	defer patch1.Unpatch()
+
+	err := thread.VerifySubmittedSolution("/tmp/rendered_frames/solution1")
+
+	// Verify that we got the expected error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "ListDirectory error")
+}
+
+func TestVerifySubmittedSolution_ListDirectoryOk_FilesExistKo(t *testing.T) {
+	// Setup
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+		Workers:    []string{"alice"},
+		Solution: &VideoRenderingThread_Solution{
+			ProposedBy: "alice",
+			PublicKey:  "alicePublicKey123",
+			Dir:        "/tmp/rendered_frames/solution1",
+			Accepted:   true,
+			Frames: []*VideoRenderingThread_Frame{
+				{
+					Filename:     "frame1.png",
+					Signature:    "sig1",
+					Cid:          "cid1",
+					Hash:         "hash1",
+					ValidCount:   1,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame2.png",
+					Signature:    "sig2",
+					Cid:          "cid2",
+					Hash:         "hash2",
+					ValidCount:   2,
+					InvalidCount: 0,
+				},
+			},
+		},
+	}
+
+	// Monkey patching
+	patch1 := monkey.Patch(ipfs.ListDirectory, func(cid string) (map[string]string, error) {
+		return map[string]string{
+			"frame1.png": "cid1",
+			"frame2.png": "cid",
+		}, nil
+	})
+	defer patch1.Unpatch()
+
+	err := thread.VerifySubmittedSolution("/tmp/rendered_frames/solution1")
+
+	// Verify that we got the expected error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "doesn't exists in")
+}
+
+func TestVerifySubmittedSolution_ListDirectoryOk_FilesExistOk(t *testing.T) {
+	// Setup
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+		Workers:    []string{"alice"},
+		Solution: &VideoRenderingThread_Solution{
+			ProposedBy: "alice",
+			PublicKey:  "alicePublicKey123",
+			Dir:        "/tmp/rendered_frames/solution1",
+			Accepted:   true,
+			Frames: []*VideoRenderingThread_Frame{
+				{
+					Filename:     "frame1.png",
+					Signature:    "sig1",
+					Cid:          "cid1",
+					Hash:         "hash1",
+					ValidCount:   1,
+					InvalidCount: 0,
+				},
+				{
+					Filename:     "frame2.png",
+					Signature:    "sig2",
+					Cid:          "cid2",
+					Hash:         "hash2",
+					ValidCount:   2,
+					InvalidCount: 0,
+				},
+			},
+		},
+	}
+
+	// Monkey patching
+	patch1 := monkey.Patch(ipfs.ListDirectory, func(cid string) (map[string]string, error) {
+		return map[string]string{
+			"frame1.png": "cid1",
+			"frame2.png": "cid2",
+		}, nil
+	})
+	defer patch1.Unpatch()
+
+	err := thread.VerifySubmittedSolution("/tmp/rendered_frames/solution1")
+
+	// Verify that we got no error
+	require.NoError(t, err)
+}
