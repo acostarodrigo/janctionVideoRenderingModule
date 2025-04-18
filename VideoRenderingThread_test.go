@@ -1314,6 +1314,44 @@ func TestSubmitSolution_IpfsOk_SubmitSolutionOk(t *testing.T) {
 }
 
 // --- Test for submitSolution ---
+func TestSubmitSolutionKo(t *testing.T) {
+	// Setup
+	address := "validator1-address"
+	taskId := "task-abc-123"
+	threadId := "thread-xyz-789"
+	cid := "bafybeigdyrztq2h7s4i5c4g4qkkl7urxkzv5n6x5k3qscgopn4mmybghpe"
+
+	// Monkey patching
+	patch1 := monkey.Patch(ExecuteCli, func(args []string) error {
+		return fmt.Errorf("ExecuteCLI error")
+	})
+	defer patch1.Unpatch()
+
+	err := submitSolution(address, taskId, threadId, cid)
+
+	// Verify that we got the expected error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "ExecuteCLI error")
+}
+
+func TestSubmitSolutionOk(t *testing.T) {
+	// Setup
+	address := "validator1-address"
+	taskId := "task-abc-123"
+	threadId := "thread-xyz-789"
+	cid := "bafybeigdyrztq2h7s4i5c4g4qkkl7urxkzv5n6x5k3qscgopn4mmybghpe"
+
+	// Monkey patching
+	patch1 := monkey.Patch(ExecuteCli, func(args []string) error {
+		return nil
+	})
+	defer patch1.Unpatch()
+
+	err := submitSolution(address, taskId, threadId, cid)
+
+	// Verify that we got no error
+	require.NoError(t, err)
+}
 
 // --- Test for IsReverse ---
 func TestIsReverse(t *testing.T) {
