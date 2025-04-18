@@ -1,15 +1,20 @@
 package videoRendering
 
 import (
+	fmt "fmt"
 	"image"
 	"image/png"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"reflect"
 	"sort"
 	"testing"
+
+	"bou.ke/monkey"
 )
 
+// --- Test for MapToKeyValueFormat ---
 func TestMapToKeyValueFormat(t *testing.T) {
 	testMap := map[string]string{
 		"Key1": "Value1",
@@ -37,9 +42,106 @@ func TestMapToKeyValueFormat(t *testing.T) {
 	}
 }
 
-// func TestExecuteCli(t *testing.T) {
-// }
+// --- Test for ExecuteCli ---
+func TestExecuteCli(t *testing.T) {
+	tests := []struct {
+		name       string
+		mockOutput func(cmd *exec.Cmd) ([]byte, error)
+		expectErr  bool
+	}{
+		{
+			name: "Successful CLI execution",
+			mockOutput: func(cmd *exec.Cmd) ([]byte, error) {
+				return []byte("simulated output"), nil
+			},
+			expectErr: false,
+		},
+		{
+			name: "CLI execution error",
+			mockOutput: func(cmd *exec.Cmd) ([]byte, error) {
+				return nil, fmt.Errorf("simulated error")
+			},
+			expectErr: true,
+		},
+	}
 
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			// Monkey patch exec.Command to return a minimal valid *exec.Cmd
+			patchCmd := monkey.Patch(exec.Command, func(name string, args ...string) *exec.Cmd {
+				return &exec.Cmd{
+					Path: name,
+					Args: append([]string{name}, args...),
+				}
+			})
+			defer patchCmd.Unpatch()
+
+			// Monkey patch the Output method of *exec.Cmd to simulate CLI output or error
+			patchOutput := monkey.PatchInstanceMethod(reflect.TypeOf(&exec.Cmd{}), "Output", tt.mockOutput)
+			defer patchOutput.Unpatch()
+
+			// Execute the CLI function
+			err := ExecuteCli([]string{"test"})
+
+			// Assert based on expected error
+			if (err != nil) != tt.expectErr {
+				t.Errorf("Expected error: %v, got: %v", tt.expectErr, err != nil)
+			}
+		})
+	}
+}
+
+// --- Test for FromCliToFrames ---
+func TestFromCliToFrames(t *testing.T) {
+	tests := []struct {
+		name     string
+		entries  []string
+		expected map[string]VideoRenderingThread_Frame
+	}{
+		{
+			name:    "Valid entry",
+			entries: []string{"file1.png=cid123:hash123"},
+			expected: map[string]VideoRenderingThread_Frame{
+				"file1.png": {Filename: "file1.png", Cid: "cid123", Hash: "hash123"},
+			},
+		},
+		{
+			name:     "Invalid entry (missing '=')",
+			entries:  []string{"invalidEntryWithoutEquals"},
+			expected: map[string]VideoRenderingThread_Frame{},
+		},
+		{
+			name:     "Invalid CID:Hash format",
+			entries:  []string{"file2.png=missingColon"},
+			expected: map[string]VideoRenderingThread_Frame{},
+		},
+		{
+			name: "Mixed entries",
+			entries: []string{
+				"valid1.png=cidA:hashA",
+				"invalidNoEquals",
+				"badCidHash=justcid",
+				"valid2.png=cidB:hashB",
+			},
+			expected: map[string]VideoRenderingThread_Frame{
+				"valid1.png": {Filename: "valid1.png", Cid: "cidA", Hash: "hashA"},
+				"valid2.png": {Filename: "valid2.png", Cid: "cidB", Hash: "hashB"},
+			},
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			result := FromCliToFrames(tt.entries)
+
+			if !reflect.DeepEqual(result, tt.expected) {
+				t.Errorf("Expected: %+v, got: %+v", tt.expected, result)
+			}
+		})
+	}
+}
+
+// --- Test for FromFramesToCli ---
 func TestFromFramesToCli(t *testing.T) {
 	tests := []struct {
 		name     string
@@ -114,6 +216,7 @@ func createTestTextFile(filePath string) error {
 	return nil
 }
 
+// --- Test for CalculateFileHash ---
 func TestCalculateFileHash(t *testing.T) {
 	err := createTestImage("test_image.png")
 	if err != nil {
@@ -162,56 +265,90 @@ func TestCalculateFileHash(t *testing.T) {
 	}
 }
 
+// --- Test for GenerateDirectoryFileHashes ---
 func TestGenerateDirectoryFileHashes(t *testing.T) {
 	type testCase struct {
-		dirPath           string
+		name              string
+		setup             func(dir string) error
 		expectedHashCount int
-		expectedToError   bool
+		expectError       bool
 	}
 
-	tempDir, err := os.MkdirTemp("", "testDir")
-	if err != nil {
-		t.Fatalf("Failed to create temporary directory: %v", err)
+	createPng := func(path string) error {
+		img := image.NewRGBA(image.Rect(0, 0, 1, 1))
+		file, err := os.Create(path)
+		if err != nil {
+			return err
+		}
+		defer file.Close()
+		return png.Encode(file, img)
 	}
-	defer os.RemoveAll(tempDir)
 
-	imgPath := filepath.Join(tempDir, "image.png")
-	if err := createTestImage(imgPath); err != nil {
-		t.Fatalf("Failed to create test image: %v", err)
-	}
-
-	testCases := []testCase{
+	tests := []testCase{
 		{
-			dirPath:           tempDir,
-			expectedHashCount: 1,
-			expectedToError:   false,
-		},
-		{
-			dirPath:           filepath.Join(tempDir, "nonExistentDir"),
-			expectedHashCount: 0,
-			expectedToError:   true,
-		},
-		{
-			dirPath:           filepath.Join(tempDir, "emptyDir"),
-			expectedHashCount: 0,
-			expectedToError:   false,
-		},
-	}
-
-	for _, tt := range testCases {
-		t.Run(tt.dirPath, func(t *testing.T) {
-			if tt.dirPath == filepath.Join(tempDir, "emptyDir") {
-				if err := os.Mkdir(tt.dirPath, 0755); err != nil {
-					t.Fatalf("Failed to create empty directory: %v", err)
+			name: "Directory with 2 PNG files",
+			setup: func(dir string) error {
+				if err := createPng(filepath.Join(dir, "a.png")); err != nil {
+					return err
 				}
-				defer os.RemoveAll(tt.dirPath)
+				if err := createPng(filepath.Join(dir, "b.png")); err != nil {
+					return err
+				}
+				return nil
+			},
+			expectedHashCount: 2,
+			expectError:       false,
+		},
+		{
+			name: "Empty directory",
+			setup: func(dir string) error {
+				// Nothing to do
+				return nil
+			},
+			expectedHashCount: 0,
+			expectError:       false,
+		},
+		{
+			name: "Non-existent directory",
+			setup: func(dir string) error {
+				return os.RemoveAll(dir)
+			},
+			expectedHashCount: 0,
+			expectError:       true,
+		},
+		{
+			name: "PNG file with unreadable permissions",
+			setup: func(dir string) error {
+				path := filepath.Join(dir, "unreadable.png")
+				if err := createPng(path); err != nil {
+					return err
+				}
+				return os.Chmod(path, 0000)
+			},
+			expectedHashCount: 0,
+			expectError:       true,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			dir, err := os.MkdirTemp("", "testDir")
+			if err != nil {
+				t.Fatalf("Failed to create temp dir: %v", err)
 			}
-			hashes, err := GenerateDirectoryFileHashes(tt.dirPath)
-			if (err != nil) != tt.expectedToError {
-				t.Errorf("Expected error: %v, got: %v", tt.expectedToError, err != nil)
+			defer os.RemoveAll(dir)
+
+			if err := tc.setup(dir); err != nil {
+				t.Fatalf("Setup failed: %v", err)
 			}
-			if len(hashes) != tt.expectedHashCount {
-				t.Errorf("Expected %d hashes, got %d", tt.expectedHashCount, len(hashes))
+
+			hashes, err := GenerateDirectoryFileHashes(dir)
+
+			if (err != nil) != tc.expectError {
+				t.Errorf("Expected error: %v, got: %v", tc.expectError, err)
+			}
+			if !tc.expectError && len(hashes) != tc.expectedHashCount {
+				t.Errorf("Expected %d hashes, got %d", tc.expectedHashCount, len(hashes))
 			}
 		})
 	}
