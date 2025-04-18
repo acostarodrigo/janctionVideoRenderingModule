@@ -1151,6 +1151,46 @@ func TestSubmitVerification_FileCountOk_FileThresholdOk_GenerateFileHashesOk_Get
 }
 
 // --- Test for submitValidation ---
+func TestSubmitValidationKo(t *testing.T) {
+	// Setup
+	validator := "alice"
+	taskId := "task456"
+	threadId := "thread123"
+	publicKey := "alicePublicKey123"
+	signatures := []string{"sig1", "sig2"}
+
+	// Monkey patching
+	patch1 := monkey.Patch(ExecuteCli, func(args []string) error {
+		return fmt.Errorf("ExecuteCLI error")
+	})
+	defer patch1.Unpatch()
+
+	err := submitValidation(validator, taskId, threadId, publicKey, signatures)
+
+	// Verify that we got the expected error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "ExecuteCLI error")
+}
+
+func TestSubmitValidationOk(t *testing.T) {
+	// Setup
+	validator := "alice"
+	taskId := "task456"
+	threadId := "thread123"
+	publicKey := "alicePublicKey123"
+	signatures := []string{"sig1", "sig2"}
+
+	// Monkey patching
+	patch1 := monkey.Patch(ExecuteCli, func(args []string) error {
+		return nil
+	})
+	defer patch1.Unpatch()
+
+	err := submitValidation(validator, taskId, threadId, publicKey, signatures)
+
+	// Verify that we got no error
+	require.NoError(t, err)
+}
 
 // --- Test for SubmitSolution ---
 func TestSubmitSolution_IpfsKo(t *testing.T) {
