@@ -1,6 +1,7 @@
 package ipfs
 
 import (
+	"bufio"
 	"bytes"
 	"context"
 	"crypto/sha256"
@@ -13,8 +14,8 @@ import (
 	"os/exec"
 	"path/filepath"
 	"reflect"
-	"strings"
 	"testing"
+	"time"
 
 	"bou.ke/monkey"
 	shell "github.com/ipfs/go-ipfs-api"
@@ -22,46 +23,44 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestIPFSGet(t *testing.T) {
-	// Patch shell.Shell.Get to avoid real IPFS interaction
+func TestIPFSGet_Success(t *testing.T) {
+	// Patch IPFS shell Get method to simulate success
 	patch := monkey.Patch((*shell.Shell).Get, func(_ *shell.Shell, cid string, outDir string) error {
-		// Simulate success only for the "validCID"
-		if cid == "validCID" {
-			return nil
-		}
-		// Simulate failure for any other CID
-		return errors.New("Mock error")
+		return nil
 	})
 	defer patch.Unpatch()
 
-	path := "/tmp/fakepath"
-
-	// Define table-driven test cases
-	tests := []struct {
-		name            string
-		cid             string
-		expectedToError bool
-	}{
-		{
-			name:            "valid",
-			cid:             "validCID",
-			expectedToError: false,
-		},
-		{
-			name:            "invalid",
-			cid:             "invalidCID",
-			expectedToError: true,
-		},
+	// Call IPFSGet with a valid CID and path
+	err := IPFSGet("validCID", "/tmp/testpath_success")
+	if err != nil {
+		t.Errorf("Expected no error, got: %v", err)
 	}
+}
 
-	// Run each test case in a subtest
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			err := IPFSGet(tt.cid, path)
-			if (err != nil) != tt.expectedToError {
-				t.Errorf("Test %q failed: expectedToError=%v, got err=%v", tt.name, tt.expectedToError, err)
-			}
-		})
+func TestIPFSGet_IPFSError(t *testing.T) {
+	// Patch IPFS shell Get method to simulate failure
+	patch := monkey.Patch((*shell.Shell).Get, func(_ *shell.Shell, cid string, outDir string) error {
+		return errors.New("mock IPFS error")
+	})
+	defer patch.Unpatch()
+
+	// Call IPFSGet with an invalid CID
+	err := IPFSGet("invalidCID", "/tmp/testpath_error")
+	if err == nil {
+		t.Error("Expected an error but got nil")
+	}
+}
+
+func TestIPFSGet_MkdirError(t *testing.T) {
+	// Patch os.MkdirAll to simulate failure
+	patch := monkey.Patch(os.MkdirAll, func(path string, perm os.FileMode) error {
+		return fmt.Errorf("mock mkdir error")
+	})
+	defer patch.Unpatch()
+
+	err := IPFSGet("anyCID", "/tmp/testpath_mkdirfail")
+	if err == nil || err.Error() != "mock mkdir error" {
+		t.Errorf("Expected mkdir error, got: %v", err)
 	}
 }
 
@@ -96,7 +95,7 @@ func fakeExecCommandWithError(stderr string) *exec.Cmd {
 	return cmd
 }
 
-func TestCalculateCIDs(t *testing.T) {
+func TestCalculateCIDs_Success(t *testing.T) {
 	// Create temporary files and expected contents for testing
 	dir, fileContents := createTempFiles(t)
 
@@ -131,24 +130,49 @@ func TestCalculateCIDs(t *testing.T) {
 	}
 }
 
-func TestUploadSolution(t *testing.T) {
+func TestCalculateCIDs_DirectoryWalkError(t *testing.T) {
+	// This patch forces filepath.Walk to return an error on access
+	patch := monkey.Patch(filepath.Walk, func(root string, walkFn filepath.WalkFunc) error {
+		return walkFn("/badpath", nil, fmt.Errorf("mock walk error"))
+	})
+	defer patch.Unpatch()
+
+	cidMap, err := CalculateCIDs("/somepath")
+
+	assert.Error(t, err)
+	assert.Nil(t, cidMap)
+}
+
+func TestCalculateCIDs_CommandExecutionFails(t *testing.T) {
+	dir, _ := createTempFiles(t)
+
+	// Patch exec.Command to simulate a command that always fails
+	patch := monkey.Patch(exec.Command, func(name string, args ...string) *exec.Cmd {
+		return &exec.Cmd{
+			Path:   "/bin/false",
+			Args:   []string{"false"},
+			Stdout: &bytes.Buffer{},
+			Stderr: bytes.NewBufferString("simulated command failure"),
+		}
+	})
+	defer patch.Unpatch()
+
+	_, err := CalculateCIDs(dir)
+	assert.Error(t, err)
+}
+
+func TestUploadSolution_Success(t *testing.T) {
 	dir := t.TempDir()
 	threadId := "thread123"
 	threadOutputPath := filepath.Join(dir, "renders", threadId, "output")
 
-	// Create output directory and a dummy file
-	err := os.MkdirAll(threadOutputPath, 0755)
-	require.NoError(t, err)
+	// Setup valid output directory and dummy file
+	require.NoError(t, os.MkdirAll(threadOutputPath, 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(threadOutputPath, "result.png"), []byte("fake image content"), 0644))
 
-	err = os.WriteFile(filepath.Join(threadOutputPath, "result.png"), []byte("fake image content"), 0644)
-	require.NoError(t, err)
-
-	// Patch the AddDir method to simulate a successful CID return
+	// Patch AddDir to simulate success
 	patch := monkey.Patch((*shell.Shell).AddDir, func(s *shell.Shell, path string, opts ...func(*shell.RequestBuilder) error) (string, error) {
-		if strings.Contains(path, "output") {
-			return "QmFakeCID123", nil
-		}
-		return "", errors.New("unexpected path")
+		return "QmFakeCID123", nil
 	})
 	defer patch.Unpatch()
 
@@ -157,56 +181,118 @@ func TestUploadSolution(t *testing.T) {
 	assert.Equal(t, "QmFakeCID123", cid)
 }
 
-func TestCheckIPFSStatus(t *testing.T) {
-	// "Happy Path" subtest: simulate a 200 OK response by patching RoundTrip.
-	t.Run("happy path", func(t *testing.T) {
-		// Patch the RoundTrip method of the default transport.
-		patch := monkey.PatchInstanceMethod(
-			// http.DefaultTransport is an interface; its underlying value is *http.Transport.
-			reflect.TypeOf(http.DefaultTransport.(*http.Transport)),
-			"RoundTrip",
-			func(rt *http.Transport, req *http.Request) (*http.Response, error) {
-				// Check that this is our target request.
-				if req.Method == "POST" && req.URL.String() == "http://localhost:5001/api/v0/id" {
-					return &http.Response{
-						StatusCode: http.StatusOK,
-						// Create a ReadCloser from a buffer using io.NopCloser.
-						Body:    io.NopCloser(bytes.NewBufferString(`{"ID": "mockID"}`)),
-						Header:  make(http.Header),
-						Request: req,
-					}, nil
-				}
-				return nil, fmt.Errorf("unexpected request")
-			},
-		)
-		defer patch.Unpatch()
+func TestUploadSolution_PathDoesNotExist(t *testing.T) {
+	dir := t.TempDir()
+	threadId := "nonexistent"
 
-		err := CheckIPFSStatus()
-		assert.NoError(t, err)
+	cid, err := UploadSolution(context.Background(), dir, threadId)
+	assert.Error(t, err)
+	assert.Empty(t, cid)
+	assert.Contains(t, err.Error(), "failed to access thread output path")
+}
+
+func TestUploadSolution_PathIsNotDirectory(t *testing.T) {
+	dir := t.TempDir()
+	threadId := "thread123"
+	renderPath := filepath.Join(dir, "renders", threadId)
+	require.NoError(t, os.MkdirAll(renderPath, 0755))
+
+	// Create a file instead of a directory at output path
+	outputFilePath := filepath.Join(renderPath, "output")
+	require.NoError(t, os.WriteFile(outputFilePath, []byte("not a dir"), 0644))
+
+	cid, err := UploadSolution(context.Background(), dir, threadId)
+	assert.Error(t, err)
+	assert.Empty(t, cid)
+	assert.Contains(t, err.Error(), "thread output path is not a directory")
+}
+
+func TestUploadSolution_AddDirFails(t *testing.T) {
+	dir := t.TempDir()
+	threadId := "thread123"
+	threadOutputPath := filepath.Join(dir, "renders", threadId, "output")
+
+	require.NoError(t, os.MkdirAll(threadOutputPath, 0755))
+	require.NoError(t, os.WriteFile(filepath.Join(threadOutputPath, "result.png"), []byte("dummy"), 0644))
+
+	// Patch AddDir to simulate error
+	patch := monkey.Patch((*shell.Shell).AddDir, func(s *shell.Shell, path string, opts ...func(*shell.RequestBuilder) error) (string, error) {
+		return "", errors.New("upload failed")
 	})
+	defer patch.Unpatch()
 
-	// "Error" subtest: simulate a 400 Bad Request response.
-	t.Run("bad request", func(t *testing.T) {
-		patch := monkey.PatchInstanceMethod(
-			reflect.TypeOf(http.DefaultTransport.(*http.Transport)),
-			"RoundTrip",
-			func(rt *http.Transport, req *http.Request) (*http.Response, error) {
-				if req.Method == "POST" && req.URL.String() == "http://localhost:5001/api/v0/id" {
-					return &http.Response{
-						StatusCode: http.StatusBadRequest,
-						Body:       io.NopCloser(bytes.NewBufferString("Bad Request")),
-						Header:     make(http.Header),
-						Request:    req,
-					}, nil
-				}
-				return nil, fmt.Errorf("unexpected request")
-			},
-		)
-		defer patch.Unpatch()
+	cid, err := UploadSolution(context.Background(), dir, threadId)
+	assert.Error(t, err)
+	assert.Empty(t, cid)
+	assert.Contains(t, err.Error(), "failed to upload files")
+}
 
-		err := CheckIPFSStatus()
-		assert.Error(t, err)
+func TestCheckIPFSStatus_Success(t *testing.T) {
+	patch := monkey.PatchInstanceMethod(
+		reflect.TypeOf(http.DefaultTransport.(*http.Transport)),
+		"RoundTrip",
+		func(rt *http.Transport, req *http.Request) (*http.Response, error) {
+			if req.Method == "POST" && req.URL.String() == "http://localhost:5001/api/v0/id" {
+				return &http.Response{
+					StatusCode: http.StatusOK,
+					Body:       io.NopCloser(bytes.NewBufferString(`{"ID": "mockID"}`)),
+					Header:     make(http.Header),
+					Request:    req,
+				}, nil
+			}
+			return nil, fmt.Errorf("unexpected request")
+		},
+	)
+	defer patch.Unpatch()
+
+	err := CheckIPFSStatus()
+	assert.NoError(t, err)
+}
+
+func TestCheckIPFSStatus_BadRequest(t *testing.T) {
+	patch := monkey.PatchInstanceMethod(
+		reflect.TypeOf(http.DefaultTransport.(*http.Transport)),
+		"RoundTrip",
+		func(rt *http.Transport, req *http.Request) (*http.Response, error) {
+			return &http.Response{
+				StatusCode: http.StatusBadRequest,
+				Body:       io.NopCloser(bytes.NewBufferString("Bad Request")),
+				Header:     make(http.Header),
+				Request:    req,
+			}, nil
+		},
+	)
+	defer patch.Unpatch()
+
+	err := CheckIPFSStatus()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "non-200")
+}
+
+func TestCheckIPFSStatus_RequestCreationFails(t *testing.T) {
+	patch := monkey.Patch(http.NewRequest, func(method, url string, body io.Reader) (*http.Request, error) {
+		return nil, fmt.Errorf("mock NewRequest error")
 	})
+	defer patch.Unpatch()
+
+	err := CheckIPFSStatus()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to create request")
+}
+
+func TestCheckIPFSStatus_ClientDoFails(t *testing.T) {
+	patch := monkey.PatchInstanceMethod(
+		reflect.TypeOf(http.DefaultTransport.(*http.Transport)),
+		"RoundTrip",
+		func(rt *http.Transport, req *http.Request) (*http.Response, error) {
+			return nil, fmt.Errorf("mock Do error")
+		},
+	)
+	defer patch.Unpatch()
+
+	err := CheckIPFSStatus()
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "unreachable")
 }
 
 func TestStartIPFS(t *testing.T) {
@@ -317,7 +403,125 @@ func TestEnsureIPFSRunning(t *testing.T) {
 	})
 }
 
-func TestListDirectory(t *testing.T) {
+func TestListDirectory_Success(t *testing.T) {
+	patch := monkey.Patch(exec.CommandContext, func(ctx context.Context, name string, args ...string) *exec.Cmd {
+		output := "QmCid1 12345 file1.txt\nQmCid2 67890 file2.txt"
+		return fakeExecCommand(output)
+	})
+	defer patch.Unpatch()
+
+	result, err := ListDirectory("mockCID")
+	assert.NoError(t, err)
+	assert.Equal(t, map[string]string{
+		"file1.txt": "QmCid1",
+		"file2.txt": "QmCid2",
+	}, result)
+}
+
+func TestListDirectory_RunFails(t *testing.T) {
+	patch := monkey.Patch(exec.CommandContext, func(ctx context.Context, name string, args ...string) *exec.Cmd {
+		return fakeExecCommandWithError("command error")
+	})
+	defer patch.Unpatch()
+
+	result, err := ListDirectory("mockCID")
+	assert.Error(t, err)
+	assert.Nil(t, result)
+}
+
+func TestListDirectory_SkipMalformedLines(t *testing.T) {
+	patch := monkey.Patch(exec.CommandContext, func(ctx context.Context, name string, args ...string) *exec.Cmd {
+		output := "QmCidOnly\nQmCid2 67890 file2.txt"
+		return fakeExecCommand(output)
+	})
+	defer patch.Unpatch()
+
+	result, err := ListDirectory("mockCID")
+	assert.NoError(t, err)
+	assert.Equal(t, map[string]string{
+		"file2.txt": "QmCid2",
+	}, result)
+}
+
+func TestListDirectory_ScannerError(t *testing.T) {
+	// Use a buffer with malformed data (not enough fields)
+	buf := bytes.NewBufferString("QmFakeCID fileNameOnly")
+
+	// Patch exec.CommandContext to return a command with our malformed buffer as stdout
+	patch := monkey.Patch(exec.CommandContext, func(ctx context.Context, name string, args ...string) *exec.Cmd {
+		cmd := exec.Command("echo") // dummy command
+		cmd.Stdout = buf
+		return cmd
+	})
+	defer patch.Unpatch()
+
+	// Run the function under test
+	result, err := ListDirectory("mockCID")
+	assert.NoError(t, err)                       // Check that no error is returned
+	assert.Equal(t, map[string]string{}, result) // Check that the result is an empty map
+}
+
+func TestListDirectory_Timeout(t *testing.T) {
+	// Patch context.WithTimeout to return an expired context
+	patch := monkey.Patch(context.WithTimeout, func(parent context.Context, timeout time.Duration) (context.Context, context.CancelFunc) {
+		ctx, cancel := context.WithDeadline(parent, time.Now().Add(-1*time.Second)) // Already expired
+		return ctx, cancel
+	})
+	defer patch.Unpatch()
+
+	// Patch exec.CommandContext to prevent real execution
+	patchCmd := monkey.Patch(exec.CommandContext, func(ctx context.Context, name string, arg ...string) *exec.Cmd {
+		return fakeExecCommand("") // Won't be used because timeout triggers first
+	})
+	defer patchCmd.Unpatch()
+
+	result, err := ListDirectory("fakeCID")
+
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "timeout")
+	assert.Nil(t, result)
+}
+
+func TestListDirectory_ScannerErrMethod(t *testing.T) {
+	// Patch exec.CommandContext to return a command with empty output
+	patchCmd := monkey.Patch(exec.CommandContext, func(ctx context.Context, name string, args ...string) *exec.Cmd {
+		// out buffer will remain empty
+		return fakeExecCommand("")
+	})
+	defer patchCmd.Unpatch()
+
+	// Patch bufio.Scanner.Err to simulate a scan error after iteration
+	patchErr := monkey.PatchInstanceMethod(
+		reflect.TypeOf(&bufio.Scanner{}),
+		"Err",
+		func(s *bufio.Scanner) error {
+			return fmt.Errorf("simulated scanner failure")
+		},
+	)
+	defer patchErr.Unpatch()
+
+	// Call under test
+	result, err := ListDirectory("anyCID")
+
+	// Validate: we should get that scanner‑error path
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "error reading command output")
+	assert.Nil(t, result)
+}
+
+func TestListDirectory_ExecCommandWithInvalidCID(t *testing.T) {
+	// Patch exec.CommandContext to simulate an error when using an invalid CID
+	patch := monkey.Patch(exec.CommandContext, func(ctx context.Context, name string, arg ...string) *exec.Cmd {
+		return fakeExecCommandWithError("invalid CID")
+	})
+	defer patch.Unpatch()
+
+	result, err := ListDirectory("invalidCID")
+
+	// Assert that an error is returned for invalid CID
+	assert.Error(t, err)
+	assert.Contains(t, err.Error(), "failed to execute ipfs ls")
+	assert.Nil(t, result)
 }
 
 func TestConnectToIPFSNode(t *testing.T) {
