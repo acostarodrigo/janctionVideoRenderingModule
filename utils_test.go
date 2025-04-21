@@ -12,7 +12,40 @@ import (
 	"testing"
 
 	"bou.ke/monkey"
+	"github.com/stretchr/testify/assert"
 )
+
+// --- Test for SliceToMap ---
+func TestTransformSliceToMap_Success(t *testing.T) {
+	input := []string{
+		"file1.txt=hash1",
+		"file2.txt=hash2",
+		"file3.txt=hash3",
+	}
+
+	expected := map[string]string{
+		"file1.txt": "hash1",
+		"file2.txt": "hash2",
+		"file3.txt": "hash3",
+	}
+
+	result, err := TransformSliceToMap(input)
+	assert.NoError(t, err)
+	assert.Equal(t, expected, result)
+}
+
+func TestTransformSliceToMap_InvalidFormat(t *testing.T) {
+	input := []string{
+		"file1.txt=hash1",
+		"invalidfile", // Invalid entry
+		"file2.txt=hash2",
+	}
+
+	result, err := TransformSliceToMap(input)
+	assert.Error(t, err)
+	assert.Nil(t, result)
+	assert.Contains(t, err.Error(), "invalid format: invalidfile")
+}
 
 // --- Test for MapToKeyValueFormat ---
 func TestMapToKeyValueFormat(t *testing.T) {
