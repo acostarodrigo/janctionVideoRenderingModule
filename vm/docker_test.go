@@ -59,7 +59,7 @@ func TestIsContainerRunningOk(t *testing.T) {
 }
 
 // --- Test for renderVideoFrame ---
-func TestRenderVideoFrame_ContainerAlreadyExist(t *testing.T) {
+func TestRenderVideoFrame_ContainerVerificationError(t *testing.T) {
 	// 1. Setup
 	mockDB := new(mocks.DB)
 	ctx := context.Background()
@@ -87,63 +87,13 @@ func TestRenderVideoFrame_ContainerAlreadyExist(t *testing.T) {
 
 	// 5. Verification
 	require.Error(t, err)
-	require.Contains(t, err.Error(), "Error verifying if container already exists")
+	require.Contains(t, err.Error(), "failed to check container existence: Error verifying if container already exists")
 
 	// 6. Verify mock expectations
 	mockDB.AssertExpectations(t)
 }
 
-func TestRenderVideoFrame_CreatingContainerKo(t *testing.T) {
-	// 1. Setup
-	mockDB := new(mocks.DB)
-	ctx := context.Background()
-	cid := "bafybeigdyrztxx3b7d5qzq2ujay5g4qxxuj5f6x3h6lgv7d4ttrddn3cxa"
-	frameNumber := int64(42)
-	id := "thread123"
-	path := "/tmp/rendering/thread123/frame_42"
-
-	// 2. Mock DB methods
-	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
-
-	// 3. Monkey patch CommandContext to return an *exec.Cmd with visible arguments
-	patch1 := monkey.Patch(exec.CommandContext, func(ctx context.Context, name string, arg ...string) *exec.Cmd {
-		return &exec.Cmd{
-			Path: name,
-			Args: append([]string{name}, arg...),
-		}
-	})
-	defer patch1.Unpatch()
-
-	// 4. Patch Output to simulate the container already exists
-	patch2 := monkey.PatchInstanceMethod(reflect.TypeOf(&exec.Cmd{}), "Output", func(cmd *exec.Cmd) ([]byte, error) {
-		if len(cmd.Args) > 1 && cmd.Args[1] == "ps" {
-			return []byte(""), nil
-		}
-		return nil, fmt.Errorf("unexpected Output command")
-	})
-	defer patch2.Unpatch()
-
-	// 5. Patch Run to simulate failure when creating the container
-	patch3 := monkey.PatchInstanceMethod(reflect.TypeOf(&exec.Cmd{}), "Run", func(cmd *exec.Cmd) error {
-		if len(cmd.Args) > 1 && cmd.Args[1] == "run" {
-			return fmt.Errorf("Error creating container")
-		}
-		return nil
-	})
-	defer patch3.Unpatch()
-
-	// 6. Execute the function under test
-	err := renderVideoFrame(ctx, cid, frameNumber, id, path, mockDB)
-
-	// 7. Assert the error
-	require.Error(t, err)
-	require.Contains(t, err.Error(), "Error creating container")
-
-	// 8. Verify mock expectations
-	mockDB.AssertExpectations(t)
-}
-
-func TestRenderVideoFrame_CreatingContainerOk(t *testing.T) {
+func TestRenderVideoFrame_ContainerAlreadyExist(t *testing.T) {
 	// 1. Setup
 	mockDB := new(mocks.DB)
 	ctx := context.Background()
@@ -176,14 +126,162 @@ func TestRenderVideoFrame_CreatingContainerOk(t *testing.T) {
 	mockDB.AssertExpectations(t)
 }
 
-func TestRenderVideoFrame_CreatingContainerOk_WaitingContainerKo(t *testing.T) {
+func TestRenderVideoFrame_CreatingContainerKo(t *testing.T) {
+	// 1. Setup
+	mockDB := new(mocks.DB)
+	ctx := context.Background()
+	cid := "bafybeigdyrztxx3b7d5qzq2ujay5g4qxxuj5f6x3h6lgv7d4ttrddn3cxa"
+	frameNumber := int64(42)
+	id := "thread123"
+	path := "/tmp/rendering/thread123/frame_42"
 
+	// 2. Mock DB methods
+	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
+
+	// 3. Monkey patch CommandContext to return an *exec.Cmd with visible arguments
+	patch1 := monkey.Patch(exec.CommandContext, func(ctx context.Context, name string, arg ...string) *exec.Cmd {
+		return &exec.Cmd{
+			Path: name,
+			Args: append([]string{name}, arg...),
+		}
+	})
+	defer patch1.Unpatch()
+
+	// 4. Patch Output to simulate that container doesn't exist
+	patch2 := monkey.PatchInstanceMethod(reflect.TypeOf(&exec.Cmd{}), "Output", func(cmd *exec.Cmd) ([]byte, error) {
+		return []byte(""), nil
+	})
+	defer patch2.Unpatch()
+
+	// 5. Patch Run to simulate failure when creating the container
+	patch3 := monkey.PatchInstanceMethod(reflect.TypeOf(&exec.Cmd{}), "Run", func(cmd *exec.Cmd) error {
+		return fmt.Errorf("Error creating container")
+	})
+	defer patch3.Unpatch()
+
+	// 6. Execute the function under test
+	err := renderVideoFrame(ctx, cid, frameNumber, id, path, mockDB)
+
+	// 7. Assert the error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "failed to create and start container: Error creating container")
+
+	// 8. Verify mock expectations
+	mockDB.AssertExpectations(t)
+}
+
+func TestRenderVideoFrame_CreatingContainerOk_WaitingContainerKo(t *testing.T) {
+	// 1. Setup
+	mockDB := new(mocks.DB)
+	ctx := context.Background()
+	cid := "bafybeigdyrztxx3b7d5qzq2ujay5g4qxxuj5f6x3h6lgv7d4ttrddn3cxa"
+	frameNumber := int64(42)
+	id := "thread123"
+	path := "/tmp/rendering/thread123/frame_42"
+
+	// 2. Mock DB methods
+	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
+
+	// 3. Monkey patch CommandContext to return an *exec.Cmd with visible arguments
+	patch1 := monkey.Patch(exec.CommandContext, func(ctx context.Context, name string, arg ...string) *exec.Cmd {
+		return &exec.Cmd{
+			Path: name,
+			Args: append([]string{name}, arg...),
+		}
+	})
+	defer patch1.Unpatch()
+
+	// 4. Patch Output to simulate that container doesn't exist
+	patch2 := monkey.PatchInstanceMethod(reflect.TypeOf(&exec.Cmd{}), "Output", func(cmd *exec.Cmd) ([]byte, error) {
+		return []byte(""), nil
+	})
+	defer patch2.Unpatch()
+
+	// 5. Patch Run to simulate success when creating the container and failure when waiting for it
+	patch3 := monkey.PatchInstanceMethod(reflect.TypeOf(&exec.Cmd{}), "Run", func(cmd *exec.Cmd) error {
+		if len(cmd.Args) > 1 {
+			switch cmd.Args[1] {
+			case "run":
+				return nil
+			case "wait":
+				return fmt.Errorf("failed here")
+			}
+		}
+		return fmt.Errorf("unexpected command")
+	})
+	defer patch3.Unpatch()
+
+	// 6. Execute the function under test
+	err := renderVideoFrame(ctx, cid, frameNumber, id, path, mockDB)
+
+	// 7. Assert the error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "failed to wait for container: failed here")
+
+	// 8. Verify mock expectations
+	mockDB.AssertExpectations(t)
 }
 
 func TestRenderVideoFrame_CreatingContainerOk_WaitingContainerOk_RetrieveLogsKo(t *testing.T) {
+	// 1. Setup
+	mockDB := new(mocks.DB)
+	ctx := context.Background()
+	cid := "bafybeigdyrztxx3b7d5qzq2ujay5g4qxxuj5f6x3h6lgv7d4ttrddn3cxa"
+	frameNumber := int64(42)
+	id := "thread123"
+	path := "/tmp/rendering/thread123/frame_42"
 
+	// 2. Mock DB methods
+	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
+
+	// 3. Monkey patch CommandContext to return an *exec.Cmd with visible arguments
+	patch1 := monkey.Patch(exec.CommandContext, func(ctx context.Context, name string, arg ...string) *exec.Cmd {
+		return &exec.Cmd{
+			Path: name,
+			Args: append([]string{name}, arg...),
+		}
+	})
+	defer patch1.Unpatch()
+
+	// 4. Patch Output to simulate that container doesn't exist and retrieving logs fail
+	patch2 := monkey.PatchInstanceMethod(reflect.TypeOf(&exec.Cmd{}), "Output", func(cmd *exec.Cmd) ([]byte, error) {
+		switch cmd.Args[1] {
+		case "ps":
+			return []byte(""), nil
+		case "logs":
+			return nil, fmt.Errorf("failed here")
+		}
+		return nil, fmt.Errorf("unexpected command")
+	})
+	defer patch2.Unpatch()
+
+	// 5. Patch Run to simulate success when creating and waiting for the container and failure when retrieving
+	patch3 := monkey.PatchInstanceMethod(reflect.TypeOf(&exec.Cmd{}), "Run", func(cmd *exec.Cmd) error {
+		if len(cmd.Args) > 1 {
+			switch cmd.Args[1] {
+			case "run":
+				return nil
+			case "wait":
+				return nil
+			}
+		}
+		return fmt.Errorf("unexpected command")
+	})
+	defer patch3.Unpatch()
+
+	// 6. Execute the function under test
+	err := renderVideoFrame(ctx, cid, frameNumber, id, path, mockDB)
+
+	// 7. Assert the error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "failed to retrieve container logs: failed here")
+
+	// 8. Verify mock expectations
+	mockDB.AssertExpectations(t)
 }
 
-func TestRenderVideoFrame_CreatingContainerOk_WaitingContainerOk_RetrieveLogsOk(t *testing.T) {
+func TestRenderVideoFrame_CreatingContainerOk_WaitingContainerOk_RetrieveLogsOk_VerifyFileKo(t *testing.T) {
+}
 
+func TestRenderVideoFrame_CreatingContainerOk_WaitingContainerOk_RetrieveLogsOk_VerifyFileOk(t *testing.T) {
 }

@@ -112,7 +112,7 @@ func renderVideoFrame(ctx context.Context, cid string, frameNumber int64, id str
 	videoRenderingLogger.Logger.Info("Starting docker: %s", runCmd.String())
 	err = runCmd.Run()
 	if err != nil {
-		db.AddLogEntry(id, fmt.Sprintf("Error in crearing the container. %s", err.Error()), started, 1)
+		db.AddLogEntry(id, fmt.Sprintf("Error in creating the container. %s", err.Error()), started, 1)
 		videoRenderingLogger.Logger.Error("failed to create and start container: %s", err.Error())
 		return fmt.Errorf("failed to create and start container: %w", err)
 	}
