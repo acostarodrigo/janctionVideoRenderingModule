@@ -398,3 +398,37 @@ func TestRemoveContainerOk(t *testing.T) {
 	// 5. Assert no error
 	require.NoError(t, err)
 }
+
+func TestCountFilesInDirectoryKo(t *testing.T) {
+	// 1. Setup
+	path := "path123"
+
+	// 2. Patch Os.ReadDir to simulate failure when reading the directory
+	patch4 := monkey.Patch(os.ReadDir, func(name string) ([]os.DirEntry, error) {
+		return nil, fmt.Errorf("failed to read directory")
+	})
+	defer patch4.Unpatch()
+
+	// 3. Execute the function under test
+	count := CountFilesInDirectory(path)
+
+	// 4. Assert the error
+	require.Equal(t, count, 0)
+}
+
+func TestCountFilesInDirectoryOk(t *testing.T) {
+	// 1. Setup
+	path := "path123"
+
+	// 2. Patch Os.ReadDir to simulate failure when reading the directory
+	patch4 := monkey.Patch(os.ReadDir, func(name string) ([]os.DirEntry, error) {
+		return nil, nil
+	})
+	defer patch4.Unpatch()
+
+	// 3. Execute the function under test
+	count := CountFilesInDirectory(path)
+
+	// 4. Assert the error
+	require.Equal(t, count, 0)
+}
