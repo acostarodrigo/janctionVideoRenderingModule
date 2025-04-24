@@ -253,7 +253,7 @@ func submitValidation(validator string, taskId, threadId, publicKey string, sign
 	return nil
 }
 
-func (t VideoRenderingThread) SubmitSolution(ctx context.Context, workerAddress, rootPath string, db *db.DB) error {
+func (t VideoRenderingThread) SubmitSolution(ctx context.Context, workerAddress, rootPath string, db db.Database) error {
 	db.UpdateThread(t.ThreadId, true, true, true, true, true, true, true, true)
 
 	db.AddLogEntry(t.ThreadId, "Submiting solution to IPFS...", time.Now().Unix(), 0)
@@ -335,7 +335,7 @@ func calculateValidatorPayment(filesValidated, totalFilesValidated int, totalVal
 }
 
 // Once validations are ready, we show blockchain the solution
-func (t *VideoRenderingThread) RevealSolution(rootPath string, db *db.DB) error {
+func (t *VideoRenderingThread) RevealSolution(rootPath string, db db.Database) error {
 	output := path.Join(rootPath, "renders", t.ThreadId, "output")
 	cids, err := ipfs.CalculateCIDs(output)
 	if err != nil {
