@@ -20,7 +20,7 @@ import (
 	"github.com/janction/videoRendering/vm"
 )
 
-func (t *VideoRenderingThread) StartWork(ctx context.Context, worker string, cid string, path string, db db.Database) error {
+func (t *VideoRenderingThread) StartWork(ctx context.Context, worker string, cid string, path string, db *db.DB) error {
 	// ctx := context.Background()
 
 	if err := db.UpdateThread(t.ThreadId, false, false, true, false, false, false, false, false); err != nil {
@@ -92,7 +92,7 @@ func (t *VideoRenderingThread) StartWork(ctx context.Context, worker string, cid
 	return nil
 }
 
-func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAddress string, rootPath string, db db.Database) error {
+func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAddress string, rootPath string, db *db.DB) error {
 	db.UpdateThread(t.ThreadId, true, true, true, true, true, false, false, false)
 
 	output := path.Join(rootPath, "renders", t.ThreadId, "output")
@@ -165,7 +165,7 @@ func (t VideoRenderingThread) ProposeSolution(codec codec.Codec, alias, workerAd
 	return nil
 }
 
-func (t VideoRenderingThread) SubmitVerification(codec codec.Codec, alias, workerAddress string, rootPath string, db db.Database) error {
+func (t VideoRenderingThread) SubmitVerification(codec codec.Codec, alias, workerAddress string, rootPath string, db *db.DB) error {
 	// we will verify any file we already have rendered.
 	db.UpdateThread(t.ThreadId, true, true, true, true, true, true, false, false)
 	output := path.Join(rootPath, "renders", t.ThreadId, "output")
@@ -253,7 +253,7 @@ func submitValidation(validator string, taskId, threadId, publicKey string, sign
 	return nil
 }
 
-func (t VideoRenderingThread) SubmitSolution(ctx context.Context, workerAddress, rootPath string, db db.Database) error {
+func (t VideoRenderingThread) SubmitSolution(ctx context.Context, workerAddress, rootPath string, db *db.DB) error {
 	db.UpdateThread(t.ThreadId, true, true, true, true, true, true, true, true)
 
 	db.AddLogEntry(t.ThreadId, "Submiting solution to IPFS...", time.Now().Unix(), 0)
@@ -269,7 +269,7 @@ func (t VideoRenderingThread) SubmitSolution(ctx context.Context, workerAddress,
 	if err != nil {
 		duration = 0
 	}
-	
+
 	err = submitSolution(workerAddress, t.TaskId, t.ThreadId, cid, int64(duration))
 	if err != nil {
 		db.UpdateThread(t.ThreadId, true, true, true, true, true, true, true, false)
@@ -335,7 +335,7 @@ func calculateValidatorPayment(filesValidated, totalFilesValidated int, totalVal
 }
 
 // Once validations are ready, we show blockchain the solution
-func (t *VideoRenderingThread) RevealSolution(rootPath string, db db.Database) error {
+func (t *VideoRenderingThread) RevealSolution(rootPath string, db *db.DB) error {
 	output := path.Join(rootPath, "renders", t.ThreadId, "output")
 	cids, err := ipfs.CalculateCIDs(output)
 	if err != nil {
