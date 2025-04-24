@@ -6,9 +6,11 @@ import (
 	"os"
 	"os/exec"
 	"reflect"
+	"runtime"
 	"testing"
 
 	"bou.ke/monkey"
+	"github.com/janction/videoRendering/db"
 	"github.com/janction/videoRendering/mocks"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
@@ -57,6 +59,60 @@ func TestIsContainerRunningOk(t *testing.T) {
 
 	// 4. Verification
 	require.True(t, b)
+}
+
+func TestRenderVideoNoReverse(t *testing.T) {
+	// 1. Setup
+	mockDB := new(mocks.DB)
+	ctx := context.Background()
+	cid := "bafybeigdyrztxx3b7d5qzq2ujay5g4qxxuj5f6x3h6lgv7d4ttrddn3cxa"
+	id := "thread123"
+	path := "/tmp/rendering/thread123/frame_42"
+	start := int64(1)
+	end := int64(10)
+	reverse := false
+	function_calls := make([]int64, 0, 10) // Empty slice with a capacity of 10
+
+	// 2. Monkey patch the renderVideoFrame function to not actually call it, just count the number of times it is called
+	patch1 := monkey.Patch(renderVideoFrame, func(ctx context.Context, cid string, frameNumber int64, id string, path string, db db.Database) error {
+		function_calls = append(function_calls, frameNumber)
+		return nil
+	})
+	defer patch1.Unpatch()
+
+	// 3. Execute method under test
+	RenderVideo(ctx, cid, start, end, id, path, reverse, mockDB)
+
+	// 5. Verification
+	expected := []int64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
+	require.Equal(t, function_calls, expected)
+}
+
+func TestRenderVideoReverse(t *testing.T) {
+	// 1. Setup
+	mockDB := new(mocks.DB)
+	ctx := context.Background()
+	cid := "bafybeigdyrztxx3b7d5qzq2ujay5g4qxxuj5f6x3h6lgv7d4ttrddn3cxa"
+	id := "thread123"
+	path := "/tmp/rendering/thread123/frame_42"
+	start := int64(1)
+	end := int64(10)
+	reverse := true
+	function_calls := make([]int64, 0, 10) // Empty slice with a capacity of 10
+
+	// 2. Monkey patch the renderVideoFrame function to not actually call it, just count the number of times it is called
+	patch1 := monkey.Patch(renderVideoFrame, func(ctx context.Context, cid string, frameNumber int64, id string, path string, db db.Database) error {
+		function_calls = append(function_calls, frameNumber)
+		return nil
+	})
+	defer patch1.Unpatch()
+
+	// 3. Execute method under test
+	RenderVideo(ctx, cid, start, end, id, path, reverse, mockDB)
+
+	// 5. Verification
+	expected := []int64{10, 9, 8, 7, 6, 5, 4, 3, 2, 1}
+	require.Equal(t, function_calls, expected)
 }
 
 // --- Test for renderVideoFrame ---
@@ -412,7 +468,7 @@ func TestCountFilesInDirectoryKo(t *testing.T) {
 	// 3. Execute the function under test
 	count := CountFilesInDirectory(path)
 
-	// 4. Assert the error
+	// 4. Assert that the count is 0
 	require.Equal(t, count, 0)
 }
 
@@ -420,7 +476,7 @@ func TestCountFilesInDirectoryOk(t *testing.T) {
 	// 1. Setup
 	path := "path123"
 
-	// 2. Patch Os.ReadDir to simulate failure when reading the directory
+	// 2. Patch Os.ReadDir to simulate success when reading the directory
 	patch4 := monkey.Patch(os.ReadDir, func(name string) ([]os.DirEntry, error) {
 		return nil, nil
 	})
@@ -429,6 +485,90 @@ func TestCountFilesInDirectoryOk(t *testing.T) {
 	// 3. Execute the function under test
 	count := CountFilesInDirectory(path)
 
-	// 4. Assert the error
+	// 4. Assert that the count is 0
 	require.Equal(t, count, 0)
+}
+
+func TestFormatFrameFilename(t *testing.T) {
+	// 1. Setup
+	frame := 42
+
+	// 2. Execute the function under test
+	filename := FormatFrameFilename(frame)
+
+	// 3. Assert
+	require.Equal(t, filename, "frame_000042.png")
+}
+
+func TestIsARM64(t *testing.T) {
+	// 1. Execute the function under test
+	is_arm := isARM64()
+
+	// 2. Assert
+	require.Equal(t, is_arm, runtime.GOARCH == "arm64")
+}
+
+func TestIsContainerExitedKo(t *testing.T) {
+	// 1. Setup
+	id := "thread123"
+
+	// 2. Monkey patch CommandContext to return an *exec.Cmd with visible arguments
+	patch1 := monkey.Patch(exec.Command, func(name string, arg ...string) *exec.Cmd {
+		return &exec.Cmd{
+			Path: name,
+			Args: append([]string{name}, arg...),
+		}
+	})
+	defer patch1.Unpatch()
+
+	// 3. Patch Run in order to simulate docker ps failure
+	patch2 := monkey.PatchInstanceMethod(reflect.TypeOf(&exec.Cmd{}), "Run", func(cmd *exec.Cmd) error {
+		switch cmd.Args[1] {
+		case "ps":
+			return fmt.Errorf("Error creating container")
+		}
+		return fmt.Errorf("unexpected command")
+	})
+	defer patch2.Unpatch()
+
+	// 4. Execute the function under test
+	result, err := IsContainerExited(id)
+
+	// 5. Assert
+	require.Equal(t, result, false)
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "Error creating container")
+}
+
+func TestIsContainerExitedOk(t *testing.T) {
+	// 1. Setup
+	threadId := "thread123"
+	containerName := "myBlender" + threadId
+
+	// 2. Monkey patch CommandContext to return an *exec.Cmd with visible arguments
+	patch1 := monkey.Patch(exec.Command, func(name string, arg ...string) *exec.Cmd {
+		return &exec.Cmd{
+			Path: name,
+			Args: append([]string{name}, arg...),
+		}
+	})
+	defer patch1.Unpatch()
+
+	// 3. Patch Run in order to simulate docker ps failure
+	patch2 := monkey.PatchInstanceMethod(reflect.TypeOf(&exec.Cmd{}), "Run", func(cmd *exec.Cmd) error {
+		switch cmd.Args[1] {
+		case "ps":
+			cmd.Stdout.Write([]byte(containerName))
+			return nil
+		}
+		return fmt.Errorf("unexpected command")
+	})
+	defer patch2.Unpatch()
+
+	// 4. Execute the function under test
+	result, err := IsContainerExited(threadId)
+
+	// 5. Assert
+	require.Equal(t, result, true)
+	require.NoError(t, err)
 }
