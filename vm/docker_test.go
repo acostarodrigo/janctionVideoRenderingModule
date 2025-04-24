@@ -61,6 +61,7 @@ func TestIsContainerRunningOk(t *testing.T) {
 	require.True(t, b)
 }
 
+// --- Test for RenderVideo ---
 func TestRenderVideoNoReverse(t *testing.T) {
 	// 1. Setup
 	mockDB := new(mocks.DB)
@@ -73,7 +74,7 @@ func TestRenderVideoNoReverse(t *testing.T) {
 	reverse := false
 	function_calls := make([]int64, 0, 10) // Empty slice with a capacity of 10
 
-	// 2. Monkey patch the renderVideoFrame function to not actually call it, just count the number of times it is called
+	// 2. Monkey patch the renderVideoFrame function to not actually call it, just save the call to a variable
 	patch1 := monkey.Patch(renderVideoFrame, func(ctx context.Context, cid string, frameNumber int64, id string, path string, db db.Database) error {
 		function_calls = append(function_calls, frameNumber)
 		return nil
@@ -400,6 +401,7 @@ func TestRenderVideoFrame_CreatingContainerOk_WaitingContainerOk_RetrieveLogsOk_
 	mockDB.AssertExpectations(t)
 }
 
+// --- Test for RemoveContainer ---
 func TestRemoveContainerKo(t *testing.T) {
 	// 1. Setup
 	ctx := context.Background()
@@ -455,6 +457,7 @@ func TestRemoveContainerOk(t *testing.T) {
 	require.NoError(t, err)
 }
 
+// --- Test for CountFilesInDirectory ---
 func TestCountFilesInDirectoryKo(t *testing.T) {
 	// 1. Setup
 	path := "path123"
@@ -489,6 +492,7 @@ func TestCountFilesInDirectoryOk(t *testing.T) {
 	require.Equal(t, count, 0)
 }
 
+// --- Test for FormatFrameFilename ---
 func TestFormatFrameFilename(t *testing.T) {
 	// 1. Setup
 	frame := 42
@@ -500,6 +504,7 @@ func TestFormatFrameFilename(t *testing.T) {
 	require.Equal(t, filename, "frame_000042.png")
 }
 
+// --- Test for IsARM64 ---
 func TestIsARM64(t *testing.T) {
 	// 1. Execute the function under test
 	is_arm := isARM64()
@@ -508,6 +513,7 @@ func TestIsARM64(t *testing.T) {
 	require.Equal(t, is_arm, runtime.GOARCH == "arm64")
 }
 
+// --- Test for IsContainerExited ---
 func TestIsContainerExitedKo(t *testing.T) {
 	// 1. Setup
 	id := "thread123"
