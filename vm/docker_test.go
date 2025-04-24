@@ -302,7 +302,7 @@ func TestRenderVideoFrame_CreatingContainerOk_WaitingContainerOk_RetrieveLogsOk_
 	})
 	defer patch1.Unpatch()
 
-	// 4. Patch Output to simulate that container doesn't exist and retrieving logs fail
+	// 4. Patch Output to simulate that container doesn't exist and retrieving logs succeeds
 	patch2 := monkey.PatchInstanceMethod(reflect.TypeOf(&exec.Cmd{}), "Output", func(cmd *exec.Cmd) ([]byte, error) {
 		switch cmd.Args[1] {
 		case "ps":
@@ -314,7 +314,7 @@ func TestRenderVideoFrame_CreatingContainerOk_WaitingContainerOk_RetrieveLogsOk_
 	})
 	defer patch2.Unpatch()
 
-	// 5. Patch Run to simulate success when creating and waiting for the container and failure when retrieving
+	// 5. Patch Run to simulate success when creating and waiting for the container
 	patch3 := monkey.PatchInstanceMethod(reflect.TypeOf(&exec.Cmd{}), "Run", func(cmd *exec.Cmd) error {
 		if len(cmd.Args) > 1 {
 			switch cmd.Args[1] {
@@ -342,4 +342,59 @@ func TestRenderVideoFrame_CreatingContainerOk_WaitingContainerOk_RetrieveLogsOk_
 
 	// 9. Verify mock expectations
 	mockDB.AssertExpectations(t)
+}
+
+func TestRemoveContainerKo(t *testing.T) {
+	// 1. Setup
+	ctx := context.Background()
+	name := "container123"
+
+	// 2. Monkey patch CommandContext to return an *exec.Cmd with visible arguments
+	patch1 := monkey.Patch(exec.CommandContext, func(ctx context.Context, name string, arg ...string) *exec.Cmd {
+		return &exec.Cmd{
+			Path: name,
+			Args: append([]string{name}, arg...),
+		}
+	})
+	defer patch1.Unpatch()
+
+	// 3. Patch Run to simulate that container was removed successfully
+	patch2 := monkey.PatchInstanceMethod(reflect.TypeOf(&exec.Cmd{}), "Run", func(cmd *exec.Cmd) error {
+		return fmt.Errorf("failed removing container")
+	})
+	defer patch2.Unpatch()
+
+	// 4. Execute the function under test
+	err := RemoveContainer(ctx, name)
+
+	// 5. Assert the error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "failed removing container")
+}
+
+func TestRemoveContainerOk(t *testing.T) {
+	// 1. Setup
+	ctx := context.Background()
+	name := "container123"
+
+	// 2. Monkey patch CommandContext to return an *exec.Cmd with visible arguments
+	patch1 := monkey.Patch(exec.CommandContext, func(ctx context.Context, name string, arg ...string) *exec.Cmd {
+		return &exec.Cmd{
+			Path: name,
+			Args: append([]string{name}, arg...),
+		}
+	})
+	defer patch1.Unpatch()
+
+	// 3. Patch Run to simulate that container was removed successfully
+	patch2 := monkey.PatchInstanceMethod(reflect.TypeOf(&exec.Cmd{}), "Run", func(cmd *exec.Cmd) error {
+		return nil
+	})
+	defer patch2.Unpatch()
+
+	// 4. Execute the function under test
+	err := RemoveContainer(ctx, name)
+
+	// 5. Assert no error
+	require.NoError(t, err)
 }
