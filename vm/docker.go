@@ -34,7 +34,7 @@ func IsContainerRunning(ctx context.Context, threadId string) bool {
 	return containerName == name
 }
 
-func RenderVideo(ctx context.Context, cid string, start int64, end int64, id string, path string, reverse bool, db *db.DB) {
+func RenderVideo(ctx context.Context, cid string, start int64, end int64, id string, path string, reverse bool, db db.Database) {
 	if reverse {
 		for i := end; i >= start; i-- {
 			videoRenderingLogger.Logger.Info("Rendering frame %v in reverse", i)
@@ -48,7 +48,7 @@ func RenderVideo(ctx context.Context, cid string, start int64, end int64, id str
 	}
 }
 
-func renderVideoFrame(ctx context.Context, cid string, frameNumber int64, id string, path string, db *db.DB) error {
+func renderVideoFrame(ctx context.Context, cid string, frameNumber int64, id string, path string, db db.Database) error {
 	n := "myBlender" + id
 
 	started := time.Now().Unix()
@@ -112,7 +112,7 @@ func renderVideoFrame(ctx context.Context, cid string, frameNumber int64, id str
 	videoRenderingLogger.Logger.Info("Starting docker: %s", runCmd.String())
 	err = runCmd.Run()
 	if err != nil {
-		db.AddLogEntry(id, fmt.Sprintf("Error in crearing the container. %s", err.Error()), started, 1)
+		db.AddLogEntry(id, fmt.Sprintf("Error in creating the container. %s", err.Error()), started, 1)
 		videoRenderingLogger.Logger.Error("failed to create and start container: %s", err.Error())
 		return fmt.Errorf("failed to create and start container: %w", err)
 	}
