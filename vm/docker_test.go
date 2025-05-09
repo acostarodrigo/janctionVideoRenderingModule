@@ -329,7 +329,7 @@ func TestRenderVideoFrame_CreatingContainerOk_WaitingContainerOk_RetrieveLogsKo(
 	defer patch3.Unpatch()
 
 	// 6. Execute the function under test
-	err := renderVideoFrame(ctx, cid, frameNumber, id, path, mockDB)
+	err := renderVideoFrame(ctx, cid, frameNumber, id, path, &mockDB)
 
 	// 7. Assert the error
 	require.Error(t, err)
@@ -350,6 +350,11 @@ func TestRenderVideoFrame_CreatingContainerOk_WaitingContainerOk_RetrieveLogsOk_
 		return nil
 	})
 	defer patch5.Unpatch()
+
+	patch6 := monkey.Patch((*db.DB).AddRenderDuration, func(_ *db.DB, threadId string, frame int, duration int) error {
+		return nil
+	})
+	defer patch6.Unpatch()
 
 	// 3. Monkey patch CommandContext to return an *exec.Cmd with visible arguments
 	patch1 := monkey.Patch(exec.CommandContext, func(ctx context.Context, name string, arg ...string) *exec.Cmd {
