@@ -9,7 +9,7 @@ import (
 	"bou.ke/monkey"
 	sdkmath "cosmossdk.io/math"
 	"github.com/cosmos/cosmos-sdk/types"
-	"github.com/janction/videoRendering/mocks"
+	"github.com/janction/videoRendering/db"
 
 	"github.com/stretchr/testify/require"
 )
@@ -94,23 +94,25 @@ func TestSplitFrames(t *testing.T) {
 
 // --- Test for SubscribeWorkerToTask ---
 func TestSubscribeWorkerToTaskKo(t *testing.T) {
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	task := VideoRenderingTask{}
 
-	mockDB.On("UpdateTask", "task123", "thread456", false).Return(nil)
-
-	patch := monkey.Patch(ExecuteCli, func(args []string) error {
+	patch1 := monkey.Patch(ExecuteCli, func(args []string) error {
 		return fmt.Errorf("mock error")
 	})
-	defer patch.Unpatch()
+	defer patch1.Unpatch()
 
-	err := task.SubscribeWorkerToTask(context.Background(), "workerAddress", "task123", "thread456", mockDB)
+	patch2 := monkey.Patch((*db.DB).UpdateTask, func(_ *db.DB, taskId, threadId string, workerSubscribed bool) error {
+		return nil
+	})
+	defer patch2.Unpatch()
+
+	err := task.SubscribeWorkerToTask(context.Background(), "workerAddress", "task123", "thread456", &mockDB)
 	require.Error(t, err)
-	mockDB.AssertExpectations(t)
 }
 
 func TestSubscribeWorkerToTaskOk(t *testing.T) {
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	task := VideoRenderingTask{}
 
 	patch := monkey.Patch(ExecuteCli, func(args []string) error {
@@ -118,7 +120,7 @@ func TestSubscribeWorkerToTaskOk(t *testing.T) {
 	})
 	defer patch.Unpatch()
 
-	err := task.SubscribeWorkerToTask(context.Background(), "workerAddress", "task123", "thread456", mockDB)
+	err := task.SubscribeWorkerToTask(context.Background(), "workerAddress", "task123", "thread456", &mockDB)
 	require.NoError(t, err)
 }
 

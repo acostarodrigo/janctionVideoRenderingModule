@@ -60,7 +60,7 @@ func splitFrames(startFrame, endFrame, threads int) []frameRange {
 	return result
 }
 
-func (t VideoRenderingTask) SubscribeWorkerToTask(ctx context.Context, workerAddress, taskId, threadId string, db db.Database) error {
+func (t VideoRenderingTask) SubscribeWorkerToTask(ctx context.Context, workerAddress, taskId, threadId string, db *db.DB) error {
 	// TODO call cmd with message subscribeWorkerToTask
 	args := []string{
 		"tx", "videoRendering", "subscribe-worker-to-task",

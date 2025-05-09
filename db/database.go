@@ -54,10 +54,8 @@ type DB struct {
 	conn *sql.DB
 }
 
-type Database interface {
-	UpdateTask(taskId, threadId string, completed bool) error
-	UpdateThread(id string, downloadStarted, downloadCompleted, workStarted, workCompleted, solProposed, verificationStarted, solutionRevealed bool, submitionStarted bool) error
-	AddLogEntry(threadId, log string, timestamp, severity int64) error
+func NewDB(conn *sql.DB) DB {
+	return DB{conn: conn}
 }
 
 // Init initializes the SQLite database and creates the threads table.
