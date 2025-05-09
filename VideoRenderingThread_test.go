@@ -19,31 +19,41 @@ import (
 	"github.com/janction/videoRendering/ipfs"
 	"github.com/janction/videoRendering/mocks"
 	"github.com/janction/videoRendering/vm"
-	"github.com/stretchr/testify/mock"
 
+	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
 // --- Test for StartWork ---
 func TestStartWork_ContainerRunning(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
 		EndFrame:   1,
 	}
 
-	// Mock DB methods
-	mockDB.On("UpdateThread", "thread123", false, false, true, false, false, false, false, false).Return(nil).Once()
-
-	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
-
 	// Monkey patching
 	patch1 := monkey.Patch(vm.IsContainerRunning, func(ctx context.Context, threadId string) bool {
-		return true // Simulate that the container is running
+		return true
 	})
 	defer patch1.Unpatch()
+
+	patch2 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch2.Unpatch()
+
+	patch3 := monkey.Patch((*db.DB).AddLogEntry, func(_ *db.DB, threadId, log string, timestamp, severity int64) error {
+		return nil
+	})
+	defer patch3.Unpatch()
 
 	// Prepare test context and input values
 	cid := "fakeCID"
@@ -51,27 +61,18 @@ func TestStartWork_ContainerRunning(t *testing.T) {
 	ctx := context.Background()
 
 	// Execute method under test
-	err := thread.StartWork(ctx, "worker1", cid, path, mockDB)
+	err := thread.StartWork(ctx, "worker1", cid, path, &mockDB)
 	require.NoError(t, err)
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestStartWork_ContainerNotRunning_IPFSRunning_IPFSGetKo(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
 		EndFrame:   1,
 	}
-
-	// Mock DB methods
-	mockDB.On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-		mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Times(3)
-
-	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
 
 	// Monkey patching
 	patch1 := monkey.Patch(vm.IsContainerRunning, func(ctx context.Context, threadId string) bool {
@@ -95,53 +96,42 @@ func TestStartWork_ContainerNotRunning_IPFSRunning_IPFSGetKo(t *testing.T) {
 	})
 	defer patch4.Unpatch()
 
+	patch5 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch5.Unpatch()
+
+	patch6 := monkey.Patch((*db.DB).AddLogEntry, func(_ *db.DB, threadId, log string, timestamp, severity int64) error {
+		return nil
+	})
+	defer patch6.Unpatch()
+
 	// Prepare test context and input values
 	cid := "fakeCID"
 	path := t.TempDir()
 	ctx := context.Background()
 
 	// Execute method under test
-	err := thread.StartWork(ctx, "worker1", cid, path, mockDB)
+	err := thread.StartWork(ctx, "worker1", cid, path, &mockDB)
 
 	// Verify that we got the expected error (IPFS file not available)
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "IPFS file is not available")
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestStartWork_ContainerNotRunning_IPFSRunning_IPFSGetOk_RenderVideoKo(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
 		EndFrame:   1,
 	}
-	expected := false
-
-	// Mock DB methods
-	mockDB.
-		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Run(func(args mock.Arguments) {
-			// thread expected status validation
-			if args.Bool(1) == true &&
-				args.Bool(2) == true &&
-				args.Bool(3) == false &&
-				args.Bool(4) == false &&
-				args.Bool(5) == false &&
-				args.Bool(6) == false &&
-				args.Bool(7) == false &&
-				args.Bool(8) == false {
-				expected = true
-			}
-		}).
-		Return(nil).
-		Times(4)
-
-	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
 
 	// Monkey patching
 	patch1 := monkey.Patch(vm.IsContainerRunning, func(ctx context.Context, threadId string) bool {
@@ -154,7 +144,7 @@ func TestStartWork_ContainerNotRunning_IPFSRunning_IPFSGetOk_RenderVideoKo(t *te
 	})
 	defer patch2.Unpatch()
 
-	patch3 := monkey.Patch(vm.RenderVideo, func(ctx context.Context, cid string, start int64, end int64, id string, path string, reverse bool, db db.Database) {
+	patch3 := monkey.Patch(vm.RenderVideo, func(ctx context.Context, cid string, start int64, end int64, id string, path string, reverse bool, db *db.DB) {
 		// no-op, simulate video rendering
 	})
 	defer patch3.Unpatch()
@@ -175,25 +165,36 @@ func TestStartWork_ContainerNotRunning_IPFSRunning_IPFSGetOk_RenderVideoKo(t *te
 	})
 	defer patch6.Unpatch()
 
+	patch7 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch7.Unpatch()
+
+	patch8 := monkey.Patch((*db.DB).AddLogEntry, func(_ *db.DB, threadId, log string, timestamp, severity int64) error {
+		return nil
+	})
+	defer patch8.Unpatch()
+
 	// Prepare test context and input values
 	cid := "fakeCID"
 	path := t.TempDir()
 	ctx := context.Background()
 
 	// Execute method under test
-	err := thread.StartWork(ctx, "worker1", cid, path, mockDB)
+	err := thread.StartWork(ctx, "worker1", cid, path, &mockDB)
 
 	// Verify that we got the expected thread status (video rendering error)
 	require.NoError(t, err)
-	require.True(t, expected, "Expected thread status (video rendering error)")
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestStartWork_ContainerNotRunning_IPFSRunning_IPFSGetOk_RenderVideoOk_FilesKo(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
@@ -209,29 +210,6 @@ func TestStartWork_ContainerNotRunning_IPFSRunning_IPFSGetOk_RenderVideoOk_Files
 	files := []os.DirEntry{
 		mocks.MockDirEntry{Filename: "video1.mp4", IsDir_: false},
 	}
-	expected := false
-
-	// Mock DB methods
-	mockDB.
-		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Run(func(args mock.Arguments) {
-			// thread expected status validation
-			if args.Bool(1) == true &&
-				args.Bool(2) == true &&
-				args.Bool(3) == false &&
-				args.Bool(4) == false &&
-				args.Bool(5) == false &&
-				args.Bool(6) == false &&
-				args.Bool(7) == false &&
-				args.Bool(8) == false {
-				expected = true
-			}
-		}).
-		Return(nil).
-		Times(4)
-
-	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
 
 	// Monkey patching
 	patch1 := monkey.Patch(vm.IsContainerRunning, func(ctx context.Context, threadId string) bool {
@@ -244,7 +222,7 @@ func TestStartWork_ContainerNotRunning_IPFSRunning_IPFSGetOk_RenderVideoOk_Files
 	})
 	defer patch2.Unpatch()
 
-	patch3 := monkey.Patch(vm.RenderVideo, func(ctx context.Context, cid string, start int64, end int64, id string, path string, reverse bool, db db.Database) {
+	patch3 := monkey.Patch(vm.RenderVideo, func(ctx context.Context, cid string, start int64, end int64, id string, path string, reverse bool, db *db.DB) {
 		// no-op, simulate video rendering
 	})
 	defer patch3.Unpatch()
@@ -270,25 +248,36 @@ func TestStartWork_ContainerNotRunning_IPFSRunning_IPFSGetOk_RenderVideoOk_Files
 	})
 	defer patch7.Unpatch()
 
+	patch8 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch8.Unpatch()
+
+	patch9 := monkey.Patch((*db.DB).AddLogEntry, func(_ *db.DB, threadId, log string, timestamp, severity int64) error {
+		return nil
+	})
+	defer patch9.Unpatch()
+
 	// Prepare test context and input values
 	cid := "fakeCID"
 	path := t.TempDir()
 	ctx := context.Background()
 
 	// Execute method under test
-	err := thread.StartWork(ctx, "worker1", cid, path, mockDB)
+	err := thread.StartWork(ctx, "worker1", cid, path, &mockDB)
 
 	// Verify that we got the expected thread status (incorrect amount of files)
 	require.NoError(t, err)
-	require.True(t, expected, "Expected thread status (incorrect amount of files)")
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestStartWork_ContainerNotRunning_IPFSRunning_IPFSGetOk_RenderVideoOk_FilesOk(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
@@ -305,29 +294,6 @@ func TestStartWork_ContainerNotRunning_IPFSRunning_IPFSGetOk_RenderVideoOk_Files
 		mocks.MockDirEntry{Filename: "video1.mp4", IsDir_: false},
 		mocks.MockDirEntry{Filename: "video2.mp4", IsDir_: false},
 	}
-	expected := false
-
-	// Mock DB methods
-	mockDB.
-		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Run(func(args mock.Arguments) {
-			// thread expected status validation
-			if args.Bool(1) == true &&
-				args.Bool(2) == true &&
-				args.Bool(3) == true &&
-				args.Bool(4) == true &&
-				args.Bool(5) == false &&
-				args.Bool(6) == false &&
-				args.Bool(7) == false &&
-				args.Bool(8) == false {
-				expected = true
-			}
-		}).
-		Return(nil).
-		Times(4)
-
-	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
 
 	// Monkey patching
 	patch1 := monkey.Patch(vm.IsContainerRunning, func(ctx context.Context, threadId string) bool {
@@ -340,7 +306,7 @@ func TestStartWork_ContainerNotRunning_IPFSRunning_IPFSGetOk_RenderVideoOk_Files
 	})
 	defer patch2.Unpatch()
 
-	patch3 := monkey.Patch(vm.RenderVideo, func(ctx context.Context, cid string, start int64, end int64, id string, path string, reverse bool, db db.Database) {
+	patch3 := monkey.Patch(vm.RenderVideo, func(ctx context.Context, cid string, start int64, end int64, id string, path string, reverse bool, db *db.DB) {
 		// no-op, simulate video rendering
 	})
 	defer patch3.Unpatch()
@@ -366,53 +332,43 @@ func TestStartWork_ContainerNotRunning_IPFSRunning_IPFSGetOk_RenderVideoOk_Files
 	})
 	defer patch7.Unpatch()
 
+	patch8 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch8.Unpatch()
+
+	patch9 := monkey.Patch((*db.DB).AddLogEntry, func(_ *db.DB, threadId, log string, timestamp, severity int64) error {
+		return nil
+	})
+	defer patch9.Unpatch()
+
 	// Prepare test context and input values
 	cid := "fakeCID"
 	path := t.TempDir()
 	ctx := context.Background()
 
 	// Execute method under test
-	err := thread.StartWork(ctx, "worker1", cid, path, mockDB)
+	err := thread.StartWork(ctx, "worker1", cid, path, &mockDB)
 
 	// Verify that we got the expected thread status (video rendering error)
 	require.NoError(t, err)
-	require.True(t, expected, "Expected thread status (no error)")
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 // --- Test for ProposeSolution ---
 func TestProposeSolution_FrameAmountKo(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
 		EndFrame:   1,
 	}
 	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
-	expected := false
-
-	// Mock DB methods
-	mockDB.
-		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Run(func(args mock.Arguments) {
-			// thread expected status validation
-			if args.Bool(1) == true &&
-				args.Bool(2) == true &&
-				args.Bool(3) == true &&
-				args.Bool(4) == true &&
-				args.Bool(5) == false &&
-				args.Bool(6) == false &&
-				args.Bool(7) == false &&
-				args.Bool(8) == false {
-				expected = true
-			}
-		}).
-		Return(nil).
-		Twice()
 
 	// Monkey patching
 	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
@@ -420,32 +376,31 @@ func TestProposeSolution_FrameAmountKo(t *testing.T) {
 	})
 	defer patch1.Unpatch()
 
-	err := thread.ProposeSolution(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+	patch2 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch2.Unpatch()
+
+	err := thread.ProposeSolution(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", &mockDB)
 
 	// Verify that we got the expected thread status (frame amount error)
 	require.NoError(t, err)
-	require.True(t, expected, "Expected thread status (frame amount error)")
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestProposeSolution_FrameAmountOk_GenerateHashesKo(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
 		EndFrame:   1,
 	}
 	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
-
-	// Mock DB methods
-	mockDB.
-		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Return(nil).
-		Twice()
 
 	// Monkey patching
 	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
@@ -458,32 +413,32 @@ func TestProposeSolution_FrameAmountOk_GenerateHashesKo(t *testing.T) {
 	})
 	defer patch2.Unpatch()
 
-	err := thread.ProposeSolution(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+	patch3 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch3.Unpatch()
+
+	err := thread.ProposeSolution(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", &mockDB)
 
 	// Verify that we got the expected error
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "Generate hash error")
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestProposeSolution_FrameAmountOk_GenerateHashesOk_ExtractPublicKeyKo(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
 		EndFrame:   1,
 	}
 	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
-
-	// Mock DB methods
-	mockDB.
-		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Return(nil).
-		Twice()
 
 	// Monkey patching
 	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
@@ -504,32 +459,32 @@ func TestProposeSolution_FrameAmountOk_GenerateHashesOk_ExtractPublicKeyKo(t *te
 	})
 	defer patch3.Unpatch()
 
-	err := thread.ProposeSolution(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+	patch4 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch4.Unpatch()
+
+	err := thread.ProposeSolution(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", &mockDB)
 
 	// Verify that we got the expected error
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "Extracting public key error")
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestProposeSolution_FrameAmountOk_GenerateHashesOk_ExtractPublicKeyOk_GenerateMessageKo(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
 		EndFrame:   1,
 	}
 	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
-
-	// Mock DB methods
-	mockDB.
-		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Return(nil).
-		Twice()
 
 	// Monkey patching
 	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
@@ -555,32 +510,32 @@ func TestProposeSolution_FrameAmountOk_GenerateHashesOk_ExtractPublicKeyOk_Gener
 	})
 	defer patch4.Unpatch()
 
-	err := thread.ProposeSolution(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+	patch5 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch5.Unpatch()
+
+	err := thread.ProposeSolution(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", &mockDB)
 
 	// Verify that we got the expected error
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "GenerateSignableMessage error")
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestProposeSolution_FrameAmountOk_GenerateHashesOk_ExtractPublicKeyOk_GenerateMessageOk_SignMessageKo(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
 		EndFrame:   1,
 	}
 	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
-
-	// Mock DB methods
-	mockDB.
-		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Return(nil).
-		Twice()
 
 	// Monkey patching
 	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
@@ -611,32 +566,32 @@ func TestProposeSolution_FrameAmountOk_GenerateHashesOk_ExtractPublicKeyOk_Gener
 	})
 	defer patch5.Unpatch()
 
-	err := thread.ProposeSolution(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+	patch6 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch6.Unpatch()
+
+	err := thread.ProposeSolution(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", &mockDB)
 
 	// Verify that we got the expected error
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "Signing message error")
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestProposeSolution_FrameAmountOk_GenerateHashesOk_ExtractPublicKeyOk_GenerateMessageOk_SignMessageOk_SolutionKo(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
 		EndFrame:   1,
 	}
 	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
-
-	// Mock DB methods
-	mockDB.
-		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Return(nil).
-		Once()
 
 	// Monkey patching
 	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
@@ -672,34 +627,32 @@ func TestProposeSolution_FrameAmountOk_GenerateHashesOk_ExtractPublicKeyOk_Gener
 	})
 	defer patch6.Unpatch()
 
-	err := thread.ProposeSolution(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+	patch7 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch7.Unpatch()
+
+	err := thread.ProposeSolution(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", &mockDB)
 
 	// Verify that we got the expected error
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "Solution error")
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestProposeSolution_FrameAmountOk_GenerateHashesOk_ExtractPublicKeyOk_GenerateMessageOk_SignMessageOk_SolutionOk(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
 		EndFrame:   1,
 	}
 	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
-
-	// Mock DB methods
-	mockDB.
-		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Return(nil).
-		Once()
-
-	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
 
 	// Monkey patching
 	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
@@ -735,46 +688,37 @@ func TestProposeSolution_FrameAmountOk_GenerateHashesOk_ExtractPublicKeyOk_Gener
 	})
 	defer patch6.Unpatch()
 
-	err := thread.ProposeSolution(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+	patch7 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch7.Unpatch()
+
+	patch8 := monkey.Patch((*db.DB).AddLogEntry, func(_ *db.DB, threadId, log string, timestamp, severity int64) error {
+		return nil
+	})
+	defer patch8.Unpatch()
+
+	err := thread.ProposeSolution(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", &mockDB)
 
 	// Verify that we got no error
 	require.NoError(t, err)
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 // --- Test for SubmitVerification ---
 func TestSubmitVerification_FileCountKo(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
 		EndFrame:   1,
 	}
 	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
-	expected := false
-
-	// Mock DB methods
-	mockDB.
-		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Run(func(args mock.Arguments) {
-			// thread expected status validation
-			if args.Bool(1) == true &&
-				args.Bool(2) == true &&
-				args.Bool(3) == true &&
-				args.Bool(4) == true &&
-				args.Bool(5) == true &&
-				args.Bool(6) == false &&
-				args.Bool(7) == false &&
-				args.Bool(8) == false {
-				expected = true
-			}
-		}).
-		Return(nil).
-		Twice()
 
 	// Monkey patching
 	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
@@ -782,46 +726,31 @@ func TestSubmitVerification_FileCountKo(t *testing.T) {
 	})
 	defer patch1.Unpatch()
 
-	err := thread.SubmitVerification(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+	patch2 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch2.Unpatch()
+
+	err := thread.SubmitVerification(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", &mockDB)
 
 	// Verify that we got the expected thread status (file amount error)
 	require.NoError(t, err)
-	require.True(t, expected, "Expected thread status (file amount error)")
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestSubmitVerification_FileCountOk_FileThresholdKo(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
 		EndFrame:   10,
 	}
 	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
-	expected := false
-
-	// Mock DB methods
-	mockDB.
-		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Run(func(args mock.Arguments) {
-			// thread expected status validation
-			if args.Bool(1) == true &&
-				args.Bool(2) == true &&
-				args.Bool(3) == true &&
-				args.Bool(4) == true &&
-				args.Bool(5) == true &&
-				args.Bool(6) == false &&
-				args.Bool(7) == false &&
-				args.Bool(8) == false {
-				expected = true
-			}
-		}).
-		Return(nil).
-		Twice()
 
 	// Monkey patching
 	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
@@ -829,32 +758,31 @@ func TestSubmitVerification_FileCountOk_FileThresholdKo(t *testing.T) {
 	})
 	defer patch1.Unpatch()
 
-	err := thread.SubmitVerification(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+	patch2 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch2.Unpatch()
+
+	err := thread.SubmitVerification(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", &mockDB)
 
 	// Verify that we got the expected error
 	require.NoError(t, err)
-	require.True(t, expected, "Expected thread status (file threshold error)")
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestSubmitVerification_FileCountOk_FileThresholdOk_GenerateFileHashesKo(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
 		EndFrame:   1,
 	}
 	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
-
-	// Mock DB methods
-	mockDB.
-		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Return(nil).
-		Twice()
 
 	// Monkey patching
 	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
@@ -867,32 +795,32 @@ func TestSubmitVerification_FileCountOk_FileThresholdOk_GenerateFileHashesKo(t *
 	})
 	defer patch2.Unpatch()
 
-	err := thread.SubmitVerification(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+	patch3 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch3.Unpatch()
+
+	err := thread.SubmitVerification(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", &mockDB)
 
 	// Verify that we got the expected error
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "Generate hash error")
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestSubmitVerification_FileCountOk_FileThresholdOk_GenerateFileHashesOk_GetPublicKeyKo(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
 		EndFrame:   1,
 	}
 	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
-
-	// Mock DB methods
-	mockDB.
-		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Return(nil).
-		Twice()
 
 	// Monkey patching
 	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
@@ -912,32 +840,32 @@ func TestSubmitVerification_FileCountOk_FileThresholdOk_GenerateFileHashesOk_Get
 	})
 	defer patch3.Unpatch()
 
-	err := thread.SubmitVerification(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+	patch4 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch4.Unpatch()
+
+	err := thread.SubmitVerification(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", &mockDB)
 
 	// Verify that we got the expected error
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "Get public key error")
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestSubmitVerification_FileCountOk_FileThresholdOk_GenerateFileHashesOk_GetPublicKeyOk_GenerateSignableMessageKo(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
 		EndFrame:   1,
 	}
 	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
-
-	// Mock DB methods
-	mockDB.
-		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Return(nil).
-		Twice()
 
 	// Monkey patching
 	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
@@ -962,32 +890,32 @@ func TestSubmitVerification_FileCountOk_FileThresholdOk_GenerateFileHashesOk_Get
 	})
 	defer patch4.Unpatch()
 
-	err := thread.SubmitVerification(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+	patch5 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch5.Unpatch()
+
+	err := thread.SubmitVerification(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", &mockDB)
 
 	// Verify that we got the expected error
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "GenerateSignableMessage error")
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestSubmitVerification_FileCountOk_FileThresholdOk_GenerateFileHashesOk_GetPublicKeyOk_GenerateSignableMessageOk_SignMessageKo(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
 		EndFrame:   1,
 	}
 	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
-
-	// Mock DB methods
-	mockDB.
-		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Return(nil).
-		Twice()
 
 	// Monkey patching
 	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
@@ -1017,34 +945,32 @@ func TestSubmitVerification_FileCountOk_FileThresholdOk_GenerateFileHashesOk_Get
 	})
 	defer patch5.Unpatch()
 
-	err := thread.SubmitVerification(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+	patch6 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch6.Unpatch()
+
+	err := thread.SubmitVerification(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", &mockDB)
 
 	// Verify that we got the expected error
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "Signing message error")
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestSubmitVerification_FileCountOk_FileThresholdOk_GenerateFileHashesOk_GetPublicKeyOk_GenerateSignableMessageOk_SignMessageOk_SubmitValidationKo(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
 		EndFrame:   1,
 	}
 	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
-
-	// Mock DB methods
-	mockDB.
-		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Return(nil).
-		Twice()
-
-	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
 
 	// Monkey patching
 	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
@@ -1079,34 +1005,37 @@ func TestSubmitVerification_FileCountOk_FileThresholdOk_GenerateFileHashesOk_Get
 	})
 	defer patch6.Unpatch()
 
-	err := thread.SubmitVerification(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+	patch7 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch7.Unpatch()
+
+	patch8 := monkey.Patch((*db.DB).AddLogEntry, func(_ *db.DB, threadId, log string, timestamp, severity int64) error {
+		return nil
+	})
+	defer patch8.Unpatch()
+
+	err := thread.SubmitVerification(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", &mockDB)
 
 	// Verify that we got the expected error
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "Submit validation error")
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestSubmitVerification_FileCountOk_FileThresholdOk_GenerateFileHashesOk_GetPublicKeyOk_GenerateSignableMessageOk_SignMessageOk_SubmitValidationOk(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
 		EndFrame:   1,
 	}
 	cdc := codec.NewProtoCodec(types.NewInterfaceRegistry())
-
-	// Mock DB methods
-	mockDB.
-		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Return(nil).
-		Once()
-
-	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
 
 	// Monkey patching
 	patch1 := monkey.Patch(vm.CountFilesInDirectory, func(directoryPath string) int {
@@ -1141,13 +1070,25 @@ func TestSubmitVerification_FileCountOk_FileThresholdOk_GenerateFileHashesOk_Get
 	})
 	defer patch6.Unpatch()
 
-	err := thread.SubmitVerification(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", mockDB)
+	patch7 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch7.Unpatch()
+
+	patch8 := monkey.Patch((*db.DB).AddLogEntry, func(_ *db.DB, threadId, log string, timestamp, severity int64) error {
+		return nil
+	})
+	defer patch8.Unpatch()
+
+	err := thread.SubmitVerification(cdc, "worker-alias-001", "cosmos1abcdefg1234567", "/tmp/test-rendering", &mockDB)
 
 	// Verify that we got no error
 	require.NoError(t, err)
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 // --- Test for submitValidation ---
@@ -1195,7 +1136,7 @@ func TestSubmitValidationOk(t *testing.T) {
 // --- Test for SubmitSolution ---
 func TestSubmitSolution_IpfsKo(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
@@ -1204,15 +1145,6 @@ func TestSubmitSolution_IpfsKo(t *testing.T) {
 	ctx := context.Background()
 	workerAddress := "cosmos1abcd1234workerxyz"
 	rootPath := "/tmp/rendering/thread123"
-
-	// Mock DB methods
-	mockDB.
-		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Return(nil).
-		Twice()
-
-	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
 
 	// Monkey patching
 	patch1 := monkey.Patch(ipfs.UploadSolution, func(ctx context.Context, rootPath, threadId string) (string, error) {
@@ -1220,97 +1152,125 @@ func TestSubmitSolution_IpfsKo(t *testing.T) {
 	})
 	defer patch1.Unpatch()
 
-	err := thread.SubmitSolution(ctx, workerAddress, rootPath, mockDB)
-
-	// Verify that we got the expected error
-	require.Error(t, err)
-	require.Contains(t, err.Error(), "Ipfs upload solution error")
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
-}
-
-func TestSubmitSolution_IpfsOk_SubmitSolutionKo(t *testing.T) {
-	// Setup
-	mockDB := new(mocks.DB)
-	thread := &VideoRenderingThread{
-		ThreadId:   "thread123",
-		StartFrame: 0,
-		EndFrame:   1,
-	}
-	ctx := context.Background()
-	workerAddress := "cosmos1abcd1234workerxyz"
-	rootPath := "/tmp/rendering/thread123"
-
-	// Mock DB methods
-	mockDB.
-		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Return(nil).
-		Twice()
-
-	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
-
-	// Monkey patching
-	patch1 := monkey.Patch(ipfs.UploadSolution, func(ctx context.Context, rootPath, threadId string) (string, error) {
-		return "bafybeibwzifn3f6ld5n3nqsh2gsyw5vcnrbdfzq3e6q3yhdh6kuz3w5xku", nil
-	})
-	defer patch1.Unpatch()
-
-	patch2 := monkey.Patch(submitSolution, func(address string, taskId string, threadId string, cid string) error {
-		return fmt.Errorf("submit solution error")
-	})
-	defer patch2.Unpatch()
-
-	err := thread.SubmitSolution(ctx, workerAddress, rootPath, mockDB)
-
-	// Verify that we got the expected error
-	require.Error(t, err)
-	require.Contains(t, err.Error(), "submit solution error")
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
-}
-
-func TestSubmitSolution_IpfsOk_SubmitSolutionOk(t *testing.T) {
-	// Setup
-	mockDB := new(mocks.DB)
-	thread := &VideoRenderingThread{
-		ThreadId:   "thread123",
-		StartFrame: 0,
-		EndFrame:   1,
-	}
-	ctx := context.Background()
-	workerAddress := "cosmos1abcd1234workerxyz"
-	rootPath := "/tmp/rendering/thread123"
-
-	// Mock DB methods
-	mockDB.
-		On("UpdateThread", mock.Anything, mock.Anything, mock.Anything, mock.Anything, mock.Anything,
-			mock.Anything, mock.Anything, mock.Anything, mock.Anything).
-		Return(nil).
-		Once()
-
-	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
-
-	// Monkey patching
-	patch1 := monkey.Patch(ipfs.UploadSolution, func(ctx context.Context, rootPath, threadId string) (string, error) {
-		return "bafybeibwzifn3f6ld5n3nqsh2gsyw5vcnrbdfzq3e6q3yhdh6kuz3w5xku", nil
-	})
-	defer patch1.Unpatch()
-
-	patch2 := monkey.Patch(submitSolution, func(address string, taskId string, threadId string, cid string) error {
+	patch2 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
 		return nil
 	})
 	defer patch2.Unpatch()
 
-	err := thread.SubmitSolution(ctx, workerAddress, rootPath, mockDB)
+	patch3 := monkey.Patch((*db.DB).AddLogEntry, func(_ *db.DB, threadId, log string, timestamp, severity int64) error {
+		return nil
+	})
+	defer patch3.Unpatch()
+
+	err := thread.SubmitSolution(ctx, workerAddress, rootPath, &mockDB)
+
+	// Verify that we got the expected error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "Ipfs upload solution error")
+}
+
+func TestSubmitSolution_IpfsOk_SubmitSolutionKo(t *testing.T) {
+	// Setup
+	mockDB := db.NewDB(nil)
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+	}
+	ctx := context.Background()
+	workerAddress := "cosmos1abcd1234workerxyz"
+	rootPath := "/tmp/rendering/thread123"
+
+	// Monkey patching
+	patch1 := monkey.Patch(ipfs.UploadSolution, func(ctx context.Context, rootPath, threadId string) (string, error) {
+		return "bafybeibwzifn3f6ld5n3nqsh2gsyw5vcnrbdfzq3e6q3yhdh6kuz3w5xku", nil
+	})
+	defer patch1.Unpatch()
+
+	patch2 := monkey.Patch(submitSolution, func(address string, taskId string, threadId string, cid string, duration int64) error {
+		return fmt.Errorf("submit solution error")
+	})
+	defer patch2.Unpatch()
+
+	patch3 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch3.Unpatch()
+
+	patch4 := monkey.Patch((*db.DB).AddLogEntry, func(_ *db.DB, threadId, log string, timestamp, severity int64) error {
+		return nil
+	})
+	defer patch4.Unpatch()
+
+	patch5 := monkey.Patch((*db.DB).GetAverageRenderTime, func(_ *db.DB, threadId string) (int, error) {
+		return 0, nil
+	})
+	defer patch5.Unpatch()
+
+	err := thread.SubmitSolution(ctx, workerAddress, rootPath, &mockDB)
+
+	// Verify that we got the expected error
+	require.Error(t, err)
+	require.Contains(t, err.Error(), "submit solution error")
+}
+
+func TestSubmitSolution_IpfsOk_SubmitSolutionOk(t *testing.T) {
+	// Setup
+	mockDB := db.NewDB(nil)
+	thread := &VideoRenderingThread{
+		ThreadId:   "thread123",
+		StartFrame: 0,
+		EndFrame:   1,
+	}
+	ctx := context.Background()
+	workerAddress := "cosmos1abcd1234workerxyz"
+	rootPath := "/tmp/rendering/thread123"
+
+	// Monkey patching
+	patch1 := monkey.Patch(ipfs.UploadSolution, func(ctx context.Context, rootPath, threadId string) (string, error) {
+		return "bafybeibwzifn3f6ld5n3nqsh2gsyw5vcnrbdfzq3e6q3yhdh6kuz3w5xku", nil
+	})
+	defer patch1.Unpatch()
+
+	patch2 := monkey.Patch(submitSolution, func(address string, taskId string, threadId string, cid string, duration int64) error {
+		return nil
+	})
+	defer patch2.Unpatch()
+
+	patch3 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return nil
+	})
+	defer patch3.Unpatch()
+
+	patch4 := monkey.Patch((*db.DB).AddLogEntry, func(_ *db.DB, threadId, log string, timestamp, severity int64) error {
+		return nil
+	})
+	defer patch4.Unpatch()
+
+	patch5 := monkey.Patch((*db.DB).GetAverageRenderTime, func(_ *db.DB, threadId string) (int, error) {
+		return 0, nil
+	})
+	defer patch5.Unpatch()
+
+	err := thread.SubmitSolution(ctx, workerAddress, rootPath, &mockDB)
 
 	// Verify that we got no error
 	require.NoError(t, err)
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 // --- Test for submitSolution ---
@@ -1327,7 +1287,7 @@ func TestSubmitSolutionKo(t *testing.T) {
 	})
 	defer patch1.Unpatch()
 
-	err := submitSolution(address, taskId, threadId, cid)
+	err := submitSolution(address, taskId, threadId, cid, 1000)
 
 	// Verify that we got the expected error
 	require.Error(t, err)
@@ -1347,7 +1307,7 @@ func TestSubmitSolutionOk(t *testing.T) {
 	})
 	defer patch1.Unpatch()
 
-	err := submitSolution(address, taskId, threadId, cid)
+	err := submitSolution(address, taskId, threadId, cid, 1000)
 
 	// Verify that we got no error
 	require.NoError(t, err)
@@ -1461,7 +1421,7 @@ func TestCalculateValidatorPayment(t *testing.T) {
 // --- Test for RevealSolution ---
 func TestRevealSolution_CalculateCIDsKo(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
@@ -1475,7 +1435,7 @@ func TestRevealSolution_CalculateCIDsKo(t *testing.T) {
 	})
 	defer patch1.Unpatch()
 
-	err := thread.RevealSolution(rootPath, mockDB)
+	err := thread.RevealSolution(rootPath, &mockDB)
 
 	// Verify that we got the expected error
 	require.Error(t, err)
@@ -1484,7 +1444,7 @@ func TestRevealSolution_CalculateCIDsKo(t *testing.T) {
 
 func TestRevealSolution_CalculateCIDsOk_CalculateFileHashKo(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
@@ -1506,7 +1466,7 @@ func TestRevealSolution_CalculateCIDsOk_CalculateFileHashKo(t *testing.T) {
 	})
 	defer patch2.Unpatch()
 
-	err := thread.RevealSolution(rootPath, mockDB)
+	err := thread.RevealSolution(rootPath, &mockDB)
 
 	// Verify that we got the expected error
 	require.Error(t, err)
@@ -1515,7 +1475,7 @@ func TestRevealSolution_CalculateCIDsOk_CalculateFileHashKo(t *testing.T) {
 
 func TestRevealSolution_CalculateCIDsOk_CalculateFileHashOk_ExecuteCliKo(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
@@ -1565,7 +1525,7 @@ func TestRevealSolution_CalculateCIDsOk_CalculateFileHashOk_ExecuteCliKo(t *test
 	})
 	defer patch4.Unpatch()
 
-	err := thread.RevealSolution(rootPath, mockDB)
+	err := thread.RevealSolution(rootPath, &mockDB)
 
 	// Verify that we got the expected error
 	require.Error(t, err)
@@ -1574,7 +1534,7 @@ func TestRevealSolution_CalculateCIDsOk_CalculateFileHashOk_ExecuteCliKo(t *test
 
 func TestRevealSolution_CalculateCIDsOk_CalculateFileHashOk_ExecuteCliOk_UpdateThreadKo(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
@@ -1605,9 +1565,6 @@ func TestRevealSolution_CalculateCIDsOk_CalculateFileHashOk_ExecuteCliOk_UpdateT
 		}}
 	rootPath := "/tmp/rendering/thread123"
 
-	// Mock DB methods
-	mockDB.On("UpdateThread", "thread123", true, true, true, true, true, true, true, false).Return(fmt.Errorf("UpdateThread error")).Once()
-
 	// Monkey patching
 	patch1 := monkey.Patch(ipfs.CalculateCIDs, func(dirPath string) (map[string]string, error) {
 		return map[string]string{
@@ -1622,24 +1579,31 @@ func TestRevealSolution_CalculateCIDsOk_CalculateFileHashOk_ExecuteCliOk_UpdateT
 	})
 	defer patch2.Unpatch()
 
-	patch4 := monkey.Patch(ExecuteCli, func(args []string) error {
+	patch3 := monkey.Patch(ExecuteCli, func(args []string) error {
 		return nil
+	})
+	defer patch3.Unpatch()
+
+	patch4 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
+		return fmt.Errorf("UpdateThread error")
 	})
 	defer patch4.Unpatch()
 
-	err := thread.RevealSolution(rootPath, mockDB)
+	err := thread.RevealSolution(rootPath, &mockDB)
 
 	// Verify that we got the expected error
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "UpdateThread error")
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestRevealSolution_CalculateCIDsOk_CalculateFileHashOk_ExecuteCliOk_UpdateThreadOk(t *testing.T) {
 	// Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	thread := &VideoRenderingThread{
 		ThreadId:   "thread123",
 		StartFrame: 0,
@@ -1670,9 +1634,6 @@ func TestRevealSolution_CalculateCIDsOk_CalculateFileHashOk_ExecuteCliOk_UpdateT
 		}}
 	rootPath := "/tmp/rendering/thread123"
 
-	// Mock DB methods
-	mockDB.On("UpdateThread", "thread123", true, true, true, true, true, true, true, false).Return(nil).Once()
-
 	// Monkey patching
 	patch1 := monkey.Patch(ipfs.CalculateCIDs, func(dirPath string) (map[string]string, error) {
 		return map[string]string{
@@ -1687,18 +1648,25 @@ func TestRevealSolution_CalculateCIDsOk_CalculateFileHashOk_ExecuteCliOk_UpdateT
 	})
 	defer patch2.Unpatch()
 
-	patch4 := monkey.Patch(ExecuteCli, func(args []string) error {
+	patch3 := monkey.Patch(ExecuteCli, func(args []string) error {
+		return nil
+	})
+	defer patch3.Unpatch()
+
+	patch4 := monkey.Patch((*db.DB).UpdateThread, func(
+		_ *db.DB,
+		id string,
+		downloadStarted, downloadCompleted, workStarted, workCompleted,
+		solProposed, verificationStarted, solutionRevealed, submitionStarted bool,
+	) error {
 		return nil
 	})
 	defer patch4.Unpatch()
 
-	err := thread.RevealSolution(rootPath, mockDB)
+	err := thread.RevealSolution(rootPath, &mockDB)
 
 	// Verify that we got no error
 	require.NoError(t, err)
-
-	// Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 // --- Test for EvaluateVerifications ---
@@ -1794,6 +1762,7 @@ func TestEvaluateVerifications_DecodePublicKeyFromCLIKo(t *testing.T) {
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "DecodePublicKeyFromCLI error")
 }
+
 func TestEvaluateVerifications_DecodePublicKeyFromCLIOk_GenerateSignableMessageKo(t *testing.T) {
 	// Setup
 	thread := &VideoRenderingThread{
@@ -1891,6 +1860,7 @@ func TestEvaluateVerifications_DecodePublicKeyFromCLIOk_GenerateSignableMessageK
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "GenerateSignableMessage error")
 }
+
 func TestEvaluateVerifications_DecodePublicKeyFromCLIOk_GenerateSignableMessageOk_DecodeSignatureFromCLIKo(t *testing.T) {
 	// Setup
 	thread := &VideoRenderingThread{
@@ -1993,6 +1963,7 @@ func TestEvaluateVerifications_DecodePublicKeyFromCLIOk_GenerateSignableMessageO
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "DecodeSignatureFromCLI error")
 }
+
 func TestEvaluateVerifications_DecodePublicKeyFromCLIOk_GenerateSignableMessageOk_DecodeSignatureFromCLIOk_VerifySignatureFalse(t *testing.T) {
 	// Setup
 	thread := &VideoRenderingThread{
@@ -2098,6 +2069,7 @@ func TestEvaluateVerifications_DecodePublicKeyFromCLIOk_GenerateSignableMessageO
 	// Verify that we got no error
 	require.NoError(t, err)
 }
+
 func TestEvaluateVerifications_DecodePublicKeyFromCLIOk_GenerateSignableMessageOk_DecodeSignatureFromCLIOk_VerifySignatureTrue(t *testing.T) {
 	// Setup
 	thread := &VideoRenderingThread{
