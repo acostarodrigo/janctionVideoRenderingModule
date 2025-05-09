@@ -11,8 +11,6 @@ import (
 
 	"bou.ke/monkey"
 	"github.com/janction/videoRendering/db"
-	"github.com/janction/videoRendering/mocks"
-	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -64,7 +62,7 @@ func TestIsContainerRunningOk(t *testing.T) {
 // --- Test for RenderVideo ---
 func TestRenderVideoNoReverse(t *testing.T) {
 	// 1. Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	ctx := context.Background()
 	cid := "bafybeigdyrztxx3b7d5qzq2ujay5g4qxxuj5f6x3h6lgv7d4ttrddn3cxa"
 	id := "thread123"
@@ -75,14 +73,14 @@ func TestRenderVideoNoReverse(t *testing.T) {
 	function_calls := make([]int64, 0, 10) // Empty slice with a capacity of 10
 
 	// 2. Monkey patch the renderVideoFrame function to not actually call it, just save the call to a variable
-	patch1 := monkey.Patch(renderVideoFrame, func(ctx context.Context, cid string, frameNumber int64, id string, path string, db db.Database) error {
+	patch1 := monkey.Patch(renderVideoFrame, func(ctx context.Context, cid string, frameNumber int64, id string, path string, db *db.DB) error {
 		function_calls = append(function_calls, frameNumber)
 		return nil
 	})
 	defer patch1.Unpatch()
 
 	// 3. Execute method under test
-	RenderVideo(ctx, cid, start, end, id, path, reverse, mockDB)
+	RenderVideo(ctx, cid, start, end, id, path, reverse, &mockDB)
 
 	// 5. Verification
 	expected := []int64{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}
@@ -91,7 +89,7 @@ func TestRenderVideoNoReverse(t *testing.T) {
 
 func TestRenderVideoReverse(t *testing.T) {
 	// 1. Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	ctx := context.Background()
 	cid := "bafybeigdyrztxx3b7d5qzq2ujay5g4qxxuj5f6x3h6lgv7d4ttrddn3cxa"
 	id := "thread123"
@@ -102,16 +100,16 @@ func TestRenderVideoReverse(t *testing.T) {
 	function_calls := make([]int64, 0, 10) // Empty slice with a capacity of 10
 
 	// 2. Monkey patch the renderVideoFrame function to not actually call it, just count the number of times it is called
-	patch1 := monkey.Patch(renderVideoFrame, func(ctx context.Context, cid string, frameNumber int64, id string, path string, db db.Database) error {
+	patch1 := monkey.Patch(renderVideoFrame, func(ctx context.Context, cid string, frameNumber int64, id string, path string, db *db.DB) error {
 		function_calls = append(function_calls, frameNumber)
 		return nil
 	})
 	defer patch1.Unpatch()
 
 	// 3. Execute method under test
-	RenderVideo(ctx, cid, start, end, id, path, reverse, mockDB)
+	RenderVideo(ctx, cid, start, end, id, path, reverse, &mockDB)
 
-	// 5. Verification
+	// 4. Verification
 	expected := []int64{10, 9, 8, 7, 6, 5, 4, 3, 2, 1}
 	require.Equal(t, function_calls, expected)
 }
@@ -119,7 +117,7 @@ func TestRenderVideoReverse(t *testing.T) {
 // --- Test for renderVideoFrame ---
 func TestRenderVideoFrame_ContainerVerificationError(t *testing.T) {
 	// 1. Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	ctx := context.Background()
 	cid := "bafybeigdyrztxx3b7d5qzq2ujay5g4qxxuj5f6x3h6lgv7d4ttrddn3cxa"
 	frameNumber := int64(42)
@@ -127,7 +125,10 @@ func TestRenderVideoFrame_ContainerVerificationError(t *testing.T) {
 	path := "/tmp/rendering/thread123/frame_42"
 
 	// 2. Mock DB methods
-	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
+	patch3 := monkey.Patch((*db.DB).AddLogEntry, func(_ *db.DB, threadId, log string, timestamp, severity int64) error {
+		return nil
+	})
+	defer patch3.Unpatch()
 
 	// 3. Monkey patching
 	patch1 := monkey.Patch(exec.CommandContext, func(ctx context.Context, name string, arg ...string) *exec.Cmd {
@@ -141,19 +142,16 @@ func TestRenderVideoFrame_ContainerVerificationError(t *testing.T) {
 	defer patch2.Unpatch()
 
 	// 4. Execute method under test
-	err := renderVideoFrame(ctx, cid, frameNumber, id, path, mockDB)
+	err := renderVideoFrame(ctx, cid, frameNumber, id, path, &mockDB)
 
 	// 5. Verification
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to check container existence: Error verifying if container already exists")
-
-	// 6. Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestRenderVideoFrame_ContainerAlreadyExist(t *testing.T) {
 	// 1. Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	ctx := context.Background()
 	cid := "bafybeigdyrztxx3b7d5qzq2ujay5g4qxxuj5f6x3h6lgv7d4ttrddn3cxa"
 	frameNumber := int64(42)
@@ -161,7 +159,10 @@ func TestRenderVideoFrame_ContainerAlreadyExist(t *testing.T) {
 	path := "/tmp/rendering/thread123/frame_42"
 
 	// 2. Mock DB methods
-	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
+	patch3 := monkey.Patch((*db.DB).AddLogEntry, func(_ *db.DB, threadId, log string, timestamp, severity int64) error {
+		return nil
+	})
+	defer patch3.Unpatch()
 
 	// 3. Monkey patching
 	patch1 := monkey.Patch(exec.CommandContext, func(ctx context.Context, name string, arg ...string) *exec.Cmd {
@@ -175,18 +176,15 @@ func TestRenderVideoFrame_ContainerAlreadyExist(t *testing.T) {
 	defer patch2.Unpatch()
 
 	// 4. Execute method under test
-	err := renderVideoFrame(ctx, cid, frameNumber, id, path, mockDB)
+	err := renderVideoFrame(ctx, cid, frameNumber, id, path, &mockDB)
 
 	// 5. Verification
 	require.NoError(t, err)
-
-	// 6. Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestRenderVideoFrame_CreatingContainerKo(t *testing.T) {
 	// 1. Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	ctx := context.Background()
 	cid := "bafybeigdyrztxx3b7d5qzq2ujay5g4qxxuj5f6x3h6lgv7d4ttrddn3cxa"
 	frameNumber := int64(42)
@@ -194,7 +192,10 @@ func TestRenderVideoFrame_CreatingContainerKo(t *testing.T) {
 	path := "/tmp/rendering/thread123/frame_42"
 
 	// 2. Mock DB methods
-	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
+	patch4 := monkey.Patch((*db.DB).AddLogEntry, func(_ *db.DB, threadId, log string, timestamp, severity int64) error {
+		return nil
+	})
+	defer patch4.Unpatch()
 
 	// 3. Monkey patch CommandContext to return an *exec.Cmd with visible arguments
 	patch1 := monkey.Patch(exec.CommandContext, func(ctx context.Context, name string, arg ...string) *exec.Cmd {
@@ -218,19 +219,16 @@ func TestRenderVideoFrame_CreatingContainerKo(t *testing.T) {
 	defer patch3.Unpatch()
 
 	// 6. Execute the function under test
-	err := renderVideoFrame(ctx, cid, frameNumber, id, path, mockDB)
+	err := renderVideoFrame(ctx, cid, frameNumber, id, path, &mockDB)
 
 	// 7. Assert the error
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to create and start container: Error creating container")
-
-	// 8. Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestRenderVideoFrame_CreatingContainerOk_WaitingContainerKo(t *testing.T) {
 	// 1. Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	ctx := context.Background()
 	cid := "bafybeigdyrztxx3b7d5qzq2ujay5g4qxxuj5f6x3h6lgv7d4ttrddn3cxa"
 	frameNumber := int64(42)
@@ -238,7 +236,10 @@ func TestRenderVideoFrame_CreatingContainerOk_WaitingContainerKo(t *testing.T) {
 	path := "/tmp/rendering/thread123/frame_42"
 
 	// 2. Mock DB methods
-	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
+	patch4 := monkey.Patch((*db.DB).AddLogEntry, func(_ *db.DB, threadId, log string, timestamp, severity int64) error {
+		return nil
+	})
+	defer patch4.Unpatch()
 
 	// 3. Monkey patch CommandContext to return an *exec.Cmd with visible arguments
 	patch1 := monkey.Patch(exec.CommandContext, func(ctx context.Context, name string, arg ...string) *exec.Cmd {
@@ -270,19 +271,16 @@ func TestRenderVideoFrame_CreatingContainerOk_WaitingContainerKo(t *testing.T) {
 	defer patch3.Unpatch()
 
 	// 6. Execute the function under test
-	err := renderVideoFrame(ctx, cid, frameNumber, id, path, mockDB)
+	err := renderVideoFrame(ctx, cid, frameNumber, id, path, &mockDB)
 
 	// 7. Assert the error
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to wait for container: failed here")
-
-	// 8. Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestRenderVideoFrame_CreatingContainerOk_WaitingContainerOk_RetrieveLogsKo(t *testing.T) {
 	// 1. Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	ctx := context.Background()
 	cid := "bafybeigdyrztxx3b7d5qzq2ujay5g4qxxuj5f6x3h6lgv7d4ttrddn3cxa"
 	frameNumber := int64(42)
@@ -290,7 +288,10 @@ func TestRenderVideoFrame_CreatingContainerOk_WaitingContainerOk_RetrieveLogsKo(
 	path := "/tmp/rendering/thread123/frame_42"
 
 	// 2. Mock DB methods
-	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
+	patch4 := monkey.Patch((*db.DB).AddLogEntry, func(_ *db.DB, threadId, log string, timestamp, severity int64) error {
+		return nil
+	})
+	defer patch4.Unpatch()
 
 	// 3. Monkey patch CommandContext to return an *exec.Cmd with visible arguments
 	patch1 := monkey.Patch(exec.CommandContext, func(ctx context.Context, name string, arg ...string) *exec.Cmd {
@@ -328,19 +329,16 @@ func TestRenderVideoFrame_CreatingContainerOk_WaitingContainerOk_RetrieveLogsKo(
 	defer patch3.Unpatch()
 
 	// 6. Execute the function under test
-	err := renderVideoFrame(ctx, cid, frameNumber, id, path, mockDB)
+	err := renderVideoFrame(ctx, cid, frameNumber, id, path, &mockDB)
 
 	// 7. Assert the error
 	require.Error(t, err)
 	require.Contains(t, err.Error(), "failed to retrieve container logs: failed here")
-
-	// 8. Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 func TestRenderVideoFrame_CreatingContainerOk_WaitingContainerOk_RetrieveLogsOk_VerifyFileOk(t *testing.T) {
 	// 1. Setup
-	mockDB := new(mocks.DB)
+	mockDB := db.NewDB(nil)
 	ctx := context.Background()
 	cid := "bafybeigdyrztxx3b7d5qzq2ujay5g4qxxuj5f6x3h6lgv7d4ttrddn3cxa"
 	frameNumber := int64(42)
@@ -348,7 +346,15 @@ func TestRenderVideoFrame_CreatingContainerOk_WaitingContainerOk_RetrieveLogsOk_
 	path := "/tmp/rendering/thread123/frame_42"
 
 	// 2. Mock DB methods
-	mockDB.On("AddLogEntry", mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(nil).Maybe()
+	patch5 := monkey.Patch((*db.DB).AddLogEntry, func(_ *db.DB, threadId, log string, timestamp, severity int64) error {
+		return nil
+	})
+	defer patch5.Unpatch()
+
+	patch6 := monkey.Patch((*db.DB).AddRenderDuration, func(_ *db.DB, threadId string, frame int, duration int) error {
+		return nil
+	})
+	defer patch6.Unpatch()
 
 	// 3. Monkey patch CommandContext to return an *exec.Cmd with visible arguments
 	patch1 := monkey.Patch(exec.CommandContext, func(ctx context.Context, name string, arg ...string) *exec.Cmd {
@@ -392,13 +398,10 @@ func TestRenderVideoFrame_CreatingContainerOk_WaitingContainerOk_RetrieveLogsOk_
 	defer patch4.Unpatch()
 
 	// 7. Execute the function under test
-	err := renderVideoFrame(ctx, cid, frameNumber, id, path, mockDB)
+	err := renderVideoFrame(ctx, cid, frameNumber, id, path, &mockDB)
 
 	// 8. Assert no error
 	require.NoError(t, err)
-
-	// 9. Verify mock expectations
-	mockDB.AssertExpectations(t)
 }
 
 // --- Test for RemoveContainer ---
